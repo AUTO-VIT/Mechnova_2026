@@ -1,0 +1,166 @@
+{
+  "project": {
+    "name": "MECHNOVA // AUTONOMOUS PLATFORM",
+    "version": "1.0.0",
+    "description": "Production-grade Autonomous Robotics Hackathon Quiz & Theme-Bidding Platform for VIT Chennai",
+    "exportedAt": "2026-08-18T14:10:00.000Z",
+    "environment": {
+      "framework": "React 18 + Vite 5",
+      "styling": "Tailwind CSS v3 + Vanilla CSS with Google Fonts (Syne, Outfit, JetBrains Mono)",
+      "graphics": "Three.js 3D Wireframe Mesh (Icosahedron, Torus, Octahedron, Horizon Grid) & Stardust Particle Constellation",
+      "stateManagement": "React Context API (AuthContext, EventContext) + Authoritative Cloud / Client Engines",
+      "widescreenOptimization": "1080p full-width expansive container (max-w-[1720px])"
+    }
+  },
+  "credentials": {
+    "admin": {
+      "portalUrl": "http://localhost:3000/admin/login",
+      "commandConsoleUrl": "http://localhost:3000/admin",
+      "masterLogin": "Smec@clubs26",
+      "masterPassword": "Smec@2026",
+      "acceptedLoginAliases": [
+        "Smec@clubs26",
+        "smec@clubs26",
+        "smec@clubs26.internal",
+        "smec@clubs26.com",
+        "smec",
+        "admin"
+      ],
+      "acceptedPasswordAliases": [
+        "Smec@2026",
+        "smec@2026",
+        "Smec2026"
+      ],
+      "sessionStorageKey": "mechathon_admin_session",
+      "grantedRole": "ADMIN",
+      "isAdmin": true
+    },
+    "participant": {
+      "registrationUrl": "http://localhost:3000/register",
+      "loginUrl": "http://localhost:3000/login",
+      "format": "Synthetic credentials generated upon registration",
+      "teamCodePattern": "AUTO-XXXX (e.g. AUTO-7892)",
+      "passkeyPattern": "10-12 character high-entropy alphanumeric passkey",
+      "syntheticEmailPattern": "team_autoxxxx@hackathon.internal",
+      "sessionStorageKey": "mechathon_team_session",
+      "grantedRole": "TEAM"
+    }
+  },
+  "colorPalette": {
+    "void": "#110515",
+    "nebula": "#221545",
+    "orchid": "#B26FCB",
+    "cosmic": "#68388D",
+    "amethyst": "#855AB4",
+    "black": "#000000",
+    "usage": {
+      "background": "#110515 (Deep Midnight Plum Void) and #000000 (Pure Black Depth)",
+      "cards": "#221545 with backdrop-blur-2xl and #855AB4/30 subtle border",
+      "accentGlow": "#B26FCB (Radiant Orchid highlight)",
+      "primaryButtons": "#68388D (Cosmic Purple) with hover #855AB4 and orchid glow",
+      "secondaryButtons": "#221545 with #855AB4/40 border and orchid text",
+      "statusPills": "Green (#10B981) for Open, Red (#EF4444) for Closed, Orchid (#B26FCB) for Active"
+    }
+  },
+  "firebase": {
+    "projectId": "mechnova-vitc",
+    "authDomain": "mechnova-vitc.firebaseapp.com",
+    "databaseUrl": "https://mechnova-vitc-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "storageBucket": "mechnova-vitc.appspot.com",
+    "firestoreConfig": {
+      "experimentalForceLongPolling": true,
+      "ignoreUndefinedProperties": true
+    }
+  },
+  "architectureAndEngines": {
+    "quizEngine": {
+      "phase1": "READ_ONLY (10.0 seconds strict reading window)",
+      "phase2": "ANSWER_MODE (10.0 seconds strict answering window)",
+      "scoring": "100 points per correct answer, 0 for incorrect",
+      "clockSync": "Authoritative timestamp delta calculation via NTP server offset"
+    },
+    "themeRevealEngine": {
+      "totalThemes": 4,
+      "revealMechanism": "Atomic transition from private storage to public collection with audit logging",
+      "defaultThemes": [
+        {
+          "id": "theme-1",
+          "themeNumber": 1,
+          "publicName": "Autonomous Kinematics & Orbital Trajectory Planning",
+          "brief": "Deliver inverse kinematics models, simulated ROS2 nodes, and latency benchmarking."
+        },
+        {
+          "id": "theme-2",
+          "themeNumber": 2,
+          "publicName": "Perception & Neural Edge Inspection",
+          "brief": "Must include inference profiling under 15ms and confidence calibration."
+        },
+        {
+          "id": "theme-3",
+          "themeNumber": 3,
+          "publicName": "Industrial PLC Logic & Deterministic SCADA Automation",
+          "brief": "Requires structured text definitions, safety interlock proofs, and telemetry dashboards."
+        },
+        {
+          "id": "theme-4",
+          "themeNumber": 4,
+          "publicName": "Satellite Swarm Telemetry & Distributed Consensus",
+          "brief": "Must demonstrate consensus retention during 40% packet degradation."
+        }
+      ]
+    },
+    "biddingAndAllocation": {
+      "priorityTuple": [
+        "scoreSnapshot DESC",
+        "bidPoints DESC",
+        "submittedAtMs ASC",
+        "tieBreakValue ASC"
+      ],
+      "allocationLock": "Deterministic greedy allocation based on prioritized queue"
+    },
+    "cmsEngine": {
+      "scope": "Controls all titles, subtitles, badges, metrics, domains, phases, navbar brand, links, and footer",
+      "persistence": "Firestore collection 'events/default-event/publicContent/homepage' + instant localStorage broadcast"
+    }
+  },
+  "routes": [
+    { "path": "/", "component": "HomePage", "access": "Public" },
+    { "path": "/register", "component": "RegistrationPage", "access": "Public" },
+    { "path": "/login", "component": "TeamAccessGate", "access": "Public / Participant" },
+    { "path": "/status", "component": "EventStatus", "access": "Public" },
+    { "path": "/themes", "component": "ThemeRevealPanel", "access": "Public" },
+    { "path": "/dashboard", "component": "TeamDashboard", "access": "Team Only" },
+    { "path": "/quiz", "component": "QuizPage", "access": "Team Only" },
+    { "path": "/bidding", "component": "BiddingPage", "access": "Team Only" },
+    { "path": "/results", "component": "ResultsPage", "access": "Team Only" },
+    { "path": "/admin/login", "component": "AdminLogin", "access": "Admin Only" },
+    { "path": "/admin", "component": "AdminDashboard", "access": "Admin Only (6 management tabs)" }
+  ],
+  "fileManifest": {
+    "src/components/common/ParticleCanvas.jsx": "Three.js 3D wireframe mesh and stardust particle animation",
+    "src/components/common/AutomationShell.jsx": "Widescreen application shell, floating header with clean navbar (Registration, Quiz, Bidding) and footer",
+    "src/components/public/HomePage.jsx": "Hero with 3-line title, mission radar HUD, 4 domains, 4-phase sequence, and CTA banner",
+    "src/components/public/RegistrationPage.jsx": "Team intake with member addition, validation, passkey modal, and PDF print sheet",
+    "src/components/public/EventStatus.jsx": "Real-time radar telemetry and timeline sequence monitor",
+    "src/components/public/ThemeRevealPanel.jsx": "Encrypted theme vault and revealed card matrix",
+    "src/components/participant/TeamAccessGate.jsx": "Participant login gate with Team Code and Passkey",
+    "src/components/participant/TeamDashboard.jsx": "Team cockpit with points balance, status transponder, and rapid links",
+    "src/components/participant/QuizPage.jsx": "Quiz arena shell with countdown ring and phase view",
+    "src/components/quiz/QuizEngine.jsx": "Timed state machine (10s READ_ONLY + 10s ANSWER_MODE) and option selection",
+    "src/components/quiz/OptionGrid.jsx": "A/B/C/D interactive option grid with color feedback",
+    "src/components/participant/BiddingPage.jsx": "Points bidding interface for revealed challenge themes",
+    "src/components/participant/ResultsPage.jsx": "Allocation outcome and rank assignment view",
+    "src/components/admin/AdminLogin.jsx": "Restricted admin sign-in accepting master and Firebase credentials",
+    "src/components/admin/AdminDashboard.jsx": "6-tab administrative command console",
+    "src/components/admin/EventControls.jsx": "Operational controls (Open/Close Registration, Quiz Channel, Bidding Arena)",
+    "src/components/admin/CmsEditor.jsx": "Complete CMS editor for homepage, navbar, metrics, domains, phases, and footer",
+    "src/components/admin/QuizQuestionEditor.jsx": "Question bank authoring and CRUD operations",
+    "src/components/admin/ThemeControl.jsx": "Theme vault secret editor and audited atomic reveal trigger",
+    "src/components/admin/AllocationConsole.jsx": "Bidding review and deterministic priority allocation finalizer",
+    "src/components/admin/AuditLogTable.jsx": "Immutable audit ledger table of all administrative actions",
+    "src/services/authService.js": "Authentication service with master admin resolution and team session handling",
+    "src/services/callableApi.js": "Authoritative backend callable functions and local engine execution",
+    "src/services/firestoreService.js": "Firestore subscriptions, default schemas, CMS storage, and control state caching",
+    "src/services/firebase.js": "Firebase app, auth, and firestore initialization with long polling fallback"
+  }
+}

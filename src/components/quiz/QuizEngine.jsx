@@ -154,10 +154,10 @@ export function QuizEngine() {
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <button
             type="button"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/')}
             className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-8 py-3.5 border border-[#855AB4]/30 rounded-full hover:bg-[#221545]/60 transition-all active:scale-95"
           >
-            Return to Cockpit
+            Return Home
           </button>
           <button
             type="button"

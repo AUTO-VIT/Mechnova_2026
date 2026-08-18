@@ -6,7 +6,6 @@ import { EventStatus } from './components/public/EventStatus';
 import { ThemeRevealPanel } from './components/public/ThemeRevealPanel';
 import { RegistrationPage } from './components/public/RegistrationPage';
 import { TeamAccessGate } from './components/participant/TeamAccessGate';
-import { TeamDashboard } from './components/participant/TeamDashboard';
 import { QuizPage } from './components/participant/QuizPage';
 import { BiddingPage } from './components/participant/BiddingPage';
 import { ResultsPage } from './components/participant/ResultsPage';
@@ -25,7 +24,6 @@ export function AppRoutes() {
         
         {/* Participant Pages */}
         <Route path="/login" element={<TeamAccessGate />} />
-        <Route path="/dashboard" element={<TeamDashboard />} />
         <Route path="/quiz" element={<QuizPage />} />
         <Route path="/bidding" element={<BiddingPage />} />
         <Route path="/results" element={<ResultsPage />} />

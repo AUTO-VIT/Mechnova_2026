@@ -38,10 +38,10 @@ export function QuizPage() {
           message="The Authoritative Quiz phase is currently CLOSED by administrative directive. Please check back when admin opens the quiz channel."
           actionButton={
             <Link
-              to="/dashboard"
+              to="/"
               className="border border-zinc-700 bg-zinc-900 px-6 py-2.5 font-mono text-xs font-bold text-zinc-300 hover:bg-zinc-800"
             >
-              RETURN TO TEAM HUB
+              RETURN TO HOME
             </Link>
           }
         />

@@ -24,7 +24,7 @@ export function TeamAccessGate() {
     setLoading(true);
     try {
       await signInTeam(teamCode.trim(), password.trim());
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || 'Authentication failed. Please check Team Code and Passkey.');
