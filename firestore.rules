@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isTeam(teamId) {
+      return isAuthenticated() && request.auth.uid == teamId;
+    }
+
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public Events & CMS
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAdmin();
+      
+      match /publicContent/{pageId} {
+        allow read: if resource.data.published == true || isAdmin();
+        allow write: if isAdmin();
+      }
+      match /adminSettings/runtime {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Team Profiles
+    match /teams/{teamId} {
+      allow read: if isAdmin() || isTeam(teamId) || (isAuthenticated() && resource.data.authUid == request.auth.uid);
+      allow write: if false; // All creation/updates via Cloud Functions
+    }
+
+    // Team Credentials (Admin Only - raw pass keys never stored)
+    match /teamCredentials/{teamId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Quizzes (Sanitized metadata)
+    match /quizzes/{quizId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      
+      match /questions/{questionId} {
+        allow read, write: if isAdmin(); // Raw questions with answerKey are admin-only
+      }
+    }
+
+    // Quiz Sessions & Answers
+    match /quizSessions/{sessionId} {
+      allow read: if isAuthenticated() && (resource.data.teamId == request.auth.uid || isAdmin());
+      allow write: if false; // Server authoritative only
+      
+      match /answers/{attemptId} {
+        allow read: if isAuthenticated() && (get(/databases/$(database)/documents/quizSessions/$(sessionId)).data.teamId == request.auth.uid || isAdmin());
+        allow write: if false;
+      }
+    }
+
+    // Scores
+    match /scores/{teamId} {
+      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
+      allow write: if false;
+    }
+
+    // Themes (Private vs Public)
+    match /themesPrivate/{eventId}/items/{themeId} {
+      allow read, write: if isAdmin(); // Strictly locked from participants
+    }
+    match /themesPublic/{eventId}/items/{themeId} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Bids & Allocations
+    match /bids/{eventId}/items/{teamId} {
+      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
+      allow write: if false;
+    }
+    match /allocations/{eventId}/items/{teamId} {
+      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
+      allow write: if false;
+    }
+
+    // Audit Logs
+    match /auditLogs/{eventId}/items/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Cloud Functions append-only
+    }
+  }
+}

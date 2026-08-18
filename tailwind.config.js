@@ -7,26 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        industrial: {
-          black: '#000000',
-          dark: '#09090b',
+        console: {
+          bg: '#000000',
+          card: '#09090b',
           surface: '#18181b',
           border: '#27272a',
           red: '#dc2626',
           'red-bright': '#ef4444',
-          'red-dark': '#991b1b',
-          'red-dim': '#450a0a',
-          steel: '#3f3f46',
-          muted: '#a1a1aa',
+          amber: '#f59e0b',
+          emerald: '#10b981',
+          cyan: '#06b6d4'
         }
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'Fira Code', 'Space Mono', 'Consolas', 'monospace'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
       },
       animation: {
         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'radar-scan': 'radarScan 4s linear infinite',
+      },
+      keyframes: {
+        radarScan: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' }
+        }
       }
     },
   },

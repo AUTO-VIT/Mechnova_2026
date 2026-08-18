@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "selectedThemeId", "order": "ASCENDING" },
+        { "fieldPath": "scoreSnapshot", "order": "DESCENDING" },
+        { "fieldPath": "bidPoints", "order": "DESCENDING" },
+        { "fieldPath": "submittedAtMs", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "createdAtMs", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
