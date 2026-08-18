@@ -15,15 +15,15 @@ export function EventProvider({ children, eventId = 'default-event' }) {
     try {
       const clientReqStart = Date.now();
       const res = await syncClockApi();
-      if (res && res.serverEpochMs) {
+      const serverMs = res?.serverEpochMs || res?.serverTimeMs;
+      if (serverMs) {
         const clientReqEnd = Date.now();
         const roundTripHalf = Math.floor((clientReqEnd - clientReqStart) / 2);
-        const estimatedServerNow = res.serverEpochMs + roundTripHalf;
+        const estimatedServerNow = serverMs + roundTripHalf;
         const offset = estimatedServerNow - Date.now();
         setServerOffsetMs(offset);
       }
     } catch (e) {
-      console.warn("Clock sync failed, falling back to local clock:", e.message);
       setServerOffsetMs(0);
     }
   }, []);

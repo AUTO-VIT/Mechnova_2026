@@ -16,16 +16,24 @@ export function AdminDashboard() {
 
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
-        <div className="h-14 w-14 rounded-full border border-[#855AB4]/40 bg-[#221545]/60 flex items-center justify-center mx-auto text-[#B26FCB]">
-          <Lock className="h-6 w-6" />
+      <div className="max-w-md mx-auto px-6 py-24 text-center space-y-6">
+        <div className="h-16 w-16 rounded-full border border-[#855AB4]/40 bg-[#221545]/60 flex items-center justify-center mx-auto text-[#B26FCB] shadow-[0_0_30px_rgba(178,111,203,0.3)]">
+          <Lock className="h-7 w-7" />
         </div>
-        <h2 className="font-display text-3xl font-extrabold text-white">
-          Admin Access Required
-        </h2>
-        <p className="text-zinc-400 text-sm font-light">
-          You must be authenticated with administrative privileges to view this portal.
-        </p>
+        <div className="space-y-2">
+          <h2 className="font-display text-3xl font-extrabold text-white">
+            Admin Access Required
+          </h2>
+          <p className="text-zinc-400 text-sm font-light">
+            You must be authenticated with administrative privileges to view this portal.
+          </p>
+        </div>
+        <a
+          href="/admin/login"
+          className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full transition-all active:scale-95 shadow-[0_0_25px_rgba(178,111,203,0.35)] border border-[#B26FCB]/40"
+        >
+          <span>PROCEED TO ADMIN SIGN IN</span>
+        </a>
       </div>
     );
   }

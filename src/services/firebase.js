@@ -1,9 +1,9 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
-// Firebase configuration (Reads from Vite env vars or uses mechnova-vitc project config)
+// Firebase configuration (Reads from Vite env vars or uses project config)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKeyForMechnovaPlatform2026",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mechnova-vitc.firebaseapp.com",
@@ -16,15 +16,29 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Initialize Firestore with robust connection settings to prevent infinite loop errors
+let db;
+try {
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    ignoreUndefinedProperties: true
+  });
+} catch (e) {
+  db = getFirestore(app);
+}
+
 const functions = getFunctions(app, "us-central1");
 
-// Connect to Local Firebase Emulators if VITE_USE_EMULATORS === 'true'
+// Connect to Local Firebase Emulators if configured
 if (import.meta.env.VITE_USE_EMULATORS === 'true') {
-  console.log("⚡ [FIREBASE] Connecting to local emulator suite...");
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  try {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  } catch (e) {
+    // ignore
+  }
 }
 
 export { app, auth, db, functions };

@@ -34,22 +34,27 @@ export function TeamAccessGate() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-6 py-12 space-y-8">
+    <div className="max-w-md mx-auto px-6 py-16 space-y-8">
       {/* Title */}
       <div className="text-center space-y-3">
-        <div className="h-10 w-10 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-zinc-400">
-          <KeyRound className="h-4 w-4" />
+        <div className="h-14 w-14 rounded-full border border-[#855AB4]/40 bg-[#221545]/80 flex items-center justify-center mx-auto text-[#B26FCB] shadow-[0_0_30px_rgba(178,111,203,0.3)]">
+          <KeyRound className="h-6 w-6" />
         </div>
-        <h1 className="font-display text-3xl font-extrabold text-white tracking-tight">
-          Team Portal
-        </h1>
-        <p className="text-zinc-400 text-sm font-light">
-          Sign in using your generated Team Code and Passkey.
+        <div className="space-y-1">
+          <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block font-bold">
+            PARTICIPANT COCKPIT GATEWAY
+          </span>
+          <h1 className="font-display text-3xl font-extrabold text-white tracking-tight">
+            Team Portal
+          </h1>
+        </div>
+        <p className="text-zinc-400 text-xs font-light">
+          Sign in using your generated Team Transponder Code and Passkey.
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/60 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(104,56,141,0.25)]">
         {error && (
           <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
             <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
@@ -58,7 +63,7 @@ export function TeamAccessGate() {
         )}
 
         <div className="space-y-1.5">
-          <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+          <label className="block font-mono text-xs text-zinc-300 uppercase tracking-wider">
             Team Code
           </label>
           <input
@@ -67,12 +72,12 @@ export function TeamAccessGate() {
             onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
             placeholder="e.g. AUTO-7892"
             required
-            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+            className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#B26FCB] transition-all"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+          <label className="block font-mono text-xs text-zinc-300 uppercase tracking-wider">
             Passkey
           </label>
           <input
@@ -81,14 +86,14 @@ export function TeamAccessGate() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter secret passkey"
             required
-            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+            className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#B26FCB] transition-all"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-3.5 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-md active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+          className="w-full bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all duration-200 shadow-[0_0_25px_rgba(178,111,203,0.35)] active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2 border border-[#B26FCB]/40"
         >
           {loading ? (
             <>
@@ -97,16 +102,16 @@ export function TeamAccessGate() {
             </>
           ) : (
             <>
-              <span>SIGN IN</span>
+              <span>SIGN IN TO COCKPIT</span>
               <ArrowRight className="h-4 w-4" />
             </>
           )}
         </button>
 
-        <div className="text-center pt-4 border-t border-white/[0.08] font-mono text-xs text-zinc-500">
+        <div className="text-center pt-4 border-t border-[#855AB4]/20 font-mono text-xs text-zinc-400">
           <span>Need to register? </span>
-          <Link to="/register" className="text-white hover:underline font-semibold ml-1">
-            Register team
+          <Link to="/register" className="text-[#B26FCB] hover:underline font-semibold ml-1">
+            Register team roster
           </Link>
         </div>
       </form>
