@@ -2,9 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 /**
- * Galaxy Space Wireframe & Cosmic Stardust Canvas powered by Three.js.
- * Features rotating galaxy-cyan & electric-blue wireframe polyhedra,
- * deep space horizon mesh, floating nebula particles, and cursor-reactive 3D parallax.
+ * Custom Cosmic Purple & Orchid Wireframe Stardust Canvas.
+ * Color Palette:
+ * - #110515 (Deep Midnight Plum Void)
+ * - #221545 (Deep Nebula Indigo)
+ * - #B26FCB (Radiant Orchid Highlight)
+ * - #68388D (Cosmic Purple Primary)
+ * - #855AB4 (Medium Amethyst Secondary)
+ * - #000000 (Pure Black Depth)
  */
 export default function ParticleCanvas() {
   const mountRef = useRef(null);
@@ -17,9 +22,9 @@ export default function ParticleCanvas() {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    // 1. Scene & Deep Space Fog
+    // 1. Scene & Deep Cosmic Fog (#110515)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x020205, 0.0011);
+    scene.fog = new THREE.FogExp2(0x110515, 0.0011);
 
     const camera = new THREE.PerspectiveCamera(60, width / height, 1, 2200);
     camera.position.z = 620;
@@ -35,27 +40,27 @@ export default function ParticleCanvas() {
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
-    // 3. Galaxy 3D Wireframe Polyhedra
-    // Main 3D Wireframe Icosahedron (Galaxy Cyan Orbital)
-    const icoGeo = new THREE.IcosahedronGeometry(190, 2);
+    // 3. 3D Wireframe Polyhedra Meshes
+    // Main 3D Wireframe Icosahedron (#B26FCB - Radiant Orchid)
+    const icoGeo = new THREE.IcosahedronGeometry(195, 2);
     const icoWire = new THREE.WireframeGeometry(icoGeo);
     const icoMat = new THREE.LineBasicMaterial({
-      color: 0x38bdf8, // Galaxy Cyan
+      color: 0xB26FCB,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.18,
       linewidth: 1
     });
     const icoMesh = new THREE.LineSegments(icoWire, icoMat);
     icoMesh.position.set(width > 1200 ? 340 : 0, 10, -40);
     scene.add(icoMesh);
 
-    // Secondary Accent Galaxy Blue Wireframe Torus
-    const torusGeo = new THREE.TorusGeometry(270, 48, 14, 44);
+    // Secondary Accent Wireframe Torus Orbit (#68388D - Cosmic Purple)
+    const torusGeo = new THREE.TorusGeometry(275, 50, 14, 44);
     const torusWire = new THREE.WireframeGeometry(torusGeo);
     const torusMat = new THREE.LineBasicMaterial({
-      color: 0x3b82f6, // Electric Galaxy Blue
+      color: 0x68388D,
       transparent: true,
-      opacity: 0.14,
+      opacity: 0.16,
       linewidth: 1
     });
     const torusMesh = new THREE.LineSegments(torusWire, torusMat);
@@ -63,49 +68,49 @@ export default function ParticleCanvas() {
     torusMesh.rotation.x = Math.PI / 3.2;
     scene.add(torusMesh);
 
-    // Inner Core Nebula Wireframe Octahedron
-    const octGeo = new THREE.OctahedronGeometry(90, 1);
+    // Inner Core Wireframe Octahedron (#855AB4 - Amethyst)
+    const octGeo = new THREE.OctahedronGeometry(95, 1);
     const octWire = new THREE.WireframeGeometry(octGeo);
     const octMat = new THREE.LineBasicMaterial({
-      color: 0x818cf8, // Indigo Nebula
+      color: 0x855AB4,
       transparent: true,
-      opacity: 0.22
+      opacity: 0.25
     });
     const octMesh = new THREE.LineSegments(octWire, octMat);
     octMesh.position.set(width > 1200 ? 340 : 0, 10, -40);
     scene.add(octMesh);
 
-    // Deep Space Wireframe Horizon Grid Plane
+    // Deep Cosmic Wireframe Horizon Grid (#221545 - Deep Nebula)
     const gridGeo = new THREE.PlaneGeometry(2600, 1800, 36, 28);
     const gridWire = new THREE.WireframeGeometry(gridGeo);
     const gridMat = new THREE.LineBasicMaterial({
-      color: 0x38bdf8,
+      color: 0x855AB4,
       transparent: true,
-      opacity: 0.05
+      opacity: 0.08
     });
     const gridMesh = new THREE.LineSegments(gridWire, gridMat);
     gridMesh.position.set(0, -360, -420);
     gridMesh.rotation.x = -Math.PI / 2.35;
     scene.add(gridMesh);
 
-    // 4. Galaxy Stardust & Particle Constellation
+    // 4. Stardust Particle Constellation (#B26FCB, #855AB4, #68388D, #ffffff)
     const particleCount = 550;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
 
-    const colorCyan = new THREE.Color(0x38bdf8);
-    const colorBlue = new THREE.Color(0x60a5fa);
-    const colorIndigo = new THREE.Color(0xa5b4fc);
+    const colorOrchid = new THREE.Color(0xB26FCB);
+    const colorAmethyst = new THREE.Color(0x855AB4);
+    const colorCosmic = new THREE.Color(0x68388D);
+    const colorWhite = new THREE.Color(0xffffff);
 
     for (let i = 0; i < particleCount; i++) {
       particlePositions[i * 3] = (Math.random() - 0.5) * 1800;
       particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 1400;
       particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 1200;
 
-      // Random galactic color
       const rand = Math.random();
-      const chosenColor = rand < 0.45 ? colorCyan : rand < 0.8 ? colorBlue : colorIndigo;
+      const chosenColor = rand < 0.45 ? colorOrchid : rand < 0.75 ? colorAmethyst : rand < 0.9 ? colorCosmic : colorWhite;
       particleColors[i * 3] = chosenColor.r;
       particleColors[i * 3 + 1] = chosenColor.g;
       particleColors[i * 3 + 2] = chosenColor.b;
@@ -114,26 +119,26 @@ export default function ParticleCanvas() {
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
 
-    // Custom circular soft glowing star texture
+    // Circular soft glowing star texture
     const canvas = document.createElement('canvas');
     canvas.width = 64;
     canvas.height = 64;
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.3, 'rgba(56, 189, 248, 0.8)');
-    gradient.addColorStop(0.7, 'rgba(59, 130, 246, 0.3)');
+    gradient.addColorStop(0.35, 'rgba(178, 111, 203, 0.85)');
+    gradient.addColorStop(0.7, 'rgba(104, 56, 141, 0.4)');
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 64, 64);
     const particleTexture = new THREE.CanvasTexture(canvas);
 
     const particleMat = new THREE.PointsMaterial({
-      size: 4.2,
+      size: 4.4,
       vertexColors: true,
       map: particleTexture,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.7,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -189,7 +194,7 @@ export default function ParticleCanvas() {
       camera.position.y = -mouseY * 0.55;
       camera.lookAt(scene.position);
 
-      // Wireframe Meshes Gentle Cosmic Rotation
+      // Wireframe Meshes Gentle Rotation
       icoMesh.rotation.x += 0.0018;
       icoMesh.rotation.y += 0.003;
 
@@ -202,7 +207,7 @@ export default function ParticleCanvas() {
       // Horizon grid breathing
       gridMesh.position.y = -360 + Math.sin(elapsedTime * 0.4) * 14;
 
-      // Galaxy particles slow drift
+      // Particles slow drift
       particles.rotation.y = elapsedTime * 0.015;
       particles.rotation.x = elapsedTime * 0.008;
 

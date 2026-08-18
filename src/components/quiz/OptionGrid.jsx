@@ -37,8 +37,8 @@ export function OptionGrid({
     <div className="relative space-y-4">
       {/* Read Only Sealed Notice */}
       {isReadOnly && (
-        <div className="py-12 px-6 rounded-2xl border border-sky-500/15 bg-sky-500/[0.02] text-center space-y-3">
-          <div className="h-10 w-10 rounded-full border border-sky-500/20 bg-sky-500/[0.04] flex items-center justify-center mx-auto text-sky-400">
+        <div className="py-12 px-6 rounded-2xl border border-[#855AB4]/30 bg-[#221545]/40 text-center space-y-3">
+          <div className="h-10 w-10 rounded-full border border-[#855AB4]/40 bg-[#68388D]/30 flex items-center justify-center mx-auto text-[#B26FCB]">
             <Lock className="h-4 w-4" />
           </div>
           <h3 className="font-display text-lg font-bold text-white">
@@ -57,17 +57,17 @@ export function OptionGrid({
             const isSelected = selectedOption === idx;
             const letter = letters[idx];
 
-            let cardStyle = 'border-sky-500/15 bg-[#06060e]/60 text-zinc-300 hover:border-sky-400/40 hover:bg-sky-500/[0.05]';
+            let cardStyle = 'border-[#855AB4]/25 bg-[#221545]/50 text-zinc-300 hover:border-[#B26FCB]/50 hover:bg-[#221545]/80';
 
             if (isSelected) {
-              cardStyle = 'border-sky-400 bg-sky-500/15 text-white shadow-[0_0_25px_rgba(56,189,248,0.25)]';
+              cardStyle = 'border-[#B26FCB] bg-[#68388D]/40 text-white shadow-[0_0_25px_rgba(178,111,203,0.3)]';
             }
 
             if (submittedOption === idx) {
               if (isCorrect === true) {
                 cardStyle = 'border-emerald-500 bg-emerald-500/15 text-white';
               } else if (isCorrect === false) {
-                cardStyle = 'border-blue-600 bg-blue-600/20 text-white';
+                cardStyle = 'border-red-600 bg-red-600/20 text-white';
               }
             }
 
@@ -82,7 +82,7 @@ export function OptionGrid({
                 <div
                   className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold ${
                     isSelected
-                      ? 'bg-blue-600 text-white shadow-[0_0_10px_rgba(59,130,246,0.8)]'
+                      ? 'bg-[#68388D] text-white shadow-[0_0_12px_rgba(178,111,203,0.8)] border border-[#B26FCB]/50'
                       : 'bg-white/10 text-zinc-400'
                   }`}
                 >
@@ -98,7 +98,7 @@ export function OptionGrid({
                     {isCorrect ? (
                       <Check className="h-4 w-4 text-emerald-400" />
                     ) : (
-                      <X className="h-4 w-4 text-sky-400" />
+                      <X className="h-4 w-4 text-[#B26FCB]" />
                     )}
                   </div>
                 )}

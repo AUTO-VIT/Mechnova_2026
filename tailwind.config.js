@@ -7,26 +7,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        void: '#020205',
-        deep: '#06060c',
+        black: '#000000',
+        void: '#110515',
+        nebula: '#221545',
+        orchid: '#B26FCB',
+        cosmic: '#68388D',
+        amethyst: '#855AB4',
         space: {
-          void: '#020205',
-          deep: '#06060e',
-          surface: '#0b0c16',
-          border: 'rgba(56, 189, 248, 0.12)',
-          blue: '#3b82f6',
-          cyan: '#38bdf8',
-          nebula: '#6366f1',
-          indigo: '#4f46e5',
-          violet: '#8b5cf6'
+          void: '#110515',
+          deep: '#221545',
+          surface: '#180e2a',
+          border: 'rgba(178, 111, 203, 0.18)',
+          orchid: '#B26FCB',
+          cosmic: '#68388D',
+          amethyst: '#855AB4',
+          glow: 'rgba(178, 111, 203, 0.35)'
         },
         console: {
-          bg: '#020205',
-          card: '#06060e',
-          surface: '#0b0c16',
-          border: 'rgba(56, 189, 248, 0.12)',
-          blue: '#3b82f6',
-          cyan: '#38bdf8',
+          bg: '#110515',
+          card: '#221545',
+          surface: '#1a0f30',
+          border: 'rgba(178, 111, 203, 0.2)',
+          orchid: '#B26FCB',
+          cosmic: '#68388D',
+          amethyst: '#855AB4',
           amber: '#f59e0b',
           emerald: '#10b981'
         }

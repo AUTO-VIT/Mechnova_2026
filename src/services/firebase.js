@@ -3,12 +3,13 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
-// Firebase configuration (Reads from Vite env vars or uses default project config)
+// Firebase configuration (Reads from Vite env vars or uses mechnova-vitc project config)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKeyForMechathonPlatform2026",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mechathon-platform.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mechathon-platform",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mechathon-platform.appspot.com",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKeyForMechnovaPlatform2026",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mechnova-vitc.firebaseapp.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://mechnova-vitc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mechnova-vitc",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mechnova-vitc.appspot.com",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "100000000000",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:100000000000:web:abcdef1234567890"
 };

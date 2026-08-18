@@ -75,7 +75,7 @@ export function BiddingPage() {
   if (!isBiddingOpen) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center space-y-6">
-        <div className="h-14 w-14 rounded-full border border-sky-500/20 bg-sky-500/[0.03] flex items-center justify-center mx-auto text-sky-400">
+        <div className="h-14 w-14 rounded-full border border-[#855AB4]/30 bg-[#221545]/40 flex items-center justify-center mx-auto text-[#B26FCB]">
           <Lock className="h-6 w-6" />
         </div>
         <div className="space-y-2">
@@ -94,7 +94,7 @@ export function BiddingPage() {
     <div className="w-full space-y-12">
       {/* Title */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 text-sky-400 font-mono text-xs tracking-widest uppercase">
+        <div className="inline-flex items-center gap-2 text-[#B26FCB] font-mono text-xs tracking-widest uppercase">
           <Award className="h-3.5 w-3.5" />
           <span>ALLOCATION ARENA</span>
         </div>
@@ -110,12 +110,12 @@ export function BiddingPage() {
       <form onSubmit={handleSubmitBid} className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
         {/* Left Bidding Controls Wing (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="border border-sky-500/20 rounded-3xl p-7 bg-[#06060e]/80 backdrop-blur-2xl space-y-6 sticky top-28 shadow-[0_0_40px_rgba(59,130,246,0.08)]">
-            <div className="flex items-center justify-between border-b border-sky-500/10 pb-4">
+          <div className="border border-[#855AB4]/30 rounded-3xl p-7 bg-[#221545]/70 backdrop-blur-2xl space-y-6 sticky top-28 shadow-[0_0_40px_rgba(104,56,141,0.2)]">
+            <div className="flex items-center justify-between border-b border-[#855AB4]/20 pb-4">
               <span className="font-mono text-xs text-white font-bold tracking-widest uppercase">
                 BID CONFIGURATION
               </span>
-              <span className="font-mono text-[10px] text-sky-400 uppercase font-bold bg-sky-500/10 border border-sky-500/30 px-2.5 py-0.5 rounded-full">
+              <span className="font-mono text-[10px] text-[#B26FCB] uppercase font-bold bg-[#68388D]/30 border border-[#855AB4]/40 px-2.5 py-0.5 rounded-full">
                 CHANNEL OPEN
               </span>
             </div>
@@ -135,13 +135,13 @@ export function BiddingPage() {
             )}
 
             {/* Balances */}
-            <div className="grid grid-cols-2 gap-4 py-2 border-b border-sky-500/10">
+            <div className="grid grid-cols-2 gap-4 py-2 border-b border-[#855AB4]/20">
               <div>
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   QUIZ BALANCE
                 </span>
                 <span className="font-mono text-2xl font-bold text-white">
-                  {formatPoints(totalPoints)} <span className="text-xs text-sky-400 font-normal">PTS</span>
+                  {formatPoints(totalPoints)} <span className="text-xs text-[#B26FCB] font-normal">PTS</span>
                 </span>
               </div>
 
@@ -149,7 +149,7 @@ export function BiddingPage() {
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   ACTIVE BID
                 </span>
-                <span className="font-mono text-2xl font-bold text-sky-400">
+                <span className="font-mono text-2xl font-bold text-[#B26FCB]">
                   {existingBid ? `${formatPoints(existingBid.bidPoints)} PTS` : "0 PTS"}
                 </span>
               </div>
@@ -167,28 +167,28 @@ export function BiddingPage() {
                 max={totalPoints}
                 value={bidPoints}
                 onChange={(e) => setBidPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                className="w-full bg-[#020205] border border-sky-500/20 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-sky-400"
+                className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-[#B26FCB]"
               />
 
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setBidPoints(Math.floor(totalPoints * 0.25))}
-                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
+                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
                 >
                   25%
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidPoints(Math.floor(totalPoints * 0.50))}
-                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
+                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
                 >
                   50%
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidPoints(totalPoints)}
-                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
+                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
                 >
                   Max
                 </button>
@@ -199,7 +199,7 @@ export function BiddingPage() {
             <button
               type="submit"
               disabled={loading || !selectedThemeId}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2 border border-blue-400/30"
+              className="w-full bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(178,111,203,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2 border border-[#B26FCB]/40"
             >
               {loading ? (
                 <>
@@ -215,8 +215,8 @@ export function BiddingPage() {
             </button>
 
             {/* Rules Info */}
-            <div className="rounded-2xl border border-sky-500/15 bg-sky-500/[0.03] p-4 font-mono text-[11px] text-zinc-400 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-sky-300 font-bold">
+            <div className="rounded-2xl border border-[#855AB4]/25 bg-[#110515]/60 p-4 font-mono text-[11px] text-zinc-400 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[#B26FCB] font-bold">
                 <Info className="h-3.5 w-3.5" />
                 <span>Priority Tuple Hierarchy:</span>
               </div>
@@ -241,12 +241,12 @@ export function BiddingPage() {
                   key={theme.id || theme.themeId || idx}
                   className={`border rounded-3xl p-8 cursor-pointer transition-all duration-300 block relative space-y-4 ${
                     isSelected
-                      ? 'border-sky-400 bg-sky-500/15 shadow-[0_0_35px_rgba(56,189,248,0.2)]'
-                      : 'border-sky-500/15 bg-[#06060e]/60 hover:border-sky-400/40 hover:bg-sky-500/[0.04]'
+                      ? 'border-[#B26FCB] bg-[#68388D]/25 shadow-[0_0_35px_rgba(178,111,203,0.25)]'
+                      : 'border-[#855AB4]/25 bg-[#221545]/50 hover:border-[#B26FCB]/50 hover:bg-[#221545]/70'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-sky-400 uppercase tracking-widest">
+                    <span className="font-mono text-xs font-bold text-[#B26FCB] uppercase tracking-widest">
                       THEME 0{theme.themeNumber || idx + 1}
                     </span>
                     <input
@@ -255,7 +255,7 @@ export function BiddingPage() {
                       value={theme.id || theme.themeId}
                       checked={isSelected}
                       onChange={() => setSelectedThemeId(theme.id || theme.themeId)}
-                      className="h-4 w-4 accent-blue-600"
+                      className="h-4 w-4 accent-[#B26FCB]"
                     />
                   </div>
 
@@ -268,14 +268,14 @@ export function BiddingPage() {
                   </p>
 
                   {theme.brief && (
-                    <div className="text-xs text-sky-200 font-light border-l border-sky-500/30 pl-3 py-1 bg-sky-500/[0.02] rounded-r-lg">
+                    <div className="text-xs text-[#B26FCB]/90 font-light border-l-2 border-[#855AB4] pl-3 py-1 bg-[#110515]/40 rounded-r-lg">
                       {theme.brief}
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-sky-500/10 flex items-center justify-between font-mono text-[11px] text-zinc-400">
+                  <div className="pt-2 border-t border-[#855AB4]/20 flex items-center justify-between font-mono text-[11px] text-zinc-400">
                     <span>ELIGIBILITY</span>
-                    <span className="text-sky-300 font-medium">{theme.eligibility || "All Teams"}</span>
+                    <span className="text-[#B26FCB] font-medium">{theme.eligibility || "All Teams"}</span>
                   </div>
                 </label>
               );
