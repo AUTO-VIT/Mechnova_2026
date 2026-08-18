@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
-import { Cpu, Terminal, LogOut, Radio, UserCheck, Shield, Menu, X, Sparkles } from 'lucide-react';
+import { LogOut, UserCheck, Shield, Radio, Menu, X } from 'lucide-react';
 import { formatTimestamp } from '../../utils/formatters';
 import ParticleCanvas from './ParticleCanvas';
 
@@ -90,9 +90,9 @@ export function AutomationShell({ children }) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`text-xs font-mono font-medium tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 ${
+                  className={`text-xs font-mono font-bold tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 ${
                     isActive
-                      ? 'text-white font-bold'
+                      ? 'text-white font-extrabold'
                       : 'text-zinc-400 hover:text-[#B26FCB]'
                   }`}
                 >
@@ -107,7 +107,7 @@ export function AutomationShell({ children }) {
 
           {/* Right Telemetry & Auth */}
           <div className="flex items-center gap-4">
-            {/* Clock */}
+            {/* NTP Clock */}
             <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-zinc-300 border border-[#855AB4]/30 rounded-full px-3.5 py-1 bg-[#221545]/40 backdrop-blur-md">
               <Radio className="h-3 w-3 text-[#B26FCB] animate-pulse" />
               <span className="text-zinc-400 uppercase">NTP</span>
@@ -183,22 +183,32 @@ export function AutomationShell({ children }) {
         {children}
       </main>
 
-      {/* Full-Width Footer */}
-      <footer className="border-t border-[#855AB4]/20 bg-[#000000]/70 backdrop-blur-md px-6 md:px-12 xl:px-16 py-8 z-10 font-mono text-xs text-zinc-400 w-full">
-        <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="font-display text-white font-bold tracking-widest text-sm">MECHNOVA 2026</span>
-            <span>&bull;</span>
-            <span className="text-[#B26FCB]/80 tracking-wider">CYBER-PHYSICAL SYSTEMS &amp; AUTONOMOUS ROBOTICS</span>
+      {/* Dynamic Full-Width Footer */}
+      <footer className="border-t border-[#855AB4]/20 bg-[#000000]/80 backdrop-blur-md px-6 md:px-12 xl:px-16 py-10 z-10 font-mono text-xs text-zinc-400 w-full">
+        <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-3">
+              <span className="font-display text-white font-bold tracking-widest text-sm">
+                {cms.footerTitle || "MECHNOVA // 2026"}
+              </span>
+              <span>&bull;</span>
+              <span className="text-[#B26FCB]/80 tracking-wider">
+                {cms.footerTagline || "CYBER-PHYSICAL SYSTEMS & AUTONOMOUS ROBOTICS"}
+              </span>
+            </div>
+            <p className="text-zinc-500 text-[11px] font-sans font-light max-w-xl">
+              {cms.footerDescription || "Authoritative autonomous systems competition platform. Built with server-side deterministic state machines, audited theme reveals, and cryptographic credentials."}
+            </p>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] tracking-wider">
-            <span className="text-[#B26FCB] flex items-center gap-1.5">
+          <div className="flex flex-col md:items-end gap-2 text-[11px] tracking-wider text-center md:text-right">
+            <div className="text-zinc-500">
+              {cms.footerCopyright || "© 2026 MECHNOVA // ROBOTICS & AUTOMATION PLATFORM. ALL RIGHTS RESERVED."}
+            </div>
+            <div className="flex items-center justify-center md:justify-end gap-2 text-[#B26FCB]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#B26FCB] animate-pulse shadow-[0_0_8px_rgba(178,111,203,0.9)]"></span>
-              CORE OPERATIONAL
-            </span>
-            <span>&bull;</span>
-            <span>VIT CHENNAI</span>
+              <span>CORE OPERATIONAL &bull; VIT CHENNAI</span>
+            </div>
           </div>
         </div>
       </footer>
