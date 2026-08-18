@@ -123,7 +123,7 @@ export function RegistrationPage() {
           <Users className="h-3.5 w-3.5" />
           <span>ROSTER INTAKE PROTOCOL</span>
         </div>
-        <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+        <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white">
           Team Registration
         </h1>
         <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
@@ -144,10 +144,10 @@ export function RegistrationPage() {
           </p>
           <div className="pt-4">
             <Link
-              to="/login"
+              to="/"
               className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full transition-all active:scale-95 shadow-[0_0_25px_rgba(178,111,203,0.35)] border border-[#B26FCB]/40"
             >
-              <span>ACCESS TEAM COCKPIT</span>
+              <span>RETURN TO HOME</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

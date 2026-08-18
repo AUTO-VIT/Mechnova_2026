@@ -293,7 +293,7 @@ export function HomePage() {
             <span>REGISTRATION WINDOW ACTIVE</span>
           </div>
 
-          <h2 className="font-display text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h2 className="font-sans text-xl sm:text-3xl font-bold text-white tracking-tight">
             Ready to Compete?
           </h2>
 

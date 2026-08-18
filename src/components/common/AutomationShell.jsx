@@ -49,7 +49,7 @@ export function AutomationShell({ children }) {
         <div className="max-w-[1720px] w-full mx-auto px-6 md:px-12 xl:px-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3.5 group">
-            <span className="font-display text-base md:text-lg font-extrabold tracking-[0.2em] text-white group-hover:text-[#B26FCB] transition-colors duration-300">
+            <span className="font-sans text-base md:text-lg font-bold tracking-wider uppercase text-white group-hover:text-[#B26FCB] transition-colors duration-300">
               MECHNOVA
             </span>
             <span className="h-2 w-2 rounded-full bg-[#B26FCB] shadow-[0_0_12px_rgba(178,111,203,1)] animate-pulse"></span>
