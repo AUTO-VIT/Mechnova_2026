@@ -7,18 +7,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        void: '#030303',
-        deep: '#0a0a0c',
+        void: '#020205',
+        deep: '#06060c',
+        space: {
+          void: '#020205',
+          deep: '#06060e',
+          surface: '#0b0c16',
+          border: 'rgba(56, 189, 248, 0.12)',
+          blue: '#3b82f6',
+          cyan: '#38bdf8',
+          nebula: '#6366f1',
+          indigo: '#4f46e5',
+          violet: '#8b5cf6'
+        },
         console: {
-          bg: '#030303',
-          card: '#0a0a0c',
-          surface: '#121215',
-          border: 'rgba(255, 255, 255, 0.08)',
-          red: '#dc2626',
-          'red-bright': '#ef4444',
+          bg: '#020205',
+          card: '#06060e',
+          surface: '#0b0c16',
+          border: 'rgba(56, 189, 248, 0.12)',
+          blue: '#3b82f6',
+          cyan: '#38bdf8',
           amber: '#f59e0b',
-          emerald: '#10b981',
-          cyan: '#06b6d4'
+          emerald: '#10b981'
         }
       },
       fontFamily: {
@@ -29,11 +39,17 @@ export default {
       animation: {
         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'radar-scan': 'radarScan 4s linear infinite',
+        'nebula-spin': 'nebulaSpin 20s linear infinite'
       },
       keyframes: {
         radarScan: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' }
+        },
+        nebulaSpin: {
+          '0%': { transform: 'rotate(0deg) scale(1)' },
+          '50%': { transform: 'rotate(180deg) scale(1.1)' },
+          '100%': { transform: 'rotate(360deg) scale(1)' }
         }
       }
     },

@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { submitBidApi } from '../../services/callableApi';
 import { subscribeToTeamBid } from '../../services/firestoreService';
-import { Award, CheckCircle2, ShieldAlert, ArrowRight, Layers, Lock, Loader2, Info } from 'lucide-react';
+import { Award, CheckCircle2, ShieldAlert, ArrowRight, Layers, Lock, Loader2, Info, Sparkles } from 'lucide-react';
 import { formatPoints, formatTimestamp } from '../../utils/formatters';
 
 export function BiddingPage() {
@@ -75,7 +75,7 @@ export function BiddingPage() {
   if (!isBiddingOpen) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center space-y-6">
-        <div className="h-14 w-14 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-zinc-400">
+        <div className="h-14 w-14 rounded-full border border-sky-500/20 bg-sky-500/[0.03] flex items-center justify-center mx-auto text-sky-400">
           <Lock className="h-6 w-6" />
         </div>
         <div className="space-y-2">
@@ -94,14 +94,14 @@ export function BiddingPage() {
     <div className="w-full space-y-12">
       {/* Title */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+        <div className="inline-flex items-center gap-2 text-sky-400 font-mono text-xs tracking-widest uppercase">
           <Award className="h-3.5 w-3.5" />
           <span>ALLOCATION ARENA</span>
         </div>
         <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
           Theme Priority Bidding
         </h1>
-        <p className="text-zinc-400 font-sans text-base max-w-3xl font-light">
+        <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
           Allocate your earned quiz score points towards your preferred challenge theme. Deterministic priority tuples resolve allocations authoritatively.
         </p>
       </div>
@@ -110,12 +110,12 @@ export function BiddingPage() {
       <form onSubmit={handleSubmitBid} className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
         {/* Left Bidding Controls Wing (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="border border-white/10 rounded-3xl p-7 bg-white/[0.02] backdrop-blur-xl space-y-6 sticky top-28">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+          <div className="border border-sky-500/20 rounded-3xl p-7 bg-[#06060e]/80 backdrop-blur-2xl space-y-6 sticky top-28 shadow-[0_0_40px_rgba(59,130,246,0.08)]">
+            <div className="flex items-center justify-between border-b border-sky-500/10 pb-4">
               <span className="font-mono text-xs text-white font-bold tracking-widest uppercase">
                 BID CONFIGURATION
               </span>
-              <span className="font-mono text-[10px] text-cyan-400 uppercase font-bold bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full">
+              <span className="font-mono text-[10px] text-sky-400 uppercase font-bold bg-sky-500/10 border border-sky-500/30 px-2.5 py-0.5 rounded-full">
                 CHANNEL OPEN
               </span>
             </div>
@@ -135,13 +135,13 @@ export function BiddingPage() {
             )}
 
             {/* Balances */}
-            <div className="grid grid-cols-2 gap-4 py-2 border-b border-white/[0.08]">
+            <div className="grid grid-cols-2 gap-4 py-2 border-b border-sky-500/10">
               <div>
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   QUIZ BALANCE
                 </span>
                 <span className="font-mono text-2xl font-bold text-white">
-                  {formatPoints(totalPoints)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
+                  {formatPoints(totalPoints)} <span className="text-xs text-sky-400 font-normal">PTS</span>
                 </span>
               </div>
 
@@ -149,7 +149,7 @@ export function BiddingPage() {
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   ACTIVE BID
                 </span>
-                <span className="font-mono text-2xl font-bold text-red-400">
+                <span className="font-mono text-2xl font-bold text-sky-400">
                   {existingBid ? `${formatPoints(existingBid.bidPoints)} PTS` : "0 PTS"}
                 </span>
               </div>
@@ -167,28 +167,28 @@ export function BiddingPage() {
                 max={totalPoints}
                 value={bidPoints}
                 onChange={(e) => setBidPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-red-500"
+                className="w-full bg-[#020205] border border-sky-500/20 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-sky-400"
               />
 
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setBidPoints(Math.floor(totalPoints * 0.25))}
-                  className="font-mono text-xs text-zinc-400 hover:text-white py-2 border border-white/10 rounded-lg hover:bg-white/[0.04]"
+                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
                 >
                   25%
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidPoints(Math.floor(totalPoints * 0.50))}
-                  className="font-mono text-xs text-zinc-400 hover:text-white py-2 border border-white/10 rounded-lg hover:bg-white/[0.04]"
+                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
                 >
                   50%
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidPoints(totalPoints)}
-                  className="font-mono text-xs text-zinc-400 hover:text-white py-2 border border-white/10 rounded-lg hover:bg-white/[0.04]"
+                  className="font-mono text-xs text-zinc-300 hover:text-white py-2 border border-sky-500/20 rounded-lg hover:bg-sky-500/[0.08]"
                 >
                   Max
                 </button>
@@ -199,7 +199,7 @@ export function BiddingPage() {
             <button
               type="submit"
               disabled={loading || !selectedThemeId}
-              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2 border border-blue-400/30"
             >
               {loading ? (
                 <>
@@ -215,12 +215,12 @@ export function BiddingPage() {
             </button>
 
             {/* Rules Info */}
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 font-mono text-[11px] text-zinc-400 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-zinc-300 font-bold">
+            <div className="rounded-2xl border border-sky-500/15 bg-sky-500/[0.03] p-4 font-mono text-[11px] text-zinc-400 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-sky-300 font-bold">
                 <Info className="h-3.5 w-3.5" />
                 <span>Priority Tuple Hierarchy:</span>
               </div>
-              <p className="text-zinc-500 text-[10px] leading-relaxed">
+              <p className="text-zinc-400 text-[10px] leading-relaxed">
                 1. Quiz Performance (Desc) &bull; 2. Bid Points (Desc) &bull; 3. Submission Time (Asc)
               </p>
             </div>
@@ -239,14 +239,14 @@ export function BiddingPage() {
               return (
                 <label
                   key={theme.id || theme.themeId || idx}
-                  className={`border rounded-3xl p-8 cursor-pointer transition-all duration-200 block relative space-y-4 ${
+                  className={`border rounded-3xl p-8 cursor-pointer transition-all duration-300 block relative space-y-4 ${
                     isSelected
-                      ? 'border-red-500 bg-red-500/10 shadow-[0_0_35px_rgba(220,38,38,0.2)]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'
+                      ? 'border-sky-400 bg-sky-500/15 shadow-[0_0_35px_rgba(56,189,248,0.2)]'
+                      : 'border-sky-500/15 bg-[#06060e]/60 hover:border-sky-400/40 hover:bg-sky-500/[0.04]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-red-500 uppercase tracking-widest">
+                    <span className="font-mono text-xs font-bold text-sky-400 uppercase tracking-widest">
                       THEME 0{theme.themeNumber || idx + 1}
                     </span>
                     <input
@@ -255,7 +255,7 @@ export function BiddingPage() {
                       value={theme.id || theme.themeId}
                       checked={isSelected}
                       onChange={() => setSelectedThemeId(theme.id || theme.themeId)}
-                      className="h-4 w-4 accent-red-600"
+                      className="h-4 w-4 accent-blue-600"
                     />
                   </div>
 
@@ -263,19 +263,19 @@ export function BiddingPage() {
                     {theme.publicName}
                   </h3>
 
-                  <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                  <p className="text-zinc-300 text-sm font-light leading-relaxed">
                     {theme.publicDescription}
                   </p>
 
                   {theme.brief && (
-                    <div className="text-xs text-zinc-300 font-light border-l border-white/20 pl-3 py-1">
+                    <div className="text-xs text-sky-200 font-light border-l border-sky-500/30 pl-3 py-1 bg-sky-500/[0.02] rounded-r-lg">
                       {theme.brief}
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between font-mono text-[11px] text-zinc-500">
+                  <div className="pt-2 border-t border-sky-500/10 flex items-center justify-between font-mono text-[11px] text-zinc-400">
                     <span>ELIGIBILITY</span>
-                    <span className="text-zinc-300 font-medium">{theme.eligibility || "All Teams"}</span>
+                    <span className="text-sky-300 font-medium">{theme.eligibility || "All Teams"}</span>
                   </div>
                 </label>
               );

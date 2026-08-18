@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
-import { Cpu, Terminal, LogOut, Radio, UserCheck, Shield, Menu, X } from 'lucide-react';
+import { Cpu, Terminal, LogOut, Radio, UserCheck, Shield, Menu, X, Sparkles } from 'lucide-react';
 import { formatTimestamp } from '../../utils/formatters';
 import ParticleCanvas from './ParticleCanvas';
 
@@ -32,18 +32,18 @@ export function AutomationShell({ children }) {
   }, [serverOffsetMs]);
 
   const navItems = [
-    { label: 'ABOUT', path: '/' },
+    { label: 'MISSION', path: '/' },
     { label: 'RADAR STATUS', path: '/status' },
-    { label: 'CHALLENGE THEMES', path: '/themes' },
-    { label: 'REGISTER TEAM', path: '/register', hideIfAuth: true }
+    { label: 'THEME VAULT', path: '/themes' },
+    { label: 'REGISTER ROSTER', path: '/register', hideIfAuth: true }
   ];
 
   if (currentUser && !isAdmin) {
     navItems.push(
-      { label: 'TEAM HUB', path: '/dashboard' },
-      { label: 'QUIZ ENGINE', path: '/quiz' },
+      { label: 'TEAM COCKPIT', path: '/dashboard' },
+      { label: 'QUIZ ARENA', path: '/quiz' },
       { label: 'THEME BIDDING', path: '/bidding' },
-      { label: 'RESULTS', path: '/results' }
+      { label: 'ALLOCATION', path: '/results' }
     );
   }
 
@@ -57,27 +57,27 @@ export function AutomationShell({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-void text-zinc-100 font-sans flex flex-col antialiased selection:bg-red-600 selection:text-white relative w-full overflow-x-hidden">
-      {/* Interactive Frontier Space & Robotics Particle Canvas */}
+    <div className="min-h-screen bg-[#020205] text-zinc-100 font-sans flex flex-col antialiased selection:bg-blue-600 selection:text-white relative w-full overflow-x-hidden">
+      {/* 3D Galaxy Wireframe & Stardust Particle Canvas */}
       <ParticleCanvas />
 
-      {/* Floating Modern Header Across 1080p Screen */}
+      {/* Floating Space Header Across 1080p Screen */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-black/85 backdrop-blur-2xl border-b border-white/[0.08] py-3.5'
+            ? 'bg-[#020205]/85 backdrop-blur-2xl border-b border-sky-500/10 py-3.5 shadow-[0_4px_30px_rgba(0,0,0,0.8)]'
             : 'bg-transparent py-5'
         }`}
       >
         <div className="max-w-[1720px] w-full mx-auto px-6 md:px-12 xl:px-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3.5 group">
-            <span className="font-display text-xl md:text-2xl font-extrabold tracking-[0.2em] text-white group-hover:text-red-500 transition-colors duration-300">
+            <span className="font-display text-xl md:text-2xl font-extrabold tracking-[0.2em] text-white group-hover:text-sky-400 transition-colors duration-300">
               MECHATHON
             </span>
-            <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-            <span className="hidden sm:inline-block font-mono text-[10px] tracking-[0.25em] text-zinc-500 uppercase">
-              AUTONOMOUS SYSTEMS // 2026
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.9)] animate-pulse"></span>
+            <span className="hidden sm:inline-block font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
+              DEEP SPACE &bull; AUTONOMOUS SYSTEMS
             </span>
           </Link>
 
@@ -93,38 +93,38 @@ export function AutomationShell({ children }) {
                   className={`text-xs font-mono font-medium tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 ${
                     isActive
                       ? 'text-white font-bold'
-                      : 'text-zinc-400 hover:text-white'
+                      : 'text-zinc-400 hover:text-sky-300'
                   }`}
                 >
                   {item.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,1)]" />
                   )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Status & Auth */}
+          {/* Right Telemetry & Auth */}
           <div className="flex items-center gap-4">
             {/* Clock */}
-            <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-zinc-400 border border-white/10 rounded-full px-3.5 py-1 bg-white/[0.02]">
-              <Radio className="h-3 w-3 text-emerald-400 animate-pulse" />
+            <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-zinc-400 border border-sky-500/20 rounded-full px-3.5 py-1 bg-sky-500/[0.03]">
+              <Radio className="h-3 w-3 text-sky-400 animate-pulse" />
               <span className="text-zinc-500 uppercase">NTP</span>
-              <span className="text-zinc-300 font-semibold">{formatTimestamp(currentClockMs)}</span>
+              <span className="text-sky-200 font-semibold">{formatTimestamp(currentClockMs)}</span>
             </div>
 
             {/* Auth State */}
             {currentUser ? (
               <div className="flex items-center gap-3">
                 {isAdmin ? (
-                  <span className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-500/10 px-3.5 py-1 rounded-full font-mono text-[11px] font-bold text-red-400 uppercase tracking-widest">
-                    <Shield className="h-3.5 w-3.5 text-red-400" />
+                  <span className="inline-flex items-center gap-1.5 border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 rounded-full font-mono text-[11px] font-bold text-indigo-300 uppercase tracking-widest">
+                    <Shield className="h-3.5 w-3.5 text-indigo-400" />
                     ADMIN
                   </span>
                 ) : (
-                  <div className="flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3.5 py-1 rounded-full">
-                    <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  <div className="flex items-center gap-2 border border-sky-500/20 bg-sky-500/[0.04] px-3.5 py-1 rounded-full">
+                    <UserCheck className="h-3.5 w-3.5 text-sky-400" />
                     <span className="font-mono text-xs font-bold text-white tracking-wider">
                       {teamData?.teamCode || "TEAM"}
                     </span>
@@ -134,7 +134,7 @@ export function AutomationShell({ children }) {
                 <button
                   onClick={handleLogout}
                   title="Sign Out"
-                  className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center text-zinc-400 hover:text-red-400 hover:border-red-500/40 transition-all duration-150 active:scale-95"
+                  className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center text-zinc-400 hover:text-sky-400 hover:border-sky-500/40 transition-all duration-150 active:scale-95"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
@@ -142,7 +142,7 @@ export function AutomationShell({ children }) {
             ) : (
               <Link
                 to="/login"
-                className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-white bg-white/10 hover:bg-red-600 border border-white/10 hover:border-red-600 px-5 py-2 rounded-full transition-all duration-200 active:scale-95 shadow-sm"
+                className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-white bg-blue-600/20 hover:bg-blue-600 border border-blue-500/40 hover:border-blue-500 px-5 py-2 rounded-full transition-all duration-200 active:scale-95 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
               >
                 TEAM PORTAL
               </Link>
@@ -160,7 +160,7 @@ export function AutomationShell({ children }) {
 
         {/* Mobile Nav */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-black/95 border-b border-white/10 px-8 py-6 space-y-4">
+          <div className="lg:hidden bg-[#020205]/95 border-b border-sky-500/20 px-8 py-6 space-y-4 backdrop-blur-2xl">
             {navItems.map((item) => {
               if (item.hideIfAuth && currentUser) return null;
               return (
@@ -168,7 +168,7 @@ export function AutomationShell({ children }) {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block font-mono text-xs tracking-[0.2em] uppercase text-zinc-300 hover:text-white py-2"
+                  className="block font-mono text-xs tracking-[0.2em] uppercase text-zinc-300 hover:text-sky-300 py-2"
                 >
                   {item.label}
                 </Link>
@@ -183,19 +183,19 @@ export function AutomationShell({ children }) {
         {children}
       </main>
 
-      {/* Full-Width Footer */}
-      <footer className="border-t border-white/[0.06] bg-black/60 backdrop-blur-md px-6 md:px-12 xl:px-16 py-8 z-10 font-mono text-xs text-zinc-500 w-full">
+      {/* Full-Width Space Footer */}
+      <footer className="border-t border-sky-500/10 bg-[#020205]/70 backdrop-blur-md px-6 md:px-12 xl:px-16 py-8 z-10 font-mono text-xs text-zinc-500 w-full">
         <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="font-display text-white font-bold tracking-widest text-sm">MECHATHON 2026</span>
             <span>&bull;</span>
-            <span className="text-zinc-400 tracking-wider">CYBER-PHYSICAL SYSTEMS &amp; INDUSTRIAL ROBOTICS</span>
+            <span className="text-zinc-400 tracking-wider">CYBER-PHYSICAL SYSTEMS &amp; SPACE ROBOTICS</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px] tracking-wider">
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              CORE OPERATIONAL
+            <span className="text-sky-400 flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]"></span>
+              GALAXY ORBITAL READY
             </span>
             <span>&bull;</span>
             <span>VIT CHENNAI</span>

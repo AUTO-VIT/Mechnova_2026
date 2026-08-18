@@ -96,9 +96,9 @@ export function QuizEngine() {
   if (loading || !session) {
     return (
       <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-red-500 mx-auto" />
-        <h2 className="font-display text-xl font-bold text-white">Initializing Engine</h2>
-        <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; question stream...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-sky-400 mx-auto" />
+        <h2 className="font-display text-xl font-bold text-white">Initializing Orbital Engine</h2>
+        <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; telemetry stream...</p>
       </div>
     );
   }
@@ -107,16 +107,16 @@ export function QuizEngine() {
   if (session.status === 'COMPLETED') {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-10 text-center">
-        <div className="h-20 w-20 rounded-full border border-emerald-500/40 bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400">
+        <div className="h-20 w-20 rounded-full border border-sky-400/40 bg-sky-500/10 flex items-center justify-center mx-auto text-sky-400 shadow-[0_0_30px_rgba(56,189,248,0.2)]">
           <Award className="h-10 w-10" />
         </div>
 
         <div className="space-y-3">
-          <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest block">
+          <span className="font-mono text-xs text-sky-400 uppercase tracking-widest block font-bold">
             EVALUATION COMPLETE
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-extrabold text-white">
-            Quiz Phase Finalized
+            Orbital Quiz Finalized
           </h1>
           <p className="text-zinc-400 text-base font-light max-w-xl mx-auto">
             Your results have been authenticated and recorded in the immutable score ledger.
@@ -124,13 +124,13 @@ export function QuizEngine() {
         </div>
 
         {/* Score Telemetry Grid */}
-        <div className="grid grid-cols-3 gap-6 py-10 border-y border-white/[0.08]">
+        <div className="grid grid-cols-3 gap-6 py-10 border-y border-sky-500/15">
           <div>
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               TOTAL SCORE
             </span>
             <span className="font-mono text-3xl sm:text-5xl font-extrabold text-white">
-              {formatPoints(teamScore?.totalPoints || 0)} <span className="text-sm text-zinc-500 font-normal">PTS</span>
+              {formatPoints(teamScore?.totalPoints || 0)} <span className="text-sm text-sky-400 font-normal">PTS</span>
             </span>
           </div>
           <div>
@@ -145,7 +145,7 @@ export function QuizEngine() {
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               ACCURACY
             </span>
-            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-emerald-400">
+            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-sky-400">
               {teamScore?.correctCount || 0}
             </span>
           </div>
@@ -155,14 +155,14 @@ export function QuizEngine() {
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-8 py-3.5 border border-white/10 rounded-full hover:bg-white/[0.04] transition-all active:scale-95"
+            className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-8 py-3.5 border border-sky-500/20 rounded-full hover:bg-sky-500/[0.05] transition-all active:scale-95"
           >
-            Return to Dashboard
+            Return to Cockpit
           </button>
           <button
             type="button"
             onClick={() => navigate('/bidding')}
-            className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(59,130,246,0.4)] border border-blue-400/30"
           >
             <span>Proceed to Bidding</span>
             <ArrowRight className="h-4 w-4" />
@@ -174,18 +174,18 @@ export function QuizEngine() {
 
   return (
     <div className="w-full space-y-10">
-      {/* 1080p Widescreen Dual Wing Quiz Arena */}
+      {/* 1080p Widescreen Dual Wing Galaxy Arena */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
         {/* Left Telemetry HUD (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="border border-white/10 rounded-3xl p-7 bg-white/[0.02] backdrop-blur-xl space-y-6 sticky top-28">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+          <div className="border border-sky-500/20 rounded-3xl p-7 bg-[#06060e]/80 backdrop-blur-2xl space-y-6 sticky top-28 shadow-[0_0_40px_rgba(59,130,246,0.08)]">
+            <div className="flex items-center justify-between border-b border-sky-500/10 pb-4">
               <div className="flex items-center gap-2 font-mono text-xs text-white font-bold tracking-widest uppercase">
-                <Radio className="h-3.5 w-3.5 text-red-500 animate-pulse" />
+                <Radio className="h-3.5 w-3.5 text-sky-400 animate-pulse" />
                 <span>QUIZ TELEMETRY</span>
               </div>
-              <span className={`font-mono text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full ${
-                isReadOnly ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
+              <span className={`font-mono text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
+                isReadOnly ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 'bg-blue-500/15 text-blue-300 border-blue-500/30'
               }`}>
                 {isReadOnly ? 'READ MODE' : 'ANSWER MODE'}
               </span>
@@ -206,7 +206,7 @@ export function QuizEngine() {
               <div className="h-2 w-full bg-white/[0.05] rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-100 ease-linear rounded-full ${
-                    isReadOnly ? 'bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.8)]' : 'bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]'
+                    isReadOnly ? 'bg-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.9)]' : 'bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.9)]'
                   }`}
                   style={{ width: `${progressPercent}%` }}
                 />
@@ -214,7 +214,7 @@ export function QuizEngine() {
             </div>
 
             {/* Question Progress & Points */}
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/[0.08]">
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-sky-500/10">
               <div>
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   PROGRESS
@@ -228,15 +228,15 @@ export function QuizEngine() {
                 <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
                   TOTAL SCORE
                 </span>
-                <span className="font-mono text-2xl font-bold text-red-400">
+                <span className="font-mono text-2xl font-bold text-sky-400">
                   {formatPoints(teamScore?.totalPoints || 0)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
                 </span>
               </div>
             </div>
 
             {/* Keyboard Shortcuts Hint */}
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 font-mono text-xs text-zinc-400 space-y-1">
-              <span className="text-zinc-500 text-[10px] uppercase tracking-wider block">KEYBOARD SHORTCUTS</span>
+            <div className="rounded-2xl border border-sky-500/15 bg-sky-500/[0.03] p-4 font-mono text-xs text-zinc-400 space-y-1">
+              <span className="text-sky-300 text-[10px] uppercase tracking-wider block font-bold">KEYBOARD SHORTCUTS</span>
               <div className="flex items-center justify-between text-zinc-300">
                 <span>Select Choice:</span>
                 <span className="text-white font-bold">1, 2, 3, 4 or A, B, C, D</span>
@@ -257,11 +257,11 @@ export function QuizEngine() {
           {/* Question Prompt */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs text-red-500 font-bold uppercase tracking-widest">
+              <span className="font-mono text-xs text-sky-400 font-bold uppercase tracking-widest">
                 QUESTION 0{session.questionIndex + 1}
               </span>
               <span className="font-mono text-xs text-zinc-500">
-                {currentQuestion?.category || "Robotics & Automation"}
+                {currentQuestion?.category || "Space Robotics & Autonomy"}
               </span>
             </div>
 
@@ -284,7 +284,7 @@ export function QuizEngine() {
 
             {/* Action Bar */}
             {!isReadOnly && (
-              <div className="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+              <div className="flex items-center justify-between pt-4 border-t border-sky-500/10">
                 <span className="font-mono text-xs text-zinc-500">
                   {selectedOption !== null ? "Option selected & ready" : "Choose one option above"}
                 </span>
@@ -293,7 +293,7 @@ export function QuizEngine() {
                   type="button"
                   disabled={selectedOption === null || submitting}
                   onClick={handleManualSubmit}
-                  className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-9 py-4 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 shadow-md"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-9 py-4 rounded-full transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 shadow-[0_0_30px_rgba(59,130,246,0.4)] border border-blue-400/30"
                 >
                   <span>{submitting ? "SUBMITTING..." : "CONFIRM SELECTION"}</span>
                   <Zap className="h-4 w-4" />
