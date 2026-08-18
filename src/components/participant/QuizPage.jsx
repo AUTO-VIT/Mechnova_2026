@@ -20,7 +20,7 @@ export function QuizPage() {
           actionButton={
             <Link
               to="/login"
-              className="bg-red-600 px-6 py-2.5 font-mono text-xs font-bold text-white hover:bg-red-500"
+              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
             >
               AUTHENTICATE NOW
             </Link>
@@ -39,7 +39,7 @@ export function QuizPage() {
           actionButton={
             <Link
               to="/"
-              className="border border-zinc-700 bg-zinc-900 px-6 py-2.5 font-mono text-xs font-bold text-zinc-300 hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
             >
               RETURN TO HOME
             </Link>

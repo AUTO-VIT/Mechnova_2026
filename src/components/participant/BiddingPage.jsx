@@ -5,6 +5,8 @@ import { submitBidApi } from '../../services/callableApi';
 import { subscribeToTeamBid } from '../../services/firestoreService';
 import { Award, CheckCircle2, ShieldAlert, ArrowRight, Layers, Lock, Loader2, Info, Sparkles } from 'lucide-react';
 import { formatPoints, formatTimestamp } from '../../utils/formatters';
+import { LockedPanel } from '../common/LockedPanel';
+import { Link } from 'react-router-dom';
 
 export function BiddingPage() {
   const { uid, teamScore } = useAuth();
@@ -72,20 +74,40 @@ export function BiddingPage() {
     }
   };
 
+  if (!uid) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16">
+        <LockedPanel
+          title="AUTHENTICATION REQUIRED"
+          message="You must authenticate at the Team Access Gate before entering the Bidding Arena."
+          actionButton={
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
+            >
+              AUTHENTICATE NOW
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
   if (!isBiddingOpen) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-24 text-center space-y-6">
-        <div className="h-14 w-14 rounded-full border border-[#855AB4]/30 bg-[#221545]/40 flex items-center justify-center mx-auto text-[#B26FCB]">
-          <Lock className="h-6 w-6" />
-        </div>
-        <div className="space-y-2">
-          <h2 className="font-display text-3xl font-extrabold text-white">
-            Bidding Channel Locked
-          </h2>
-          <p className="text-zinc-400 text-sm font-light leading-relaxed max-w-md mx-auto">
-            Theme bidding is currently closed. The bidding window opens upon completion of quiz evaluations.
-          </p>
-        </div>
+      <div className="mx-auto max-w-3xl px-4 py-16">
+        <LockedPanel
+          title="BIDDING CHANNEL LOCKED"
+          message="Theme bidding is currently closed. The bidding window opens upon completion of quiz evaluations."
+          actionButton={
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
+            >
+              RETURN TO HOME
+            </Link>
+          }
+        />
       </div>
     );
   }
