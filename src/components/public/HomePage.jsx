@@ -96,7 +96,7 @@ export function HomePage() {
           </div>
 
           {/* 3-Line Headline */}
-          <h1 className="font-display text-2xl sm:text-4xl md:text-5xl xl:text-6xl font-extrabold text-white tracking-tight leading-[1.04]">
+          <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight">
             Autonomous <br />
             Systems <span className="text-[#B26FCB] font-light">&amp;</span> <br />
             Intelligent Control
@@ -107,23 +107,22 @@ export function HomePage() {
           </p>
 
           {/* Action Row */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 pt-2">
             <Link
               to="/register"
-              className="inline-flex items-center gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
+              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
             >
               <span>REGISTRATION PORTAL</span>
-              <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/quiz"
-              className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
+              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
             >
               <span>QUIZ PORTAL</span>
             </Link>
             <Link
               to="/bidding"
-              className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
+              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
             >
               <span>BIDDING PORTAL</span>
             </Link>
