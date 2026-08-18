@@ -96,50 +96,36 @@ export function HomePage() {
           </div>
 
           {/* 3-Line Headline */}
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold text-white tracking-tight leading-[1.04]">
+          <h1 className="font-display text-2xl sm:text-4xl md:text-5xl xl:text-6xl font-extrabold text-white tracking-tight leading-[1.04]">
             Autonomous <br />
             Systems <span className="text-[#B26FCB] font-light">&amp;</span> <br />
             Intelligent Control
           </h1>
 
-          <p className="text-sm sm:text-base xl:text-lg text-zinc-300 font-sans font-light leading-relaxed max-w-2xl">
+          <p className="text-xs sm:text-sm xl:text-base text-zinc-300 font-sans font-light leading-relaxed max-w-2xl">
             {cms.heroSubtitle || "The next-generation mission control and evaluation platform for engineering teams. Features timed two-phase quiz verification, sealed theme reveals, and deterministic priority bidding."}
           </p>
 
           {/* Action Row */}
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            {!currentUser ? (
-              <>
-                <Link
-                  to={cms.heroPrimaryCtaLink || "/register"}
-                  className="inline-flex items-center gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
-                >
-                  <span>{cms.heroPrimaryCtaText || "REGISTER TEAM"}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  to={cms.heroSecondaryCtaLink || "/login"}
-                  className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
-                >
-                  <span>{cms.heroSecondaryCtaText || "TEAM GATEWAY"}</span>
-                </Link>
-              </>
-            ) : (
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-9 py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
-              >
-                <span>ACCESS TEAM COCKPIT</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            )}
-
             <Link
-              to="/themes"
-              className="inline-flex items-center gap-2 text-zinc-400 hover:text-[#B26FCB] font-mono text-xs tracking-[0.15em] uppercase px-5 py-4 transition-colors"
+              to="/register"
+              className="inline-flex items-center gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
             >
-              <span>THEMES ({publicThemes.length}/4)</span>
-              <ChevronRight className="h-3.5 w-3.5" />
+              <span>REGISTRATION PORTAL</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/quiz"
+              className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
+            >
+              <span>QUIZ PORTAL</span>
+            </Link>
+            <Link
+              to="/bidding"
+              className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
+            >
+              <span>BIDDING PORTAL</span>
             </Link>
           </div>
 
@@ -308,7 +294,7 @@ export function HomePage() {
             <span>REGISTRATION WINDOW ACTIVE</span>
           </div>
 
-          <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="font-display text-xl sm:text-3xl font-extrabold text-white tracking-tight">
             Ready to Compete?
           </h2>
 
@@ -318,10 +304,10 @@ export function HomePage() {
 
           <div className="pt-2 flex flex-wrap items-center gap-4">
             <Link
-              to={currentUser ? "/dashboard" : "/register"}
+              to="/register"
               className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(178,111,203,0.4)] border border-[#B26FCB]/40"
             >
-              <span>{currentUser ? "TEAM COCKPIT" : "REGISTER TEAM NOW"}</span>
+              <span>REGISTRATION PORTAL</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link

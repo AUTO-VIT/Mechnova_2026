@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useEvent } from '../../context/EventContext';
-import { LogOut, UserCheck, Shield, Radio, Menu, X } from 'lucide-react';
-import { formatTimestamp } from '../../utils/formatters';
+import { LogOut, UserCheck, Shield, Menu, X } from 'lucide-react';
 import ParticleCanvas from './ParticleCanvas';
 
 export function AutomationShell({ children }) {
   const { currentUser, isAdmin, teamData, logout } = useAuth();
-  const { serverOffsetMs } = useEvent();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [currentClockMs, setCurrentClockMs] = useState(Date.now() + serverOffsetMs);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -24,28 +20,13 @@ export function AutomationShell({ children }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentClockMs(Date.now() + serverOffsetMs);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [serverOffsetMs]);
-
   const navItems = [
-    { label: 'MISSION', path: '/' },
-    { label: 'RADAR STATUS', path: '/status' },
-    { label: 'THEME VAULT', path: '/themes' },
-    { label: 'REGISTER ROSTER', path: '/register', hideIfAuth: true }
+    { label: 'REGISTRATION PORTAL', path: '/register' },
+    { label: 'QUIZ PORTAL', path: '/quiz' },
+    { label: 'BIDDING PORTAL', path: '/bidding' }
   ];
 
-  if (currentUser && !isAdmin) {
-    navItems.push(
-      { label: 'TEAM COCKPIT', path: '/dashboard' },
-      { label: 'QUIZ ARENA', path: '/quiz' },
-      { label: 'THEME BIDDING', path: '/bidding' },
-      { label: 'ALLOCATION', path: '/results' }
-    );
-  }
+
 
   const handleLogout = async () => {
     await logout();
@@ -103,13 +84,6 @@ export function AutomationShell({ children }) {
 
           {/* Right Telemetry & Auth */}
           <div className="flex items-center gap-4">
-            {/* NTP Clock */}
-            <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-zinc-300 border border-[#855AB4]/30 rounded-full px-3.5 py-1 bg-[#221545]/40 backdrop-blur-md">
-              <Radio className="h-3 w-3 text-[#B26FCB] animate-pulse" />
-              <span className="text-zinc-400 uppercase">NTP</span>
-              <span className="text-[#B26FCB] font-semibold">{formatTimestamp(currentClockMs)}</span>
-            </div>
-
             {/* Auth State */}
             {currentUser ? (
               <div className="flex items-center gap-3">
@@ -135,14 +109,7 @@ export function AutomationShell({ children }) {
                   <LogOut className="h-3.5 w-3.5" />
                 </button>
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-white bg-[#68388D] hover:bg-[#855AB4] border border-[#B26FCB]/40 px-5 py-2 rounded-full transition-all duration-200 active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)]"
-              >
-                TEAM PORTAL
-              </Link>
-            )}
+            ) : null}
 
             {/* Mobile Menu Toggle */}
             <button
