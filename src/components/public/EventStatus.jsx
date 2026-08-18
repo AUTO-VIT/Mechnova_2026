@@ -46,25 +46,31 @@ export function EventStatus() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-16">
-      {/* Top Title */}
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
-          <Radio className="h-3.5 w-3.5 animate-pulse" />
-          <span>REAL-TIME TELEMETRY</span>
+    <div className="w-full space-y-16">
+      {/* Top Title Across 1080p */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+            <Radio className="h-3.5 w-3.5 animate-pulse" />
+            <span>REAL-TIME TELEMETRY</span>
+          </div>
+          <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+            System &amp; Event Radar
+          </h1>
+          <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
+            Live event state synchronization. Monitored through Firebase Cloud Functions and authoritative time servers.
+          </p>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-          System &amp; Event Radar
-        </h1>
-        <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
-          Live event state synchronization. Monitored through Firebase Cloud Functions and authoritative time servers.
-        </p>
+
+        <div className="font-mono text-xs text-zinc-400 border border-white/10 rounded-full px-4 py-2 bg-white/[0.02]">
+          TIME: <span className="text-white font-bold">{formatTimestamp(currentNow)}</span>
+        </div>
       </div>
 
-      {/* Phase Timeline - Plain, Elegant, Minimalist */}
+      {/* Phase Timeline - Expansive 1080p Grid */}
       <div className="space-y-6">
         <div className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-500 pb-2 border-b border-white/[0.08]">
-          EVENT PHASES
+          EVENT PHASES &bull; SEQUENCE MONITOR
         </div>
 
         <div className="divide-y divide-white/[0.06]">
@@ -73,37 +79,37 @@ export function EventStatus() {
             return (
               <div
                 key={p.key}
-                className={`py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-200 ${
-                  isCurrent ? 'bg-white/[0.02] -mx-4 px-4 rounded-lg' : ''
+                className={`py-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 transition-colors duration-200 ${
+                  isCurrent ? 'bg-white/[0.02] -mx-6 px-6 rounded-2xl' : ''
                 }`}
               >
-                <div className="flex items-start sm:items-center gap-4">
-                  <span className="font-mono text-sm text-zinc-500 w-6">
+                <div className="flex items-start sm:items-center gap-6">
+                  <span className="font-mono text-base text-zinc-500 font-bold w-8">
                     0{index + 1}
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-display text-lg font-bold text-white">
+                    <div className="flex items-center gap-3">
+                      <h2 className="font-display text-xl sm:text-2xl font-bold text-white">
                         {p.name}
                       </h2>
                       {isCurrent && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-red-500/10 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-0.5 rounded-full font-bold">
                           ACTIVE
                         </span>
                       )}
                       {p.completed && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
                           DONE
                         </span>
                       )}
                     </div>
-                    <p className="text-zinc-400 text-xs font-light mt-1">
+                    <p className="text-zinc-400 text-sm font-light mt-1">
                       {p.desc}
                     </p>
                   </div>
                 </div>
 
-                <div className="font-mono text-xs text-zinc-500 sm:text-right">
+                <div className="font-mono text-xs text-zinc-400 lg:text-right">
                   {isCurrent ? (
                     <span className="text-red-400 font-bold">IN PROGRESS</span>
                   ) : p.completed ? (
@@ -118,13 +124,13 @@ export function EventStatus() {
         </div>
       </div>
 
-      {/* Infrastructure Telemetry Stats */}
+      {/* Infrastructure Telemetry Stats Across 1080p */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/[0.08]">
-        <div className="space-y-2">
-          <span className="font-mono text-[11px] text-zinc-500 uppercase tracking-widest block">
+        <div className="border border-white/10 rounded-2xl p-8 bg-white/[0.02] space-y-2">
+          <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
             AUTHORITY OFFSET
           </span>
-          <div className="font-mono text-2xl font-bold text-white">
+          <div className="font-mono text-3xl font-bold text-white">
             {serverOffsetMs} <span className="text-sm font-normal text-zinc-400">ms</span>
           </div>
           <p className="text-xs text-zinc-400 font-light">
@@ -132,11 +138,11 @@ export function EventStatus() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <span className="font-mono text-[11px] text-zinc-500 uppercase tracking-widest block">
+        <div className="border border-white/10 rounded-2xl p-8 bg-white/[0.02] space-y-2">
+          <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
             THEME STORAGE
           </span>
-          <div className="font-mono text-2xl font-bold text-white">
+          <div className="font-mono text-3xl font-bold text-white">
             ISOLATED
           </div>
           <p className="text-xs text-zinc-400 font-light">
@@ -144,11 +150,11 @@ export function EventStatus() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          <span className="font-mono text-[11px] text-zinc-500 uppercase tracking-widest block">
+        <div className="border border-white/10 rounded-2xl p-8 bg-white/[0.02] space-y-2">
+          <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block">
             AUDIT TRAIL
           </span>
-          <div className="font-mono text-2xl font-bold text-white">
+          <div className="font-mono text-3xl font-bold text-white">
             ENABLED
           </div>
           <p className="text-xs text-zinc-400 font-light">

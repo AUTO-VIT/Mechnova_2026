@@ -23,8 +23,8 @@ export default {
       },
       fontFamily: {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['"Space Grotesk"', 'sans-serif']
+        sans: ['"Outfit"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['"Syne"', '"Outfit"', 'sans-serif']
       },
       animation: {
         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',

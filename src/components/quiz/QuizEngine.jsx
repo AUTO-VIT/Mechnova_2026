@@ -4,10 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { useQuizSession } from '../../hooks/useQuizSession';
 import { useAuthoritativeClock } from '../../hooks/useAuthoritativeClock';
-import { QuizPhaseView } from './QuizPhaseView';
 import { OptionGrid } from './OptionGrid';
-import { CheckCircle2, AlertTriangle, ArrowRight, Award, Zap, Loader2 } from 'lucide-react';
-import { formatPoints } from '../../utils/formatters';
+import { CheckCircle2, AlertTriangle, ArrowRight, Award, Zap, Loader2, Radio, Lock, Clock, Shield } from 'lucide-react';
+import { formatPoints, formatTimestamp } from '../../utils/formatters';
 
 export function QuizEngine() {
   const { uid, teamScore } = useAuth();
@@ -63,6 +62,9 @@ export function QuizEngine() {
   }, [localPhase, session, submitting, lastSubmissionResult, submitAnswerChoice, eventData, currentQuestion, selectedOption, serverOffsetMs]);
 
   const { remainingMs } = useAuthoritativeClock(localDeadline, serverOffsetMs, handleDeadlineReached);
+  const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const progressPercent = Math.min(100, Math.max(0, (remainingMs / 10000) * 100));
+  const isReadOnly = localPhase === 'READ_ONLY';
 
   const handleSelectOption = (idx) => {
     if (localPhase === 'READ_ONLY' || submitting) return;
@@ -104,46 +106,46 @@ export function QuizEngine() {
   // Quiz Completed View
   if (session.status === 'COMPLETED') {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-12 space-y-8 text-center">
-        <div className="h-16 w-16 rounded-full border border-emerald-500/40 bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400">
-          <Award className="h-8 w-8" />
+      <div className="max-w-4xl mx-auto px-6 py-16 space-y-10 text-center">
+        <div className="h-20 w-20 rounded-full border border-emerald-500/40 bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400">
+          <Award className="h-10 w-10" />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest block">
             EVALUATION COMPLETE
           </span>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold text-white">
             Quiz Phase Finalized
           </h1>
-          <p className="text-zinc-400 text-sm font-light">
+          <p className="text-zinc-400 text-base font-light max-w-xl mx-auto">
             Your results have been authenticated and recorded in the immutable score ledger.
           </p>
         </div>
 
         {/* Score Telemetry Grid */}
-        <div className="grid grid-cols-3 gap-4 py-8 border-y border-white/[0.08]">
+        <div className="grid grid-cols-3 gap-6 py-10 border-y border-white/[0.08]">
           <div>
-            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               TOTAL SCORE
             </span>
-            <span className="font-mono text-2xl sm:text-3xl font-bold text-white">
-              {formatPoints(teamScore?.totalPoints || 0)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
+            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-white">
+              {formatPoints(teamScore?.totalPoints || 0)} <span className="text-sm text-zinc-500 font-normal">PTS</span>
             </span>
           </div>
           <div>
-            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               ANSWERED
             </span>
-            <span className="font-mono text-2xl sm:text-3xl font-bold text-zinc-300">
-              {teamScore?.answeredCount || 0} / {session.totalQuestions}
+            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-zinc-300">
+              {teamScore?.answeredCount || 0} <span className="text-sm text-zinc-500 font-normal">/ {session.totalQuestions}</span>
             </span>
           </div>
           <div>
-            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
-              CORRECT
+            <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
+              ACCURACY
             </span>
-            <span className="font-mono text-2xl sm:text-3xl font-bold text-emerald-400">
+            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-emerald-400">
               {teamScore?.correctCount || 0}
             </span>
           </div>
@@ -153,14 +155,14 @@ export function QuizEngine() {
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-6 py-3 border border-white/10 rounded-full hover:bg-white/[0.04] transition-all active:scale-95"
+            className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-8 py-3.5 border border-white/10 rounded-full hover:bg-white/[0.04] transition-all active:scale-95"
           >
-            Dashboard
+            Return to Dashboard
           </button>
           <button
             type="button"
             onClick={() => navigate('/bidding')}
-            className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-7 py-3 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md"
+            className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md"
           >
             <span>Proceed to Bidding</span>
             <ArrowRight className="h-4 w-4" />
@@ -171,59 +173,135 @@ export function QuizEngine() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 md:px-12 space-y-10">
-      {/* Top Telemetry & Clock */}
-      <QuizPhaseView
-        questionIndex={session.questionIndex}
-        totalQuestions={session.totalQuestions}
-        phase={localPhase}
-        remainingMs={remainingMs}
-        score={teamScore?.totalPoints || 0}
-        category={currentQuestion?.category || "Robotics & Automation"}
-      />
+    <div className="w-full space-y-10">
+      {/* 1080p Widescreen Dual Wing Quiz Arena */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
+        {/* Left Telemetry HUD (4 Cols) */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="border border-white/10 rounded-3xl p-7 bg-white/[0.02] backdrop-blur-xl space-y-6 sticky top-28">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="flex items-center gap-2 font-mono text-xs text-white font-bold tracking-widest uppercase">
+                <Radio className="h-3.5 w-3.5 text-red-500 animate-pulse" />
+                <span>QUIZ TELEMETRY</span>
+              </div>
+              <span className={`font-mono text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full ${
+                isReadOnly ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
+              }`}>
+                {isReadOnly ? 'READ MODE' : 'ANSWER MODE'}
+              </span>
+            </div>
 
-      {error && (
-        <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
-          <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+            {/* Countdown Display */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-zinc-400 uppercase">
+                  {isReadOnly ? "Read Prompt Window" : "Answer Selection Window"}
+                </span>
+                <span className="font-mono text-xl font-black text-white tracking-widest">
+                  00:{String(remainingSeconds).padStart(2, '0')}
+                </span>
+              </div>
 
-      {/* Question Prompt */}
-      <div className="space-y-3">
-        <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
-          QUESTION 0{session.questionIndex + 1}
-        </span>
-        <h2 className="font-display text-xl sm:text-2xl font-bold text-white leading-relaxed">
-          {currentQuestion?.prompt || "Loading prompt..."}
-        </h2>
-      </div>
+              {/* Progress Bar */}
+              <div className="h-2 w-full bg-white/[0.05] rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-100 ease-linear rounded-full ${
+                    isReadOnly ? 'bg-red-500 shadow-[0_0_10px_rgba(220,38,38,0.8)]' : 'bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]'
+                  }`}
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
 
-      {/* Options Grid */}
-      <div className="space-y-6 pt-2">
-        <OptionGrid
-          options={currentQuestion?.options || []}
-          selectedOption={selectedOption}
-          onSelectOption={handleSelectOption}
-          disabled={submitting || localPhase === 'READ_ONLY'}
-          isReadOnly={localPhase === 'READ_ONLY'}
-          submittedOption={lastSubmissionResult ? selectedOption : null}
-          isCorrect={lastSubmissionResult?.isCorrect}
-        />
+            {/* Question Progress & Points */}
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/[0.08]">
+              <div>
+                <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
+                  PROGRESS
+                </span>
+                <span className="font-mono text-2xl font-bold text-white">
+                  0{session.questionIndex + 1} <span className="text-zinc-600 font-normal text-sm">/ 0{session.totalQuestions}</span>
+                </span>
+              </div>
 
-        {localPhase === 'ANSWER_MODE' && (
-          <div className="flex justify-end pt-2">
-            <button
-              type="button"
-              disabled={selectedOption === null || submitting}
-              onClick={handleManualSubmit}
-              className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 shadow-md"
-            >
-              <span>{submitting ? "SUBMITTING..." : "CONFIRM SELECTION"}</span>
-              <Zap className="h-4 w-4" />
-            </button>
+              <div>
+                <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
+                  TOTAL SCORE
+                </span>
+                <span className="font-mono text-2xl font-bold text-red-400">
+                  {formatPoints(teamScore?.totalPoints || 0)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Keyboard Shortcuts Hint */}
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 font-mono text-xs text-zinc-400 space-y-1">
+              <span className="text-zinc-500 text-[10px] uppercase tracking-wider block">KEYBOARD SHORTCUTS</span>
+              <div className="flex items-center justify-between text-zinc-300">
+                <span>Select Choice:</span>
+                <span className="text-white font-bold">1, 2, 3, 4 or A, B, C, D</span>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Right Main Arena (8 Cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          {error && (
+            <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-2xl font-mono text-xs text-red-300 flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Question Prompt */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs text-red-500 font-bold uppercase tracking-widest">
+                QUESTION 0{session.questionIndex + 1}
+              </span>
+              <span className="font-mono text-xs text-zinc-500">
+                {currentQuestion?.category || "Robotics & Automation"}
+              </span>
+            </div>
+
+            <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-white leading-snug">
+              {currentQuestion?.prompt || "Loading question prompt..."}
+            </h2>
+          </div>
+
+          {/* Options Grid */}
+          <div className="space-y-6 pt-4">
+            <OptionGrid
+              options={currentQuestion?.options || []}
+              selectedOption={selectedOption}
+              onSelectOption={handleSelectOption}
+              disabled={submitting || isReadOnly}
+              isReadOnly={isReadOnly}
+              submittedOption={lastSubmissionResult ? selectedOption : null}
+              isCorrect={lastSubmissionResult?.isCorrect}
+            />
+
+            {/* Action Bar */}
+            {!isReadOnly && (
+              <div className="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+                <span className="font-mono text-xs text-zinc-500">
+                  {selectedOption !== null ? "Option selected & ready" : "Choose one option above"}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={selectedOption === null || submitting}
+                  onClick={handleManualSubmit}
+                  className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-9 py-4 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 shadow-md"
+                >
+                  <span>{submitting ? "SUBMITTING..." : "CONFIRM SELECTION"}</span>
+                  <Zap className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

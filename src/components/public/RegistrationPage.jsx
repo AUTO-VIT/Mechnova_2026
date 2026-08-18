@@ -111,144 +111,166 @@ export function RegistrationPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-6 md:px-12 space-y-12">
+    <div className="w-full space-y-12">
       {/* Title */}
-      <div className="space-y-4 text-center">
+      <div className="space-y-3 pb-6 border-b border-white/[0.08]">
         <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
           <Users className="h-3.5 w-3.5" />
-          <span>ROSTER INTAKE</span>
+          <span>ROSTER INTAKE PROTOCOL</span>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
           Team Registration
         </h1>
-        <p className="text-zinc-400 font-sans text-base max-w-xl mx-auto font-light">
-          Register 2 to 4 team members. One-time passkeys and cryptographic team identifiers will be issued upon registration.
+        <p className="text-zinc-400 font-sans text-base max-w-3xl font-light">
+          Register 2 to 4 team members. One-time passkeys and cryptographic team identifiers will be issued upon submission.
         </p>
       </div>
 
       {!isRegistrationOpen ? (
-        <div className="py-16 text-center border-y border-white/[0.08] text-red-400 font-mono text-sm">
+        <div className="py-24 text-center border border-white/10 rounded-3xl bg-white/[0.02] text-red-400 font-mono text-sm">
           Registration is currently closed by event administration.
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-10">
-          {error && (
-            <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-xl font-mono text-xs text-red-300 flex items-center gap-3">
-              <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Team Name */}
-          <div className="space-y-2">
-            <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
-              Team Name *
-            </label>
-            <input
-              type="text"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              placeholder="e.g. Autonomous Motion Squad"
-              required
-              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 font-sans text-base text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
-            />
-          </div>
-
-          {/* Members List */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-              <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
-                Team Roster ({members.length} / 4 Members)
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Left Summary Wing (4 cols) */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="border border-white/10 rounded-3xl p-8 bg-white/[0.02] space-y-6 sticky top-28">
+              <span className="font-mono text-xs text-white font-bold uppercase tracking-wider block">
+                REGISTRATION RULES
               </span>
-              {members.length < 4 && (
-                <button
-                  type="button"
-                  onClick={handleAddMember}
-                  className="inline-flex items-center gap-1.5 font-mono text-xs text-white hover:text-red-400 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Add Member</span>
-                </button>
-              )}
-            </div>
 
-            <div className="space-y-6">
-              {members.map((m, idx) => (
-                <div key={idx} className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-zinc-500">
-                      Member 0{idx + 1} {idx === 0 ? "(Lead)" : ""}
-                    </span>
-                    {members.length > 2 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMember(idx)}
-                        className="text-zinc-500 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
+              <div className="space-y-3 text-xs text-zinc-400 font-light leading-relaxed">
+                <p>1. Teams require <strong>2 to 4 registered participants</strong>.</p>
+                <p>2. Passkeys are displayed <strong>only once</strong> upon creation.</p>
+                <p>3. The generated Team Code and Passkey give access to both the Quiz Arena and Theme Bidding.</p>
+              </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <input
-                      type="text"
-                      value={m.name}
-                      onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
-                      placeholder="Full Name *"
-                      required
-                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
-                    />
-                    <input
-                      type="email"
-                      value={m.email}
-                      onChange={(e) => handleMemberChange(idx, 'email', e.target.value)}
-                      placeholder="Email Address *"
-                      required
-                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
-                    />
-                    <input
-                      type="text"
-                      value={m.role}
-                      onChange={(e) => handleMemberChange(idx, 'role', e.target.value)}
-                      placeholder="Role (e.g. Kinematics)"
-                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
-                    />
-                  </div>
-                </div>
-              ))}
+              <div className="pt-4 border-t border-white/[0.06] font-mono text-[11px] text-zinc-500">
+                <span>SECURITY: Passkeys zero-stored in database</span>
+              </div>
             </div>
           </div>
 
-          {/* Submit */}
-          <div className="pt-6 border-t border-white/[0.08]">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-lg active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>PROVISIONING CREDENTIALS...</span>
-                </>
-              ) : (
-                <>
-                  <span>CONFIRM &amp; GENERATE TEAM PASSKEYS</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
+          {/* Right Form Wing (8 cols) */}
+          <div className="lg:col-span-8 space-y-8">
+            {error && (
+              <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-2xl font-mono text-xs text-red-300 flex items-center gap-3">
+                <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Team Name */}
+            <div className="space-y-2">
+              <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+                Team Name *
+              </label>
+              <input
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="e.g. Autonomous Motion Squad"
+                required
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 font-sans text-base text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+              />
+            </div>
+
+            {/* Members List */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+                <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+                  Roster Members ({members.length} / 4 Members)
+                </span>
+                {members.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={handleAddMember}
+                    className="inline-flex items-center gap-1.5 font-mono text-xs text-white hover:text-red-400 transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Add Member</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-6">
+                {members.map((m, idx) => (
+                  <div key={idx} className="border border-white/10 rounded-2xl p-6 bg-white/[0.02] space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs text-red-500 font-bold uppercase tracking-wider">
+                        Member 0{idx + 1} {idx === 0 ? "(Lead)" : ""}
+                      </span>
+                      {members.length > 2 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(idx)}
+                          className="text-zinc-500 hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <input
+                        type="text"
+                        value={m.name}
+                        onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
+                        placeholder="Full Name *"
+                        required
+                        className="bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                      />
+                      <input
+                        type="email"
+                        value={m.email}
+                        onChange={(e) => handleMemberChange(idx, 'email', e.target.value)}
+                        placeholder="Email Address *"
+                        required
+                        className="bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                      />
+                      <input
+                        type="text"
+                        value={m.role}
+                        onChange={(e) => handleMemberChange(idx, 'role', e.target.value)}
+                        placeholder="Role (e.g. Kinematics)"
+                        className="bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6 border-t border-white/[0.08]">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-10 py-4 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-lg active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>PROVISIONING CREDENTIALS...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>CONFIRM &amp; GENERATE PASSKEYS</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       )}
 
       {/* CREDENTIAL MODAL */}
       {credResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-xl">
-          <div className="w-full max-w-xl bg-void border border-white/20 rounded-2xl p-8 sm:p-10 space-y-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-2xl">
+          <div className="w-full max-w-xl bg-void border border-white/20 rounded-3xl p-8 sm:p-10 space-y-6 shadow-2xl">
             <div className="space-y-2">
-              <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
+              <span className="font-mono text-xs text-red-500 uppercase tracking-widest block font-bold">
                 CREDENTIALS GENERATED
               </span>
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
@@ -261,15 +283,15 @@ export function RegistrationPage() {
 
             <div className="space-y-3 pt-2">
               {/* Code */}
-              <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 flex items-center justify-between">
                 <div>
                   <span className="font-mono text-[10px] text-zinc-500 uppercase block">TEAM CODE</span>
-                  <span className="font-mono text-xl font-bold text-white tracking-widest">{credResult.teamCode}</span>
+                  <span className="font-mono text-2xl font-bold text-white tracking-widest">{credResult.teamCode}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleCopy(credResult.teamCode, 'code')}
-                  className="font-mono text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.05]"
+                  className="font-mono text-xs text-zinc-300 hover:text-white px-4 py-2 rounded-xl border border-white/10 bg-white/[0.05]"
                 >
                   {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400 inline" /> : <Copy className="h-3.5 w-3.5 inline" />}
                   <span className="ml-1.5">{copiedCode ? 'COPIED' : 'COPY'}</span>
@@ -277,15 +299,15 @@ export function RegistrationPage() {
               </div>
 
               {/* Password */}
-              <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex items-center justify-between">
+              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 flex items-center justify-between">
                 <div>
-                  <span className="font-mono text-[10px] text-zinc-500 uppercase block">PASSKEY</span>
-                  <span className="font-mono text-xl font-bold text-red-400 tracking-widest">{credResult.password}</span>
+                  <span className="font-mono text-[10px] text-zinc-500 uppercase block">SECRET PASSKEY</span>
+                  <span className="font-mono text-2xl font-bold text-red-400 tracking-widest">{credResult.password}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleCopy(credResult.password, 'pass')}
-                  className="font-mono text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.05]"
+                  className="font-mono text-xs text-zinc-300 hover:text-white px-4 py-2 rounded-xl border border-white/10 bg-white/[0.05]"
                 >
                   {copiedPass ? <Check className="h-3.5 w-3.5 text-emerald-400 inline" /> : <Copy className="h-3.5 w-3.5 inline" />}
                   <span className="ml-1.5">{copiedPass ? 'COPIED' : 'COPY'}</span>
@@ -318,7 +340,7 @@ export function RegistrationPage() {
               type="button"
               disabled={!hasConfirmedSave}
               onClick={handleCloseModal}
-              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
             >
               <span>PROCEED TO SIGN IN</span>
               <ArrowRight className="h-4 w-4" />
