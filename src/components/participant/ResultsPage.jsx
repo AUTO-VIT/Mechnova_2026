@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { subscribeToTeamAllocation } from '../../services/firestoreService';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { Award, CheckCircle, Clock, ShieldAlert } from 'lucide-react';
+import { Award, CheckCircle2, Clock, ShieldAlert, Sparkles } from 'lucide-react';
 import { formatPoints, formatTimestamp } from '../../utils/formatters';
 
 export function ResultsPage() {
@@ -31,99 +29,89 @@ export function ResultsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 space-y-8">
-      {/* Header */}
-      <div className="border border-white/10 bg-zinc-950 p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-emerald-400" />
-            <h1 className="font-mono text-xl font-black uppercase tracking-wider text-white">
-              FINAL THEME ALLOCATION RESULTS
-            </h1>
-          </div>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            Server-authoritative priority allocation outcome for team <span className="text-red-400 font-bold">{teamData?.teamName}</span> ({teamData?.teamCode}).
-          </p>
+    <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-12">
+      {/* Title */}
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+          <Award className="h-3.5 w-3.5" />
+          <span>OUTCOME LEDGER</span>
         </div>
-
-        <StatusBadge
-          status={isFinalized ? "ALLOCATION FINALIZED" : "ALLOCATION PENDING"}
-          variant={isFinalized ? "emerald" : "amber"}
-        />
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Allocation Results
+        </h1>
+        <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
+          Authoritative allocation outcome computed via priority tuple sorting.
+        </p>
       </div>
 
       {!isFinalized ? (
-        <ControlPanel title="ALLOCATION ENGINE RUNNING" subtitle="Awaiting Final Execution">
-          <div className="p-8 text-center space-y-4">
-            <Clock className="h-12 w-12 text-amber-400 animate-pulse mx-auto" />
-            <h3 className="font-mono text-base font-bold text-white uppercase">
-              THEME ALLOCATION IS CURRENTLY BEING CALCULATED
-            </h3>
-            <p className="font-mono text-xs text-zinc-400 max-w-md mx-auto">
-              Once bidding closes, administrative execution will finalize the priority tuple sort and assign ranks. Results will update automatically.
+        <div className="py-20 text-center border-y border-white/[0.08] space-y-4">
+          <div className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-amber-400">
+            <Clock className="h-5 w-5 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-display text-2xl font-bold text-white">
+              Allocation in Progress
+            </h2>
+            <p className="text-zinc-400 text-sm font-light leading-relaxed max-w-md mx-auto">
+              Bidding is currently being processed by event administration. Final theme allocations and ranks will appear automatically.
             </p>
           </div>
-        </ControlPanel>
+        </div>
       ) : (
-        <ControlPanel
-          title="OFFICIAL ASSIGNED THEME RESULT"
-          subtitle="Final Rank Assignment"
-          badge={<StatusBadge status={`RANK #${allocation?.rank || 1}`} variant="emerald" />}
-          hazardBorder={false}
-        >
-          <div className="p-6 space-y-6">
-            <div className="flex items-center gap-4 bg-emerald-950/40 p-4 border border-emerald-500/40">
-              <CheckCircle className="h-8 w-8 text-emerald-400 flex-shrink-0" />
-              <div>
-                <div className="font-mono text-sm font-extrabold text-emerald-300 uppercase">
-                  CONFIRMED ALLOCATION ASSIGNMENT
-                </div>
-                <div className="font-mono text-xs text-zinc-300">
-                  Finalized at {formatTimestamp(allocation?.finalizedAtMs)}
-                </div>
-              </div>
+        <div className="space-y-10">
+          {/* Confirmed Theme Hero */}
+          <div className="border border-white/10 rounded-2xl p-8 sm:p-10 bg-white/[0.02] space-y-6">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" />
+                OFFICIAL ASSIGNMENT
+              </span>
+              <span className="font-mono text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold">
+                RANK #{allocation?.rank || 1}
+              </span>
             </div>
 
-            {/* Assigned Theme Card */}
             {assignedTheme ? (
-              <div className="border border-white/15 bg-black p-6 space-y-4 font-mono">
-                <div className="text-xs uppercase text-zinc-500">ASSIGNED CHALLENGE THEME</div>
-                <h2 className="text-2xl font-black text-white">
-                  THEME 0{assignedTheme.themeNumber}: {assignedTheme.publicName}
+              <div className="space-y-4">
+                <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
+                  THEME 0{assignedTheme.themeNumber}
+                </span>
+                <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                  {assignedTheme.publicName}
                 </h2>
-                <p className="text-xs text-zinc-300 leading-relaxed">
+                <p className="text-zinc-400 text-sm font-light leading-relaxed">
                   {assignedTheme.publicDescription}
                 </p>
-
                 {assignedTheme.brief && (
-                  <div className="bg-zinc-900/90 p-4 border border-zinc-800 text-xs text-zinc-200">
-                    <strong>BRIEF:</strong> {assignedTheme.brief}
+                  <div className="text-xs text-zinc-300 font-light border-l border-white/20 pl-4 py-2 mt-4">
+                    {assignedTheme.brief}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="font-mono text-xs text-zinc-400">
-                Theme ID: {allocation?.themeId || "Unassigned"}
+              <div className="font-mono text-sm text-zinc-400">
+                Theme Assignment ID: {allocation?.themeId || "Unassigned"}
               </div>
             )}
+          </div>
 
-            {/* Telemetry metrics breakdown */}
-            <div className="grid grid-cols-3 gap-4 border-t border-zinc-800 pt-4 font-mono text-center">
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">ALLOCATION RANK</div>
-                <div className="text-xl font-bold text-emerald-400">#{allocation?.rank || 1}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">SCORE SNAPSHOT</div>
-                <div className="text-xl font-bold text-amber-400">{formatPoints(allocation?.scoreSnapshot || 0)} PTS</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">BID POINTS SPENT</div>
-                <div className="text-xl font-bold text-cyan-400">{formatPoints(allocation?.bidPoints || 0)} PTS</div>
-              </div>
+          {/* Allocation Breakdown Strip */}
+          <div className="grid grid-cols-3 gap-6 py-6 border-y border-white/[0.08] font-mono text-center">
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase block mb-1">FINAL RANK</span>
+              <span className="text-2xl font-bold text-emerald-400">#{allocation?.rank || 1}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase block mb-1">SCORE SNAPSHOT</span>
+              <span className="text-2xl font-bold text-white">{formatPoints(allocation?.scoreSnapshot || 0)} PTS</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase block mb-1">POINTS SPENT</span>
+              <span className="text-2xl font-bold text-red-400">{formatPoints(allocation?.bidPoints || 0)} PTS</span>
             </div>
           </div>
-        </ControlPanel>
+        </div>
       )}
     </div>
   );

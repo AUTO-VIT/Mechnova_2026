@@ -1,9 +1,6 @@
 import React from 'react';
 import { useEvent } from '../../context/EventContext';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { LockedPanel } from '../common/LockedPanel';
-import { Layers, Eye, ShieldCheck, Award } from 'lucide-react';
+import { Layers, Lock, Sparkles, ArrowUpRight } from 'lucide-react';
 import { formatTimestamp } from '../../utils/formatters';
 
 export function ThemeRevealPanel() {
@@ -11,69 +8,75 @@ export function ThemeRevealPanel() {
   const isRevealed = eventData?.themesRevealed === true || publicThemes.length > 0;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-16">
       {/* Header */}
-      <div className="border border-white/10 bg-zinc-950 p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Layers className="h-5 w-5 text-red-500" />
-            <h1 className="font-mono text-xl font-bold uppercase tracking-wider text-white">
-              HACKATHON CHALLENGE THEME REVEAL
-            </h1>
-          </div>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            Official robotics problem statements and competition domain specifications.
-          </p>
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+          <Layers className="h-3.5 w-3.5" />
+          <span>CHALLENGE DOMAINS</span>
         </div>
-
-        <StatusBadge
-          status={isRevealed ? "THEMES REVEALED" : "VAULT LOCKED"}
-          variant={isRevealed ? "emerald" : "red"}
-        />
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Hackathon Themes
+        </h1>
+        <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
+          Problem statements and robotics competition domains. Bids are submitted during the allocation phase using earned quiz points.
+        </p>
       </div>
 
       {/* Pre-reveal Locked State vs Post-reveal Grid */}
       {!isRevealed ? (
-        <LockedPanel
-          title="THEME VAULT IS SEALED"
-          message="Themes will be revealed two days prior to the event. Problem details are securely locked in the backend themesPrivate node and inaccessible to non-administrative clients."
-        />
+        <div className="py-20 text-center border-y border-white/[0.08] space-y-6">
+          <div className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-zinc-400">
+            <Lock className="h-5 w-5" />
+          </div>
+          <div className="space-y-2 max-w-md mx-auto">
+            <h2 className="font-display text-xl font-bold text-white">
+              Themes are currently sealed
+            </h2>
+            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              Themes will be revealed two days prior to the event. Problem briefs are securely isolated in the encrypted backend vault.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 font-mono text-xs text-zinc-500 border border-white/10 px-4 py-1.5 rounded-full">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>AWAITING AUDITED REVEAL</span>
+          </div>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {publicThemes.map((theme, idx) => (
-            <ControlPanel
+            <div
               key={theme.id || theme.themeId || idx}
-              title={`THEME 0${theme.themeNumber || idx + 1}: ${theme.publicName}`}
-              subtitle={`REVEALED: ${formatTimestamp(theme.revealedAtMs)}`}
-              badge={<StatusBadge status="PUBLIC" variant="cyan" />}
+              className="border-t border-white/10 pt-6 space-y-4 group hover:border-red-500 transition-colors duration-300"
             >
-              <div className="space-y-4 pt-1">
-                <div>
-                  <h4 className="font-mono text-[11px] uppercase tracking-wider text-zinc-500 mb-1">
-                    CHALLENGE OVERVIEW
-                  </h4>
-                  <p className="font-mono text-xs text-zinc-200 leading-relaxed">
-                    {theme.publicDescription || "Robotics and automation problem statement."}
-                  </p>
-                </div>
-
-                {theme.brief && (
-                  <div>
-                    <h4 className="font-mono text-[11px] uppercase tracking-wider text-zinc-500 mb-1">
-                      TECHNICAL SCOPE & BRIEF
-                    </h4>
-                    <p className="font-mono text-xs text-zinc-300 leading-relaxed bg-zinc-900/80 p-3 border border-white/5">
-                      {theme.brief}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-800 font-mono text-[11px]">
-                  <span className="text-zinc-500">ELIGIBILITY:</span>
-                  <span className="text-emerald-400 font-semibold">{theme.eligibility || "All registered teams"}</span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-red-500 font-bold tracking-widest uppercase">
+                  THEME 0{theme.themeNumber || idx + 1}
+                </span>
+                <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+                  REVEALED
+                </span>
               </div>
-            </ControlPanel>
+
+              <h2 className="font-display text-2xl font-bold text-white group-hover:text-red-400 transition-colors">
+                {theme.publicName}
+              </h2>
+
+              <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                {theme.publicDescription || "Autonomous robotics problem statement and engineering domain specifications."}
+              </p>
+
+              {theme.brief && (
+                <div className="text-xs text-zinc-300 font-light border-l border-white/20 pl-3 py-1">
+                  {theme.brief}
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-between font-mono text-xs text-zinc-500">
+                <span>ELIGIBILITY</span>
+                <span className="text-zinc-300 font-medium">{theme.eligibility || "All Active Teams"}</span>
+              </div>
+            </div>
           ))}
         </div>
       )}

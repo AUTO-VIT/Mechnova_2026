@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { subscribeToPrivateThemes, savePrivateTheme } from '../../services/firestoreService';
 import { revealThemesApi } from '../../services/callableApi';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
 import { ConfirmDialog } from '../common/ConfirmDialog';
-import { Layers, Eye, Edit2, Lock, ShieldCheck } from 'lucide-react';
+import { Layers, Eye, Edit2, Lock, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 
 export function ThemeControl({ eventData }) {
   const eventId = eventData?.id || 'default-event';
@@ -83,165 +81,162 @@ export function ThemeControl({ eventData }) {
   const isRevealed = eventData?.themesRevealed === true;
 
   return (
-    <ControlPanel
-      title="SECRET THEME VAULT & REVEAL ENGINE"
-      subtitle="Strict Pre-Reveal Privacy Protocol"
-      badge={
-        <StatusBadge
-          status={isRevealed ? "THEMES REVEALED" : "VAULT LOCKED"}
-          variant={isRevealed ? "emerald" : "red"}
-        />
-      }
-    >
-      <div className="space-y-6 pt-2 font-mono">
-        {revealMsg && (
-          <div className="border border-emerald-500/50 bg-emerald-950/60 p-3 text-xs text-emerald-300">
-            {revealMsg}
-          </div>
-        )}
+    <div className="space-y-8">
+      {revealMsg && (
+        <div className="border border-emerald-500/30 bg-emerald-500/10 p-3.5 rounded-xl font-mono text-xs text-emerald-300 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4" />
+          <span>{revealMsg}</span>
+        </div>
+      )}
 
-        {/* Status Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border border-zinc-800 bg-zinc-900/60 p-4">
-          <div>
-            <div className="text-xs uppercase text-zinc-400">PRIVATE THEMES CONFIGURED</div>
-            <div className="text-xl font-bold text-white">
-              {configuredCount} / 4 SLOTS READY
-            </div>
+      {/* Action Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-b border-white/[0.08]">
+        <div>
+          <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider block">
+            Theme Vault Configuration
+          </span>
+          <div className="font-display text-lg font-bold text-white">
+            {configuredCount} / 4 Slots Configured
           </div>
-
-          <button
-            type="button"
-            disabled={isRevealed || configuredCount < 4}
-            onClick={() => setConfirmOpen(true)}
-            className="bg-red-600 px-6 py-2.5 text-xs font-extrabold uppercase text-white hover:bg-red-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center gap-2"
-          >
-            <Eye className="h-4 w-4" />
-            <span>{isRevealed ? "THEMES REVEALED" : "EXECUTE THEME REVEAL (AUDITED)"}</span>
-          </button>
         </div>
 
-        {/* 4 Theme Slots */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {defaultThemeSlots.map((slot) => {
-            const configured = privateThemes.find(t => (t.id || t.themeId) === slot.id);
-            return (
-              <div key={slot.id} className="border border-zinc-800 bg-zinc-900/60 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-red-400">
-                    THEME 0{slot.num}
-                  </span>
-                  <button
-                    onClick={() => handleEdit(slot)}
-                    className="flex items-center gap-1 border border-zinc-700 bg-black px-2.5 py-1 text-[11px] text-zinc-300 hover:text-white"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                    <span>{configured ? "EDIT DRAFT" : "CONFIGURE"}</span>
-                  </button>
-                </div>
-
-                <div className="text-sm font-bold text-white">
-                  {configured ? (configured.name || configured.publicName) : slot.name}
-                </div>
-
-                <p className="text-xs text-zinc-400 line-clamp-2">
-                  {configured?.description || "No description configured yet."}
-                </p>
-
-                <div className="text-[10px] text-zinc-500 border-t border-zinc-800 pt-2 flex items-center justify-between">
-                  <span>VAULT NODE: themesPrivate/{slot.id}</span>
-                  <StatusBadge status={configured ? "CONFIGURED" : "EMPTY"} variant={configured ? "emerald" : "zinc"} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Edit Private Theme Modal */}
-        {editingTheme && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-            <div className="w-full max-w-xl border border-red-600 bg-zinc-950 p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h3 className="font-bold text-base text-red-400">
-                  EDIT PRIVATE THEME DRAFT
-                </h3>
-                <button onClick={() => setEditingTheme(null)} className="text-zinc-500 hover:text-white">✕</button>
-              </div>
-
-              <form onSubmit={handleSavePrivateTheme} className="space-y-4">
-                <div>
-                  <label className="block text-xs text-zinc-300 mb-1">THEME NAME *</label>
-                  <input
-                    type="text"
-                    value={themeName}
-                    onChange={(e) => setThemeName(e.target.value)}
-                    required
-                    className="w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs text-zinc-300 mb-1">PUBLIC DESCRIPTION</label>
-                  <textarea
-                    rows="3"
-                    value={themeDesc}
-                    onChange={(e) => setThemeDesc(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black p-3 text-xs text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs text-zinc-300 mb-1">TECHNICAL BRIEF</label>
-                  <textarea
-                    rows="3"
-                    value={themeBrief}
-                    onChange={(e) => setThemeBrief(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black p-3 text-xs text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs text-zinc-300 mb-1">ELIGIBILITY</label>
-                  <input
-                    type="text"
-                    value={eligibility}
-                    onChange={(e) => setEligibility(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 border-t border-zinc-800 pt-3">
-                  <button
-                    type="button"
-                    onClick={() => setEditingTheme(null)}
-                    className="border border-zinc-700 px-4 py-2 text-xs text-zinc-400"
-                  >
-                    CANCEL
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-red-600 px-5 py-2 text-xs font-bold text-white hover:bg-red-500"
-                  >
-                    SAVE PRIVATE THEME
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* REVEAL THEMES AUDITED CONFIRM DIALOG */}
-        <ConfirmDialog
-          isOpen={confirmOpen}
-          title="EXECUTE THEME REVEAL (AUDITED)"
-          message="This action will copy all 4 private themes to the public node themesPublic/ and publish problem statements to all hackathon participants. This action generates an append-only audit log and CANNOT BE UNDONE."
-          confirmLabel="AUTHORIZE THEME REVEAL"
-          requireInputMatch="REVEAL"
-          onConfirm={handleExecuteReveal}
-          onClose={() => setConfirmOpen(false)}
-          loading={loading}
-        />
+        <button
+          type="button"
+          disabled={isRevealed || configuredCount < 4}
+          onClick={() => setConfirmOpen(true)}
+          className="bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.15em] px-6 py-3 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+        >
+          <Eye className="h-4 w-4" />
+          <span>{isRevealed ? "Themes Revealed" : "Execute Audited Reveal"}</span>
+        </button>
       </div>
-    </ControlPanel>
+
+      {/* 4 Theme Slots */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {defaultThemeSlots.map((slot) => {
+          const configured = privateThemes.find(t => (t.id || t.themeId) === slot.id);
+          return (
+            <div
+              key={slot.id}
+              className="border border-white/10 rounded-2xl p-6 bg-white/[0.02] space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-red-500 font-bold uppercase tracking-wider">
+                  THEME 0{slot.num}
+                </span>
+                <button
+                  onClick={() => handleEdit(slot)}
+                  className="inline-flex items-center gap-1 font-mono text-xs text-zinc-400 hover:text-white px-3 py-1 rounded-lg border border-white/10 hover:bg-white/[0.05]"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  <span>{configured ? "Edit" : "Configure"}</span>
+                </button>
+              </div>
+
+              <h3 className="font-display text-lg font-bold text-white">
+                {configured ? (configured.name || configured.publicName) : slot.name}
+              </h3>
+
+              <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                {configured?.description || "No description configured yet."}
+              </p>
+
+              <div className="pt-2 flex items-center justify-between border-t border-white/[0.06] font-mono text-[11px] text-zinc-500">
+                <span>Vault: themesPrivate/{slot.id}</span>
+                <span className={configured ? "text-emerald-400 font-medium" : "text-zinc-600"}>
+                  {configured ? "CONFIGURED" : "EMPTY"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Edit Modal */}
+      {editingTheme && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-xl">
+          <div className="w-full max-w-xl bg-void border border-white/20 rounded-2xl p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <h3 className="font-display text-xl font-bold text-white">
+                Edit Private Theme
+              </h3>
+              <button onClick={() => setEditingTheme(null)} className="text-zinc-400 hover:text-white">✕</button>
+            </div>
+
+            <form onSubmit={handleSavePrivateTheme} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block font-mono text-xs text-zinc-400 uppercase">Theme Name *</label>
+                <input
+                  type="text"
+                  value={themeName}
+                  onChange={(e) => setThemeName(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 font-sans text-sm text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-xs text-zinc-400 uppercase">Description</label>
+                <textarea
+                  rows="3"
+                  value={themeDesc}
+                  onChange={(e) => setThemeDesc(e.target.value)}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 font-sans text-xs text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-xs text-zinc-400 uppercase">Technical Brief</label>
+                <textarea
+                  rows="3"
+                  value={themeBrief}
+                  onChange={(e) => setThemeBrief(e.target.value)}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 font-sans text-xs text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-xs text-zinc-400 uppercase">Eligibility</label>
+                <input
+                  type="text"
+                  value={eligibility}
+                  onChange={(e) => setEligibility(e.target.value)}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 font-sans text-xs text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setEditingTheme(null)}
+                  className="font-mono text-xs text-zinc-400 hover:text-white px-5 py-2.5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-white text-black font-mono text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-full hover:bg-zinc-200"
+                >
+                  Save Theme
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        title="Authorize Audited Theme Reveal"
+        message="This action will copy all 4 private themes to themesPublic/ and reveal problem statements to all participants. This generates an append-only audit log."
+        confirmLabel="Authorize Theme Reveal"
+        requireInputMatch="REVEAL"
+        onConfirm={handleExecuteReveal}
+        onClose={() => setConfirmOpen(false)}
+        loading={loading}
+      />
+    </div>
   );
 }

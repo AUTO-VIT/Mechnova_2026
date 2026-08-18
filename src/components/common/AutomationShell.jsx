@@ -2,17 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
-import { StatusBadge } from './StatusBadge';
-import { Cpu, Terminal, Shield, LogOut, Radio, UserCheck } from 'lucide-react';
+import { Cpu, Terminal, LogOut, Radio, UserCheck, Shield, Menu, X } from 'lucide-react';
 import { formatTimestamp } from '../../utils/formatters';
+import ParticleCanvas from './ParticleCanvas';
 
 export function AutomationShell({ children }) {
-  const { currentUser, role, isAdmin, teamData, logout } = useAuth();
-  const { eventData, serverOffsetMs } = useEvent();
+  const { currentUser, isAdmin, teamData, logout } = useAuth();
+  const { serverOffsetMs } = useEvent();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [currentClockMs, setCurrentClockMs] = useState(Date.now() + serverOffsetMs);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -22,10 +32,10 @@ export function AutomationShell({ children }) {
   }, [serverOffsetMs]);
 
   const navItems = [
-    { label: 'HOME', path: '/' },
+    { label: 'ABOUT', path: '/' },
     { label: 'STATUS', path: '/status' },
     { label: 'THEMES', path: '/themes' },
-    { label: 'REGISTRATION', path: '/register', hideIfAuth: true }
+    { label: 'REGISTER', path: '/register', hideIfAuth: true }
   ];
 
   if (currentUser && !isAdmin) {
@@ -47,27 +57,32 @@ export function AutomationShell({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-red-600 selection:text-white font-sans flex flex-col antialiased bg-tech-grid">
-      {/* Top SCADA Telemetry Bar */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6">
-          {/* Logo & Platform Name */}
+    <div className="min-h-screen bg-void text-zinc-100 font-sans flex flex-col antialiased selection:bg-red-600 selection:text-white relative">
+      {/* Interactive Frontier Space & Robotics Particle Canvas */}
+      <ParticleCanvas />
+
+      {/* Floating Modern Header */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-black/80 backdrop-blur-xl border-b border-white/[0.08] py-4'
+            : 'bg-transparent py-6'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center border border-red-600/60 bg-red-950/60 text-red-500 shadow-[0_0_12px_rgba(220,38,38,0.4)] transition-transform duration-160 group-hover:scale-105">
-              <Cpu className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="font-mono text-sm font-black tracking-widest text-white flex items-center gap-2">
-                MECHATHON <span className="text-red-500 font-extrabold">//</span> SCADA
-              </div>
-              <div className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
-                AUTOMATION HACKATHON PLATFORM
-              </div>
-            </div>
+            <span className="font-display text-lg md:text-xl font-extrabold tracking-[0.25em] text-white group-hover:text-red-500 transition-colors duration-300">
+              MECHATHON
+            </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+            <span className="hidden sm:inline-block font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
+              ROBOTICS & AUTONOMY
+            </span>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8 lg:gap-10">
             {navItems.map((item) => {
               if (item.hideIfAuth && currentUser) return null;
               const isActive = location.pathname === item.path;
@@ -75,40 +90,41 @@ export function AutomationShell({ children }) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-3 py-1.5 font-mono text-xs uppercase font-bold tracking-wider transition-all duration-160 active:scale-[0.97] ${
+                  className={`text-[11px] font-mono font-medium tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 ${
                     isActive
-                      ? 'border-b-2 border-red-500 text-red-400 bg-red-950/20'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                      ? 'text-white font-semibold'
+                      : 'text-zinc-400 hover:text-white'
                   }`}
                 >
                   {item.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Telemetry Controls & User Badge */}
-          <div className="flex items-center gap-3">
-            {/* Real-time Server Epoch Clock */}
-            <div className="hidden sm:flex flex-col items-end border-r border-zinc-800 pr-3 font-mono text-[10px]">
-              <span className="text-zinc-500 flex items-center gap-1">
-                <Radio className="h-3 w-3 text-emerald-400 animate-pulse" />
-                SERVER TIME
-              </span>
-              <span className="text-zinc-200 font-bold tracking-wider">
-                {formatTimestamp(currentClockMs)}
-              </span>
+          {/* Right Controls */}
+          <div className="flex items-center gap-4">
+            {/* Clock */}
+            <div className="hidden lg:flex items-center gap-2 font-mono text-[10px] text-zinc-400 border border-white/10 rounded-full px-3 py-1 bg-white/[0.02]">
+              <Radio className="h-2.5 w-2.5 text-emerald-400 animate-pulse" />
+              <span>{formatTimestamp(currentClockMs)}</span>
             </div>
 
-            {/* Auth / Identity State */}
+            {/* Auth State */}
             {currentUser ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {isAdmin ? (
-                  <StatusBadge status="ADMIN" variant="red" />
+                  <span className="inline-flex items-center gap-1.5 border border-red-500/30 bg-red-500/10 px-3 py-1 rounded-full font-mono text-[10px] font-bold text-red-400 uppercase tracking-widest">
+                    <Shield className="h-3 w-3 text-red-400" />
+                    ADMIN
+                  </span>
                 ) : (
-                  <div className="flex items-center gap-2 border border-zinc-800 bg-zinc-900 px-2.5 py-1">
-                    <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="font-mono text-xs font-bold text-white">
+                  <div className="flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-1 rounded-full">
+                    <UserCheck className="h-3 w-3 text-emerald-400" />
+                    <span className="font-mono text-xs font-bold text-white tracking-wider">
                       {teamData?.teamCode || "TEAM"}
                     </span>
                   </div>
@@ -117,44 +133,71 @@ export function AutomationShell({ children }) {
                 <button
                   onClick={handleLogout}
                   title="Sign Out"
-                  className="flex h-8 w-8 items-center justify-center border border-zinc-800 bg-zinc-900 text-zinc-400 transition-all hover:border-red-500 hover:text-red-400 active:scale-[0.97]"
+                  className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center text-zinc-400 hover:text-red-400 hover:border-red-500/40 transition-all duration-150 active:scale-95"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3.5 w-3.5" />
                 </button>
               </div>
             ) : (
               <Link
                 to="/login"
-                className="border border-red-600 bg-red-950/40 px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-red-300 transition-all hover:bg-red-600 hover:text-white active:scale-[0.97]"
+                className="font-mono text-xs font-bold tracking-[0.15em] uppercase text-white bg-white/10 hover:bg-red-600 border border-white/10 hover:border-red-600 px-4 py-2 rounded-full transition-all duration-200 active:scale-95 shadow-sm"
               >
-                TEAM GATE
+                PORTAL LOGIN
               </Link>
             )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-zinc-400 hover:text-white p-1"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-black/95 border-b border-white/10 px-6 py-6 space-y-4">
+            {navItems.map((item) => {
+              if (item.hideIfAuth && currentUser) return null;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block font-mono text-xs tracking-[0.2em] uppercase text-zinc-300 hover:text-white py-2"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </header>
 
-      {/* Main Content Viewport */}
-      <main className="flex-1">
+      {/* Main Content (Spacing for fixed header) */}
+      <main className="flex-1 z-10 pt-28 md:pt-32 pb-16">
         {children}
       </main>
 
-      {/* Footer System Telemetry Rail */}
-      <footer className="border-t border-white/10 bg-zinc-950 px-4 py-3 font-mono text-[10px] text-zinc-500">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
+      {/* Minimalist Frontier Footer */}
+      <footer className="border-t border-white/[0.06] bg-black/60 backdrop-blur-md px-6 md:px-12 py-8 z-10 font-mono text-xs text-zinc-500">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-zinc-400">
-              <Terminal className="h-3.5 w-3.5 text-red-500" />
-              SYSTEM VERSION: 2026.4.0
-            </span>
+            <span className="font-display text-white font-bold tracking-widest">MECHATHON 2026</span>
             <span>&bull;</span>
-            <span>SERVER AUTHORITY: AUTHORITATIVE</span>
+            <span className="text-zinc-400 tracking-wider">SPACE, ROBOTICS & CYBER-PHYSICAL SYSTEMS</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-emerald-400 font-bold">STATUS: OPERATIONAL</span>
+          <div className="flex items-center gap-4 text-[11px] tracking-wider">
+            <span className="text-emerald-400 flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              CORE OPERATIONAL
+            </span>
             <span>&bull;</span>
-            <span>CONFIDENTIAL ROBOTICS CONTROL SYSTEM</span>
+            <span>VIT CHENNAI</span>
           </div>
         </div>
       </footer>

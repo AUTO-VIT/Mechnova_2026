@@ -7,11 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        void: '#030303',
+        deep: '#0a0a0c',
         console: {
-          bg: '#000000',
-          card: '#09090b',
-          surface: '#18181b',
-          border: '#27272a',
+          bg: '#030303',
+          card: '#0a0a0c',
+          surface: '#121215',
+          border: 'rgba(255, 255, 255, 0.08)',
           red: '#dc2626',
           'red-bright': '#ef4444',
           amber: '#f59e0b',
@@ -20,8 +22,9 @@ export default {
         }
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif']
       },
       animation: {
         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',

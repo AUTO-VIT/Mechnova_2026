@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEvent } from '../../context/EventContext';
 import { registerTeamApi } from '../../services/callableApi';
 import { printCredentialSheet } from '../../utils/printCredentialDoc';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { Users, Plus, Trash2, ShieldAlert, Copy, Printer, Check, ArrowRight } from 'lucide-react';
+import { Users, Plus, Trash2, ShieldAlert, Copy, Printer, Check, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
 export function RegistrationPage() {
   const { eventData } = useEvent();
@@ -19,7 +17,7 @@ export function RegistrationPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [credResult, setCredResult] = useState(null); // Single Display Modal State
+  const [credResult, setCredResult] = useState(null);
   const [hasConfirmedSave, setHasConfirmedSave] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedPass, setCopiedPass] = useState(false);
@@ -113,241 +111,216 @@ export function RegistrationPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 space-y-8">
-      {/* Registration Header */}
-      <div className="border border-white/10 bg-zinc-950 p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-red-500" />
-            <h1 className="font-mono text-xl font-bold uppercase tracking-wider text-white">
-              TEAM REGISTRATION GATEWAY
-            </h1>
-          </div>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            Register your robotics team. Synthetic team credentials will be issued immediately upon submission.
-          </p>
+    <div className="max-w-3xl mx-auto px-6 md:px-12 space-y-12">
+      {/* Title */}
+      <div className="space-y-4 text-center">
+        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+          <Users className="h-3.5 w-3.5" />
+          <span>ROSTER INTAKE</span>
         </div>
-
-        <StatusBadge
-          status={isRegistrationOpen ? "REGISTRATION OPEN" : "CLOSED"}
-          variant={isRegistrationOpen ? "emerald" : "zinc"}
-        />
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Team Registration
+        </h1>
+        <p className="text-zinc-400 font-sans text-base max-w-xl mx-auto font-light">
+          Register 2 to 4 team members. One-time passkeys and cryptographic team identifiers will be issued upon registration.
+        </p>
       </div>
 
-      {/* Main Registration Form */}
-      <ControlPanel title="SYNTHETIC IDENTITY PROVISIONING" subtitle="Roster Setup">
-        {!isRegistrationOpen ? (
-          <div className="p-6 text-center font-mono text-sm text-red-400">
-            Registration is currently CLOSED by administrative directive.
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 pt-2">
-            {error && (
-              <div className="border border-red-500/50 bg-red-950/60 p-3 font-mono text-xs text-red-300 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
+      {!isRegistrationOpen ? (
+        <div className="py-16 text-center border-y border-white/[0.08] text-red-400 font-mono text-sm">
+          Registration is currently closed by event administration.
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-10">
+          {error && (
+            <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-xl font-mono text-xs text-red-300 flex items-center gap-3">
+              <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-            {/* Team Name Input */}
-            <div>
-              <label className="block font-mono text-xs uppercase font-bold text-zinc-300 mb-2">
-                TEAM NAME *
-              </label>
-              <input
-                type="text"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                placeholder="e.g. CyberRobotics Squad 01"
-                required
-                className="w-full border border-zinc-700 bg-black px-4 py-2.5 font-mono text-sm text-white focus:border-red-500 focus:outline-none"
-              />
+          {/* Team Name */}
+          <div className="space-y-2">
+            <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+              Team Name *
+            </label>
+            <input
+              type="text"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              placeholder="e.g. Autonomous Motion Squad"
+              required
+              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 font-sans text-base text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+            />
+          </div>
+
+          {/* Members List */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+                Team Roster ({members.length} / 4 Members)
+              </span>
+              {members.length < 4 && (
+                <button
+                  type="button"
+                  onClick={handleAddMember}
+                  className="inline-flex items-center gap-1.5 font-mono text-xs text-white hover:text-red-400 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add Member</span>
+                </button>
+              )}
             </div>
 
-            {/* Members Section (2-4 Members) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                <span className="font-mono text-xs uppercase font-bold text-zinc-300">
-                  ROSTER MEMBERS ({members.length} / 4)
-                </span>
-                {members.length < 4 && (
-                  <button
-                    type="button"
-                    onClick={handleAddMember}
-                    className="flex items-center gap-1 border border-zinc-700 bg-zinc-900 px-3 py-1 font-mono text-[11px] font-bold text-zinc-300 transition-all hover:border-white hover:text-white active:scale-[0.97]"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span>ADD MEMBER</span>
-                  </button>
-                )}
-              </div>
-
+            <div className="space-y-6">
               {members.map((m, idx) => (
-                <div key={idx} className="border border-zinc-800 bg-zinc-900/50 p-4 space-y-3 relative">
+                <div key={idx} className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] font-bold uppercase text-red-400">
-                      MEMBER 0{idx + 1} {idx === 0 ? "(TEAM LEAD)" : ""}
+                    <span className="font-mono text-xs text-zinc-500">
+                      Member 0{idx + 1} {idx === 0 ? "(Lead)" : ""}
                     </span>
                     {members.length > 2 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveMember(idx)}
-                        className="text-zinc-500 hover:text-red-400 font-mono text-[11px]"
+                        className="text-zinc-500 hover:text-red-400 transition-colors"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block font-mono text-[10px] text-zinc-400 mb-1">FULL NAME *</label>
-                      <input
-                        type="text"
-                        value={m.name}
-                        onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
-                        placeholder="Name"
-                        required
-                        className="w-full border border-zinc-700 bg-black px-3 py-1.5 font-mono text-xs text-white focus:border-red-500 focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-mono text-[10px] text-zinc-400 mb-1">EMAIL *</label>
-                      <input
-                        type="email"
-                        value={m.email}
-                        onChange={(e) => handleMemberChange(idx, 'email', e.target.value)}
-                        placeholder="Email"
-                        required
-                        className="w-full border border-zinc-700 bg-black px-3 py-1.5 font-mono text-xs text-white focus:border-red-500 focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-mono text-[10px] text-zinc-400 mb-1">ROLE / TITLE</label>
-                      <input
-                        type="text"
-                        value={m.role}
-                        onChange={(e) => handleMemberChange(idx, 'role', e.target.value)}
-                        placeholder="e.g. Lead Dev"
-                        className="w-full border border-zinc-700 bg-black px-3 py-1.5 font-mono text-xs text-white focus:border-red-500 focus:outline-none"
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      value={m.name}
+                      onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
+                      placeholder="Full Name *"
+                      required
+                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                    />
+                    <input
+                      type="email"
+                      value={m.email}
+                      onChange={(e) => handleMemberChange(idx, 'email', e.target.value)}
+                      placeholder="Email Address *"
+                      required
+                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                    />
+                    <input
+                      type="text"
+                      value={m.role}
+                      onChange={(e) => handleMemberChange(idx, 'role', e.target.value)}
+                      placeholder="Role (e.g. Kinematics)"
+                      className="bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                    />
                   </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Submit Action */}
-            <div className="pt-4 border-t border-zinc-800">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-red-600 py-3.5 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all hover:bg-red-500 active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600"
-              >
-                {loading ? "PROVISIONING SYNTHETIC IDENTITY..." : "PROVISION TEAM CREDENTIALS"}
-              </button>
-            </div>
-          </form>
-        )}
-      </ControlPanel>
+          {/* Submit */}
+          <div className="pt-6 border-t border-white/[0.08]">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-lg active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>PROVISIONING CREDENTIALS...</span>
+                </>
+              ) : (
+                <>
+                  <span>CONFIRM &amp; GENERATE TEAM PASSKEYS</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
 
-      {/* SINGLE DISPLAY CREDENTIAL MODAL */}
+      {/* CREDENTIAL MODAL */}
       {credResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-md">
-          <div className="w-full max-w-2xl transform border-2 border-red-600 bg-zinc-950 p-6 sm:p-8 shadow-[0_0_50px_rgba(220,38,38,0.5)] space-y-6">
-            <div className="border-b border-red-900/50 pb-3 flex items-center justify-between">
-              <div>
-                <h3 className="font-mono text-lg font-black uppercase tracking-wider text-red-500">
-                  CONFIDENTIAL TEAM ACCESS CREDENTIALS
-                </h3>
-                <p className="font-mono text-[10px] uppercase text-zinc-400">
-                  SINGLE DISPLAY WARNING &bull; SAVE / PRINT IMMEDIATELY
-                </p>
-              </div>
-              <StatusBadge status="ISSUED" variant="red" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-xl">
+          <div className="w-full max-w-xl bg-void border border-white/20 rounded-2xl p-8 sm:p-10 space-y-6 shadow-2xl">
+            <div className="space-y-2">
+              <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
+                CREDENTIALS GENERATED
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
+                Save Your Access Keys
+              </h2>
+              <p className="text-zinc-400 text-xs font-light">
+                Passkeys are generated once and never stored plaintext in databases. Save or print this sheet immediately.
+              </p>
             </div>
 
-            {/* Warning Banner */}
-            <div className="border-l-4 border-red-600 bg-red-950/40 p-4 font-mono text-xs text-red-200 leading-relaxed">
-              <strong>CRITICAL NOTICE:</strong> Passkeys are generated once and are <strong>NEVER stored raw in the database</strong>. If you close this window without saving or printing, access cannot be recovered without admin reset.
-            </div>
-
-            {/* Credential Data Box */}
-            <div className="border border-white/15 bg-black p-5 space-y-4 font-mono">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+            <div className="space-y-3 pt-2">
+              {/* Code */}
+              <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase text-zinc-500 block">TEAM NAME</span>
-                  <span className="text-base font-bold text-white">{credResult.teamName}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase text-zinc-500 block">SYNTHETIC EMAIL</span>
-                  <span className="text-xs text-zinc-400">{credResult.syntheticEmail}</span>
-                </div>
-              </div>
-
-              {/* Team Code */}
-              <div className="flex items-center justify-between bg-zinc-900 p-3 border border-zinc-800">
-                <div>
-                  <span className="text-[10px] uppercase text-zinc-500 block">8-DIGIT TEAM CODE</span>
-                  <span className="text-xl font-extrabold text-red-400 tracking-widest">{credResult.teamCode}</span>
+                  <span className="font-mono text-[10px] text-zinc-500 uppercase block">TEAM CODE</span>
+                  <span className="font-mono text-xl font-bold text-white tracking-widest">{credResult.teamCode}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleCopy(credResult.teamCode, 'code')}
-                  className="flex items-center gap-1 border border-zinc-700 bg-black px-3 py-1 text-xs text-zinc-300 hover:text-white"
+                  className="font-mono text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.05]"
                 >
-                  {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                  <span>{copiedCode ? 'COPIED' : 'COPY'}</span>
+                  {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400 inline" /> : <Copy className="h-3.5 w-3.5 inline" />}
+                  <span className="ml-1.5">{copiedCode ? 'COPIED' : 'COPY'}</span>
                 </button>
               </div>
 
-              {/* Passkey */}
-              <div className="flex items-center justify-between bg-zinc-900 p-3 border border-zinc-800">
+              {/* Password */}
+              <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase text-zinc-500 block">SECRET PASSKEY</span>
-                  <span className="text-xl font-extrabold text-amber-400 tracking-widest">{credResult.password}</span>
+                  <span className="font-mono text-[10px] text-zinc-500 uppercase block">PASSKEY</span>
+                  <span className="font-mono text-xl font-bold text-red-400 tracking-widest">{credResult.password}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleCopy(credResult.password, 'pass')}
-                  className="flex items-center gap-1 border border-zinc-700 bg-black px-3 py-1 text-xs text-zinc-300 hover:text-white"
+                  className="font-mono text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.05]"
                 >
-                  {copiedPass ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                  <span>{copiedPass ? 'COPIED' : 'COPY'}</span>
+                  {copiedPass ? <Check className="h-3.5 w-3.5 text-emerald-400 inline" /> : <Copy className="h-3.5 w-3.5 inline" />}
+                  <span className="ml-1.5">{copiedPass ? 'COPIED' : 'COPY'}</span>
                 </button>
               </div>
             </div>
 
-            {/* Print & Save Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center justify-between pt-2">
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex items-center gap-2 border border-red-500/50 bg-red-950/60 px-5 py-2.5 font-mono text-xs font-bold text-red-300 hover:bg-red-600 hover:text-white active:scale-[0.97]"
+                className="inline-flex items-center gap-2 font-mono text-xs text-zinc-300 hover:text-white"
               >
                 <Printer className="h-4 w-4" />
-                <span>PRINT / SAVE CREDENTIAL SHEET PDF</span>
+                <span>Print / Download PDF</span>
               </button>
 
-              <label className="flex items-center gap-2 font-mono text-xs text-zinc-300 cursor-pointer">
+              <label className="flex items-center gap-2 font-mono text-xs text-zinc-400 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={hasConfirmedSave}
                   onChange={(e) => setHasConfirmedSave(e.target.checked)}
-                  className="h-4 w-4 accent-red-600"
+                  className="h-4 w-4 accent-red-600 rounded"
                 />
-                <span>I have saved & printed these credentials</span>
+                <span>I have saved these keys</span>
               </label>
             </div>
 
-            {/* Dismiss Modal Button */}
             <button
               type="button"
               disabled={!hasConfirmedSave}
               onClick={handleCloseModal}
-              className="w-full bg-red-600 py-3 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-red-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
             >
-              <span>PROCEED TO TEAM ACCESS GATE</span>
+              <span>PROCEED TO SIGN IN</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>

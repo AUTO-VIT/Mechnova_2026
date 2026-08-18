@@ -2,9 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { UserCheck, Zap, Award, Layers, ArrowRight, ShieldCheck } from 'lucide-react';
+import { UserCheck, Zap, Award, Layers, ArrowRight, ShieldCheck, ChevronRight } from 'lucide-react';
 import { formatPoints } from '../../utils/formatters';
 
 export function TeamDashboard() {
@@ -12,137 +10,176 @@ export function TeamDashboard() {
   const { eventData } = useEvent();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      {/* Team Header Summary Banner */}
-      <div className="border border-white/10 bg-zinc-950 p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <UserCheck className="h-5 w-5 text-emerald-400" />
-            <h1 className="font-mono text-xl font-black uppercase tracking-wider text-white">
-              TEAM MISSION CONTROL // {teamData?.teamName || "TEAM HUB"}
-            </h1>
+    <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-16">
+      {/* Team Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+            <UserCheck className="h-3.5 w-3.5" />
+            <span>AUTHENTICATED TEAM HUB</span>
           </div>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            CODE: <span className="text-red-400 font-bold">{teamData?.teamCode || "N/A"}</span> &bull; {teamData?.syntheticEmail}
+          <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            {teamData?.teamName || "Team Hub"}
+          </h1>
+          <p className="font-mono text-xs text-zinc-400">
+            CODE: <span className="text-white font-bold tracking-widest">{teamData?.teamCode || "N/A"}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <StatusBadge status="AUTHENTICATED" variant="emerald" />
+        <div className="flex items-center gap-3 font-mono text-xs">
+          <span className="text-zinc-500">SESSION STATUS:</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            ACTIVE
+          </span>
         </div>
       </div>
 
-      {/* Live Performance & Score Snapshot */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <ControlPanel title="TOTAL POINTS BALANCE" subtitle="Quiz Score Snapshot">
-          <div className="font-mono text-4xl font-extrabold text-red-500 tracking-tight drop-shadow-[0_0_12px_rgba(220,38,38,0.5)]">
-            {formatPoints(teamScore?.totalPoints || 0)} <span className="text-sm text-zinc-500 font-normal">PTS</span>
+      {/* Live Telemetry Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div className="space-y-1">
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block">
+            QUIZ POINTS
+          </span>
+          <div className="font-mono text-3xl sm:text-4xl font-extrabold text-white">
+            {formatPoints(teamScore?.totalPoints || 0)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
           </div>
-        </ControlPanel>
+        </div>
 
-        <ControlPanel title="QUESTIONS ANSWERED" subtitle="Completion Count">
-          <div className="font-mono text-4xl font-extrabold text-amber-400 tracking-tight">
-            {teamScore?.answeredCount || 0} <span className="text-sm text-zinc-500 font-normal">COMPLETED</span>
+        <div className="space-y-1">
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block">
+            ANSWERED QUESTIONS
+          </span>
+          <div className="font-mono text-3xl sm:text-4xl font-extrabold text-zinc-300">
+            {teamScore?.answeredCount || 0}
           </div>
-        </ControlPanel>
+        </div>
 
-        <ControlPanel title="ACCURACY" subtitle="Correct Submissions">
-          <div className="font-mono text-4xl font-extrabold text-emerald-400 tracking-tight">
-            {teamScore?.correctCount || 0} <span className="text-sm text-zinc-500 font-normal">CORRECT</span>
+        <div className="space-y-1">
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block">
+            CORRECT ACCURACY
+          </span>
+          <div className="font-mono text-3xl sm:text-4xl font-extrabold text-emerald-400">
+            {teamScore?.correctCount || 0}
           </div>
-        </ControlPanel>
+        </div>
       </div>
 
-      {/* Interactive Phase Launcher Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Quiz Phase Card */}
-        <ControlPanel
-          title="01. AUTHORITATIVE QUIZ"
-          subtitle="10s Read + 10s Answer"
-          badge={
-            <StatusBadge
-              status={eventData?.quizOpen ? "QUIZ OPEN" : "QUIZ SEALED"}
-              variant={eventData?.quizOpen ? "red" : "zinc"}
-            />
-          }
+      {/* Action Modules */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+        {/* Quiz Link */}
+        <Link
+          to="/quiz"
+          className="group border border-white/10 rounded-2xl p-6 bg-white/[0.02] hover:border-red-500 hover:bg-white/[0.04] transition-all duration-200 space-y-4"
         >
-          <p className="font-mono text-xs text-zinc-300 mb-6">
-            Execute the timed robotics and automation assessment to earn score points for theme bidding.
-          </p>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs text-zinc-500 group-hover:text-red-400 font-bold">
+              01
+            </span>
+            <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded-full ${
+              eventData?.quizOpen ? 'bg-red-500/20 text-red-400' : 'bg-white/5 text-zinc-500'
+            }`}>
+              {eventData?.quizOpen ? 'OPEN' : 'CLOSED'}
+            </span>
+          </div>
 
-          <Link
-            to="/quiz"
-            className="w-full flex items-center justify-between border border-red-600 bg-red-950/40 px-4 py-3 font-mono text-xs font-extrabold uppercase text-red-300 transition-all hover:bg-red-600 hover:text-white active:scale-[0.97]"
-          >
-            <span>LAUNCH QUIZ ENGINE</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </ControlPanel>
+          <div>
+            <h3 className="font-display text-lg font-bold text-white group-hover:text-red-400 transition-colors">
+              Authoritative Quiz
+            </h3>
+            <p className="text-zinc-400 text-xs font-light leading-relaxed mt-1">
+              Complete the timed assessment under authoritative server time.
+            </p>
+          </div>
 
-        {/* Theme Bidding Phase Card */}
-        <ControlPanel
-          title="02. THEME BIDDING"
-          subtitle="Priority Point Allocation"
-          badge={
-            <StatusBadge
-              status={eventData?.biddingOpen ? "BIDDING OPEN" : "BIDDING CLOSED"}
-              variant={eventData?.biddingOpen ? "cyan" : "zinc"}
-            />
-          }
+          <div className="pt-2 flex items-center gap-1 font-mono text-xs text-white group-hover:text-red-400 font-medium">
+            <span>Enter Quiz</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
+        </Link>
+
+        {/* Bidding Link */}
+        <Link
+          to="/bidding"
+          className="group border border-white/10 rounded-2xl p-6 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04] transition-all duration-200 space-y-4"
         >
-          <p className="font-mono text-xs text-zinc-300 mb-6">
-            Spend earned quiz score points to bid on your team's preferred challenge theme.
-          </p>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs text-zinc-500 group-hover:text-white font-bold">
+              02
+            </span>
+            <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded-full ${
+              eventData?.biddingOpen ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-zinc-500'
+            }`}>
+              {eventData?.biddingOpen ? 'OPEN' : 'CLOSED'}
+            </span>
+          </div>
 
-          <Link
-            to="/bidding"
-            className="w-full flex items-center justify-between border border-zinc-700 bg-zinc-900 px-4 py-3 font-mono text-xs font-bold uppercase text-zinc-200 transition-all hover:border-white hover:bg-zinc-800 active:scale-[0.97]"
-          >
-            <span>ENTER BIDDING CONSOLE</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </ControlPanel>
+          <div>
+            <h3 className="font-display text-lg font-bold text-white group-hover:text-white transition-colors">
+              Theme Bidding
+            </h3>
+            <p className="text-zinc-400 text-xs font-light leading-relaxed mt-1">
+              Allocate your quiz balance towards your preferred challenge theme.
+            </p>
+          </div>
 
-        {/* Results & Final Allocation Card */}
-        <ControlPanel
-          title="03. FINAL RESULTS"
-          subtitle="Rank & Assigned Theme"
-          badge={
-            <StatusBadge
-              status={eventData?.allocationFinalized ? "FINALIZED" : "PENDING"}
-              variant={eventData?.allocationFinalized ? "emerald" : "zinc"}
-            />
-          }
+          <div className="pt-2 flex items-center gap-1 font-mono text-xs text-white group-hover:text-white font-medium">
+            <span>Enter Bidding</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
+        </Link>
+
+        {/* Results Link */}
+        <Link
+          to="/results"
+          className="group border border-white/10 rounded-2xl p-6 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04] transition-all duration-200 space-y-4"
         >
-          <p className="font-mono text-xs text-zinc-300 mb-6">
-            Inspect finalized theme allocation rank computed via server priority tuple.
-          </p>
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs text-zinc-500 group-hover:text-white font-bold">
+              03
+            </span>
+            <span className={`font-mono text-[10px] uppercase px-2 py-0.5 rounded-full ${
+              eventData?.allocationFinalized ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-zinc-500'
+            }`}>
+              {eventData?.allocationFinalized ? 'FINALIZED' : 'PENDING'}
+            </span>
+          </div>
 
-          <Link
-            to="/results"
-            className="w-full flex items-center justify-between border border-zinc-700 bg-zinc-900 px-4 py-3 font-mono text-xs font-bold uppercase text-zinc-200 transition-all hover:border-white hover:bg-zinc-800 active:scale-[0.97]"
-          >
-            <span>VIEW ALLOCATION RESULTS</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </ControlPanel>
+          <div>
+            <h3 className="font-display text-lg font-bold text-white group-hover:text-white transition-colors">
+              Allocation Results
+            </h3>
+            <p className="text-zinc-400 text-xs font-light leading-relaxed mt-1">
+              Inspect your final theme assignment and competition rank.
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center gap-1 font-mono text-xs text-white group-hover:text-white font-medium">
+            <span>View Results</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
+        </Link>
       </div>
 
-      {/* Team Roster Inspection */}
-      <ControlPanel title="TEAM ROSTER MEMBERS" subtitle="Registered Personnel">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+      {/* Roster Strip */}
+      <div className="space-y-4 pt-6 border-t border-white/[0.08]">
+        <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 block">
+          Team Personnel
+        </span>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(teamData?.members || []).map((m, idx) => (
-            <div key={idx} className="border border-zinc-800 bg-zinc-900/60 p-4 font-mono">
-              <div className="text-[10px] text-zinc-500 uppercase">MEMBER 0{idx + 1}</div>
-              <div className="text-sm font-bold text-white mt-1">{m.name}</div>
-              <div className="text-xs text-zinc-400 mt-0.5">{m.email}</div>
-              <div className="mt-2 text-[10px] text-red-400 font-semibold border-t border-zinc-800 pt-1">
-                {m.role || "Team Member"}
-              </div>
+            <div key={idx} className="space-y-1">
+              <span className="font-mono text-[10px] text-zinc-500 uppercase">
+                Member 0{idx + 1}
+              </span>
+              <div className="text-sm font-semibold text-white">{m.name}</div>
+              <div className="text-xs text-zinc-400 font-light">{m.email}</div>
+              <div className="text-[11px] text-red-400 font-mono">{m.role || "Member"}</div>
             </div>
           ))}
         </div>
-      </ControlPanel>
+      </div>
     </div>
   );
 }

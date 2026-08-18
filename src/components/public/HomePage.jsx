@@ -2,155 +2,191 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useEvent } from '../../context/EventContext';
 import { useAuth } from '../../context/AuthContext';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { Cpu, Terminal, ArrowRight, ShieldCheck, Zap, Layers, Award } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Zap, Award, Sparkles, Terminal, ChevronRight, Activity, Disc } from 'lucide-react';
 
 export function HomePage() {
   const { eventData, publicThemes } = useEvent();
   const { currentUser } = useAuth();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-10">
-      {/* Hero SCADA Console Section */}
-      <div className="relative overflow-hidden border border-red-600/50 bg-zinc-950 p-8 md:p-12 shadow-[0_0_50px_rgba(220,38,38,0.15)]">
-        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500" />
-        <div className="absolute top-3 right-4 font-mono text-[10px] text-zinc-600 tracking-widest uppercase">
-          TELEMETRY STREAM // VERIFIED
+    <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-24">
+      {/* Hero Section - Plain, Sleek, Space & Robotics Frontier */}
+      <section className="text-center pt-8 md:pt-16 pb-6 relative flex flex-col items-center">
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[350px] bg-red-600/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+
+        {/* Technical Status Pill */}
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm mb-8">
+          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-300">
+            MECHATHON 2026 // ROBOTICS & AUTONOMY
+          </span>
         </div>
 
-        <div className="max-w-3xl space-y-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge status="AUTOMATION HACKATHON 2026" variant="red" />
-            <StatusBadge status="SERVER AUTHORITATIVE ENGINE" variant="cyan" />
-          </div>
+        {/* Large Headline */}
+        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight max-w-4xl leading-[1.08] mb-6">
+          Autonomous Systems <br className="hidden sm:inline" />
+          <span className="text-zinc-400 font-light">&amp;</span> Intelligent Control.
+        </h1>
 
-          <h1 className="font-mono text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-none">
-            ROBOTICS & AUTOMATION <br />
-            <span className="text-red-500 drop-shadow-[0_0_20px_rgba(220,38,38,0.6)]">
-              QUIZ & THEME ALLOCATION
-            </span>
-          </h1>
+        {/* Subtitle */}
+        <p className="text-base sm:text-lg text-zinc-400 max-w-2xl font-sans font-light leading-relaxed mb-10">
+          The high-concurrency evaluation and theme allocation platform for engineering teams. Timed quiz verification, server-authoritative scoring, and priority bidding.
+        </p>
 
-          <p className="font-mono text-sm text-zinc-300 leading-relaxed max-w-2xl">
-            The mission control engine for high-concurrency robotics hackathons. Features timed two-phase quiz evaluations, server-authoritative scoring, sealed secret theme reveals, and deterministic priority bidding.
-          </p>
-
-          {/* Hero Action CTA Buttons */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            {!currentUser ? (
-              <>
-                <Link
-                  to="/register"
-                  className="flex items-center gap-2 bg-red-600 px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all duration-160 hover:bg-red-500 active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.4)]"
-                >
-                  <span>REGISTER TEAM NOW</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 border border-zinc-700 bg-zinc-900 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-zinc-200 transition-all duration-160 hover:border-white hover:bg-zinc-800 active:scale-[0.97]"
-                >
-                  <span>TEAM GATE ACCESS</span>
-                </Link>
-              </>
-            ) : (
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {!currentUser ? (
+            <>
               <Link
-                to="/dashboard"
-                className="flex items-center gap-2 bg-red-600 px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all duration-160 hover:bg-red-500 active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+                to="/register"
+                className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-7 py-3.5 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-95"
               >
-                <span>ENTER TEAM HUB</span>
+                <span>REGISTER TEAM</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
-            )}
-
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 border border-white/20 bg-transparent text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-7 py-3.5 rounded-full hover:border-white hover:bg-white/[0.04] transition-all duration-200 active:scale-95"
+              >
+                <span>TEAM PORTAL</span>
+              </Link>
+            </>
+          ) : (
             <Link
-              to="/themes"
-              className="flex items-center gap-2 border border-white/10 bg-black/60 px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-zinc-400 transition-all hover:text-white hover:border-white/30 active:scale-[0.97]"
+              to="/dashboard"
+              className="inline-flex items-center gap-2 bg-red-600 text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-red-500 transition-all duration-200 shadow-[0_0_25px_rgba(220,38,38,0.4)] active:scale-95"
             >
-              <span>VIEW REVEALED THEMES ({publicThemes.length}/4)</span>
+              <span>ACCESS TEAM DASHBOARD</span>
+              <ArrowRight className="h-4 w-4" />
             </Link>
+          )}
+
+          <Link
+            to="/themes"
+            className="inline-flex items-center gap-2 text-zinc-400 hover:text-white font-mono text-xs tracking-[0.15em] uppercase px-5 py-3.5 transition-colors"
+          >
+            <span>THEMES ({publicThemes.length}/4)</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Telemetry Numbers & Core Pillars - Plain, Borderless, Minimal */}
+      <section className="border-y border-white/[0.08] py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+              <ShieldCheck className="h-4 w-4" />
+              <span>SYNTHETIC AUTH</span>
+            </div>
+            <h2 className="font-display text-xl font-bold text-white">One-Time Passkey Identity</h2>
+            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              Teams register 2-4 members and receive cryptographic identifiers. Passkeys are never stored plaintext in databases.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-amber-400 font-mono text-xs tracking-widest uppercase">
+              <Zap className="h-4 w-4" />
+              <span>QUIZ ENGINE</span>
+            </div>
+            <h2 className="font-display text-xl font-bold text-white">10s Read + 10s Answer</h2>
+            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              Strict 2-phase question lifecycle. Server timestamps govern deadlines with zero pre-reveal keys exposed to clients.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs tracking-widest uppercase">
+              <Award className="h-4 w-4" />
+              <span>THEME BIDDING</span>
+            </div>
+            <h2 className="font-display text-xl font-bold text-white">Deterministic Priority</h2>
+            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              Points earned during the quiz are bid towards 4 challenge themes. Tie-breaks are resolved authoritatively.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* System Telemetry & Operational Controls Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ControlPanel
-          title="REGISTRATION PHASE"
-          subtitle="Team Identity Protocol"
-          badge={
-            <StatusBadge
-              status={eventData?.registrationOpen !== false ? "OPEN" : "CLOSED"}
-              variant={eventData?.registrationOpen !== false ? "emerald" : "zinc"}
-            />
-          }
-        >
-          <p className="font-mono text-xs text-zinc-400 mb-4">
-            Synthetic credentials generated once upon registration. Secure passkey sheet print capability provided.
-          </p>
-          <div className="flex items-center gap-2 text-zinc-500 font-mono text-[11px]">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            <span>Passkeys zero-stored in database</span>
+      {/* 4-Step Execution Pipeline - Open, Clean, High-End */}
+      <section className="space-y-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="font-mono text-xs text-red-500 uppercase tracking-[0.25em] mb-2">
+              EVENT ARCHITECTURE
+            </div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-white tracking-tight">
+              Operational Sequence
+            </h2>
           </div>
-        </ControlPanel>
-
-        <ControlPanel
-          title="QUIZ ENGINE"
-          subtitle="10s Read + 10s Answer"
-          badge={
-            <StatusBadge
-              status={eventData?.quizOpen ? "ACTIVE" : "STANDBY"}
-              variant={eventData?.quizOpen ? "red" : "zinc"}
-            />
-          }
-        >
-          <p className="font-mono text-xs text-zinc-400 mb-4">
-            Strict 20-second per question lifecycle. Answers evaluated server-side with zero pre-reveal keys on client.
-          </p>
-          <div className="flex items-center gap-2 text-zinc-500 font-mono text-[11px]">
-            <Zap className="h-4 w-4 text-amber-400" />
-            <span>Authoritative deadline calculation</span>
+          <div className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
+            PHASE 01 — 04
           </div>
-        </ControlPanel>
+        </div>
 
-        <ControlPanel
-          title="THEME BIDDING"
-          subtitle="Priority Tuple Allocation"
-          badge={
-            <StatusBadge
-              status={eventData?.biddingOpen ? "OPEN" : "SEALED"}
-              variant={eventData?.biddingOpen ? "cyan" : "zinc"}
-            />
-          }
-        >
-          <p className="font-mono text-xs text-zinc-400 mb-4">
-            Teams allocate earned quiz points to compete for 4 revealed challenge themes. Ties resolved deterministically.
-          </p>
-          <div className="flex items-center gap-2 text-zinc-500 font-mono text-[11px]">
-            <Award className="h-4 w-4 text-cyan-400" />
-            <span>Deterministic allocation rank</span>
-          </div>
-        </ControlPanel>
-      </div>
-
-      {/* System Pipeline Architecture Overview */}
-      <ControlPanel title="EVENT EXECUTION PIPELINE" subtitle="Stage Breakdown">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { step: '01', name: 'SYNTHETIC REGISTRATION', desc: 'Teams obtain 8-digit team codes and passkeys.' },
-            { step: '02', name: 'AUTHORITATIVE QUIZ', desc: '10s read mode, 10s answer mode per question.' },
-            { step: '03', name: 'THEME REVEAL', desc: '4 challenge briefs published simultaneously.' },
-            { step: '04', name: 'PRIORITY BIDDING', desc: 'Points allocated; rank assigned by score & time.' }
-          ].map((s) => (
-            <div key={s.step} className="border border-white/10 bg-zinc-900/60 p-4 relative group hover:border-red-500/50 transition-colors">
-              <div className="font-mono text-2xl font-black text-red-500 mb-1">{s.step}</div>
-              <div className="font-mono text-xs font-bold uppercase tracking-wider text-white mb-2">{s.name}</div>
-              <div className="font-mono text-[11px] text-zinc-400 leading-snug">{s.desc}</div>
+            {
+              step: '01',
+              title: 'Team Registration',
+              desc: 'Submit roster, receive team code & secure credential sheet.'
+            },
+            {
+              step: '02',
+              title: 'Authoritative Quiz',
+              desc: 'Complete timed robotics challenges under strict server time.'
+            },
+            {
+              step: '03',
+              title: 'Audited Theme Reveal',
+              desc: 'Four challenge briefs unlocked simultaneously prior to event.'
+            },
+            {
+              step: '04',
+              title: 'Priority Allocation',
+              desc: 'Submit point bids; server computes final deterministic ranks.'
+            }
+          ].map((item) => (
+            <div
+              key={item.step}
+              className="space-y-3 border-t border-white/10 pt-6 group hover:border-red-500 transition-colors duration-300"
+            >
+              <span className="font-mono text-xs text-zinc-500 group-hover:text-red-400 font-bold transition-colors">
+                {item.step}
+              </span>
+              <h3 className="font-display text-lg font-bold text-white">
+                {item.title}
+              </h3>
+              <p className="text-zinc-400 text-xs font-light leading-relaxed">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
-      </ControlPanel>
+      </section>
+
+      {/* Call To Action Banner - Sleek, Borderless */}
+      <section className="relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent p-10 md:p-14 text-center border border-white/[0.08] overflow-hidden">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <h2 className="font-display text-2xl md:text-4xl font-bold text-white">
+            Ready for the Challenge?
+          </h2>
+          <p className="text-zinc-400 text-sm font-light leading-relaxed">
+            Register your team today to participate in the autonomous robotics & cyber-physical systems hackathon.
+          </p>
+          <div className="pt-2">
+            <Link
+              to={currentUser ? "/dashboard" : "/register"}
+              className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95"
+            >
+              <span>{currentUser ? "GO TO DASHBOARD" : "START REGISTRATION"}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

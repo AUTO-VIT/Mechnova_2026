@@ -6,10 +6,7 @@ import { useQuizSession } from '../../hooks/useQuizSession';
 import { useAuthoritativeClock } from '../../hooks/useAuthoritativeClock';
 import { QuizPhaseView } from './QuizPhaseView';
 import { OptionGrid } from './OptionGrid';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { LockedPanel } from '../common/LockedPanel';
-import { CheckCircle, AlertTriangle, ArrowRight, Award, Zap } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ArrowRight, Award, Zap, Loader2 } from 'lucide-react';
 import { formatPoints } from '../../utils/formatters';
 
 export function QuizEngine() {
@@ -23,24 +20,21 @@ export function QuizEngine() {
     loading,
     submitting,
     error,
-    setError,
     startQuiz,
     submitAnswerChoice
   } = useQuizSession(uid);
 
   const [selectedOption, setSelectedOption] = useState(null);
   const [lastSubmissionResult, setLastSubmissionResult] = useState(null);
-  const [localPhase, setLocalPhase] = useState('READ_ONLY'); // 'READ_ONLY' | 'ANSWER_MODE'
+  const [localPhase, setLocalPhase] = useState('READ_ONLY');
   const [localDeadline, setLocalDeadline] = useState(null);
 
-  // Initialize / Resume Quiz Session
   useEffect(() => {
     if (!session && uid) {
       startQuiz(eventData?.id || 'default-event', eventData?.quizId || 'default-quiz').catch(console.error);
     }
   }, [uid, session, startQuiz, eventData]);
 
-  // Sync session state to local phase state
   useEffect(() => {
     if (session) {
       setLocalPhase(session.phase || 'READ_ONLY');
@@ -48,15 +42,12 @@ export function QuizEngine() {
     }
   }, [session]);
 
-  // Handle phase deadline expiration via trusted clock hook
   const handleDeadlineReached = useCallback(() => {
     if (localPhase === 'READ_ONLY') {
-      // 10s READ_ONLY phase ended -> transition to 10s ANSWER_MODE
       setLocalPhase('ANSWER_MODE');
       setLocalDeadline(Date.now() + serverOffsetMs + 10000);
       setSelectedOption(null);
     } else if (localPhase === 'ANSWER_MODE') {
-      // 10s ANSWER_MODE phase expired -> Auto timeout submit if not submitted
       if (session && session.status === 'RUNNING' && !submitting && !lastSubmissionResult) {
         submitAnswerChoice({
           eventId: eventData?.id || 'default-event',
@@ -66,7 +57,7 @@ export function QuizEngine() {
           selectedOption: selectedOption
         }).then(res => {
           if (res) setLastSubmissionResult(res);
-        }).catch(err => console.warn("Auto submit timeout error:", err));
+        }).catch(err => console.warn("Auto submit timeout:", err));
       }
     }
   }, [localPhase, session, submitting, lastSubmissionResult, submitAnswerChoice, eventData, currentQuestion, selectedOption, serverOffsetMs]);
@@ -90,11 +81,10 @@ export function QuizEngine() {
       });
       if (res) {
         setLastSubmissionResult(res);
-        // Clear result after 1.5s for smooth next question transition
         setTimeout(() => {
           setLastSubmissionResult(null);
           setSelectedOption(null);
-        }, 1500);
+        }, 1200);
       }
     } catch (e) {
       console.error(e);
@@ -103,10 +93,10 @@ export function QuizEngine() {
 
   if (loading || !session) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-16 text-center font-mono">
-        <div className="inline-block h-8 w-8 animate-spin border-2 border-red-500 border-t-transparent mb-4" />
-        <div className="text-sm font-bold text-white">INITIALIZING AUTHORITATIVE QUIZ ENGINE...</div>
-        <div className="text-xs text-zinc-500 mt-1">Calibrating server timestamps & loading question stream</div>
+      <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-red-500 mx-auto" />
+        <h2 className="font-display text-xl font-bold text-white">Initializing Engine</h2>
+        <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; question stream...</p>
       </div>
     );
   }
@@ -114,68 +104,75 @@ export function QuizEngine() {
   // Quiz Completed View
   if (session.status === 'COMPLETED') {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <ControlPanel
-          title="QUIZ SESSION COMPLETED"
-          subtitle="Evaluation Finalized"
-          badge={<StatusBadge status="COMPLETED" variant="emerald" />}
-          hazardBorder={false}
-        >
-          <div className="p-6 text-center space-y-6">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/50 bg-emerald-950/80 text-emerald-400 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-              <Award className="h-9 w-9" />
-            </div>
+      <div className="max-w-2xl mx-auto px-6 py-12 space-y-8 text-center">
+        <div className="h-16 w-16 rounded-full border border-emerald-500/40 bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400">
+          <Award className="h-8 w-8" />
+        </div>
 
-            <div>
-              <h2 className="font-mono text-2xl font-black text-white">
-                ALL QUESTIONS COMPLETED
-              </h2>
-              <p className="font-mono text-xs text-zinc-400 mt-1">
-                Your answers have been evaluated on trusted Cloud Functions and written to the immutable score record.
-              </p>
-            </div>
+        <div className="space-y-2">
+          <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest block">
+            EVALUATION COMPLETE
+          </span>
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+            Quiz Phase Finalized
+          </h1>
+          <p className="text-zinc-400 text-sm font-light">
+            Your results have been authenticated and recorded in the immutable score ledger.
+          </p>
+        </div>
 
-            <div className="border border-white/10 bg-black p-6 grid grid-cols-3 gap-4 font-mono">
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">FINAL SCORE</div>
-                <div className="text-2xl font-black text-red-500">{formatPoints(teamScore?.totalPoints || 0)} PTS</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">ANSWERED</div>
-                <div className="text-2xl font-black text-amber-400">{teamScore?.answeredCount || 0} / {session.totalQuestions}</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-zinc-500 uppercase">ACCURACY</div>
-                <div className="text-2xl font-black text-emerald-400">{teamScore?.correctCount || 0} CORRECT</div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard')}
-                className="border border-zinc-700 bg-zinc-900 px-6 py-3 font-mono text-xs font-bold uppercase text-zinc-200 hover:bg-zinc-800 active:scale-[0.97]"
-              >
-                RETURN TO TEAM HUB
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/bidding')}
-                className="bg-red-600 px-6 py-3 font-mono text-xs font-bold uppercase text-white hover:bg-red-500 active:scale-[0.97] flex items-center gap-2"
-              >
-                <span>PROCEED TO THEME BIDDING</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
+        {/* Score Telemetry Grid */}
+        <div className="grid grid-cols-3 gap-4 py-8 border-y border-white/[0.08]">
+          <div>
+            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+              TOTAL SCORE
+            </span>
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-white">
+              {formatPoints(teamScore?.totalPoints || 0)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
+            </span>
           </div>
-        </ControlPanel>
+          <div>
+            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+              ANSWERED
+            </span>
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-zinc-300">
+              {teamScore?.answeredCount || 0} / {session.totalQuestions}
+            </span>
+          </div>
+          <div>
+            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+              CORRECT
+            </span>
+            <span className="font-mono text-2xl sm:text-3xl font-bold text-emerald-400">
+              {teamScore?.correctCount || 0}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="font-mono text-xs uppercase tracking-wider text-zinc-400 hover:text-white px-6 py-3 border border-white/10 rounded-full hover:bg-white/[0.04] transition-all active:scale-95"
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/bidding')}
+            className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-7 py-3 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md"
+          >
+            <span>Proceed to Bidding</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      {/* Top HUD Viewport */}
+    <div className="max-w-3xl mx-auto px-6 md:px-12 space-y-10">
+      {/* Top Telemetry & Clock */}
       <QuizPhaseView
         questionIndex={session.questionIndex}
         totalQuestions={session.totalQuestions}
@@ -186,32 +183,24 @@ export function QuizEngine() {
       />
 
       {error && (
-        <div className="border border-red-500/50 bg-red-950/60 p-3 font-mono text-xs text-red-300 flex items-center gap-2">
+        <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
           <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Active Question Prompt Card */}
-      <ControlPanel
-        title={`QUESTION 0${session.questionIndex + 1}`}
-        subtitle="Prompt Description"
-        badge={
-          <StatusBadge
-            status={localPhase === 'READ_ONLY' ? "10S READ MODE" : "10S ANSWER MODE"}
-            variant={localPhase === 'READ_ONLY' ? "red" : "emerald"}
-          />
-        }
-      >
-        <div className="py-2">
-          <p className="font-mono text-base sm:text-lg font-bold text-white leading-relaxed">
-            {currentQuestion?.prompt || "Loading prompt definition..."}
-          </p>
-        </div>
-      </ControlPanel>
+      {/* Question Prompt */}
+      <div className="space-y-3">
+        <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
+          QUESTION 0{session.questionIndex + 1}
+        </span>
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-white leading-relaxed">
+          {currentQuestion?.prompt || "Loading prompt..."}
+        </h2>
+      </div>
 
-      {/* 4 Option Selection Grid */}
-      <ControlPanel title="MULTIPLE CHOICE OPTIONS" subtitle="Select One Answer (Key 1-4 or A-D)">
+      {/* Options Grid */}
+      <div className="space-y-6 pt-2">
         <OptionGrid
           options={currentQuestion?.options || []}
           selectedOption={selectedOption}
@@ -222,21 +211,20 @@ export function QuizEngine() {
           isCorrect={lastSubmissionResult?.isCorrect}
         />
 
-        {/* Submit Action Button */}
         {localPhase === 'ANSWER_MODE' && (
-          <div className="mt-6 border-t border-zinc-800 pt-4 flex justify-end">
+          <div className="flex justify-end pt-2">
             <button
               type="button"
               disabled={selectedOption === null || submitting}
               onClick={handleManualSubmit}
-              className="bg-red-600 px-8 py-3 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all hover:bg-red-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center gap-2"
+              className="inline-flex items-center gap-2 bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 shadow-md"
             >
-              <span>{submitting ? "SUBMITTING..." : "CONFIRM ANSWER"}</span>
+              <span>{submitting ? "SUBMITTING..." : "CONFIRM SELECTION"}</span>
               <Zap className="h-4 w-4" />
             </button>
           </div>
         )}
-      </ControlPanel>
+      </div>
     </div>
   );
 }

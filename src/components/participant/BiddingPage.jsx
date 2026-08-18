@@ -3,10 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { submitBidApi } from '../../services/callableApi';
 import { subscribeToTeamBid } from '../../services/firestoreService';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { LockedPanel } from '../common/LockedPanel';
-import { Award, CheckCircle, ShieldAlert, ArrowRight, Layers } from 'lucide-react';
+import { Award, CheckCircle2, ShieldAlert, ArrowRight, Layers, Lock, Loader2 } from 'lucide-react';
 import { formatPoints, formatTimestamp } from '../../utils/formatters';
 
 export function BiddingPage() {
@@ -23,7 +20,6 @@ export function BiddingPage() {
   const isBiddingOpen = eventData?.biddingOpen === true;
   const totalPoints = teamScore?.totalPoints || 0;
 
-  // Real-time subscription to team's submitted bid
   useEffect(() => {
     if (!uid || !eventData?.id) return;
     const unsub = subscribeToTeamBid(eventData.id, uid, (bid) => {
@@ -47,12 +43,12 @@ export function BiddingPage() {
     }
 
     if (typeof bidPoints !== 'number' || bidPoints < 0) {
-      setError('Specify a valid non-negative bid point amount.');
+      setError('Specify a valid non-negative point allocation.');
       return;
     }
 
     if (bidPoints > totalPoints) {
-      setError(`Bid points (${bidPoints}) exceed your earned quiz score balance (${totalPoints} PTS).`);
+      setError(`Bid points (${bidPoints}) exceed your available quiz balance (${totalPoints} PTS).`);
       return;
     }
 
@@ -65,7 +61,7 @@ export function BiddingPage() {
       });
 
       if (res && res.success) {
-        setSuccessMsg('SYSTEM BID REGISTERED SUCCESSFULLY');
+        setSuccessMsg('Bid successfully registered with authority.');
         setTimeout(() => setSuccessMsg(''), 3000);
       }
     } catch (err) {
@@ -78,171 +74,184 @@ export function BiddingPage() {
 
   if (!isBiddingOpen) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <LockedPanel
-          title="THEME BIDDING CHANNEL IS SEALED"
-          message="Theme bidding is currently CLOSED. Bidding will open after quiz scores and theme reveals are authorized by administrative directive."
-        />
+      <div className="max-w-2xl mx-auto px-6 py-20 text-center space-y-6">
+        <div className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-zinc-400">
+          <Lock className="h-5 w-5" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="font-display text-2xl font-bold text-white">
+            Bidding Channel Locked
+          </h2>
+          <p className="text-zinc-400 text-sm font-light leading-relaxed">
+            Theme bidding is currently closed. The bidding window opens upon completion of quiz evaluations.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-      {/* Header Banner */}
-      <div className="border border-white/10 bg-zinc-950 p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-cyan-400" />
-            <h1 className="font-mono text-xl font-black uppercase tracking-wider text-white">
-              THEME BIDDING & PRIORITY ALLOCATION CONSOLE
-            </h1>
-          </div>
-          <p className="font-mono text-xs text-zinc-400 mt-1">
-            Allocate quiz score points to bid on preferred robotics challenge themes.
-          </p>
+    <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-12">
+      {/* Title */}
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-2 text-red-500 font-mono text-xs tracking-widest uppercase">
+          <Award className="h-3.5 w-3.5" />
+          <span>ALLOCATION CHANNEL</span>
         </div>
-
-        <StatusBadge status="CHANNEL OPEN" variant="cyan" />
+        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+          Theme Priority Bidding
+        </h1>
+        <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
+          Allocate your earned quiz score points towards your preferred challenge theme. Deterministic priority tuples resolve allocations.
+        </p>
       </div>
 
-      {/* Score Telemetry & Existing Bid Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ControlPanel title="QUIZ SCORE BALANCE" subtitle="Total Points Available">
-          <div className="font-mono text-4xl font-extrabold text-amber-400 tracking-tight">
-            {formatPoints(totalPoints)} <span className="text-sm text-zinc-500 font-normal">PTS</span>
-          </div>
-        </ControlPanel>
+      {/* Score Telemetry Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-6 border-y border-white/[0.08]">
+        <div>
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+            QUIZ BALANCE
+          </span>
+          <span className="font-mono text-2xl font-bold text-white">
+            {formatPoints(totalPoints)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
+          </span>
+        </div>
 
-        <ControlPanel title="CURRENT SUBMITTED BID" subtitle="Active Allocation State">
-          <div className="font-mono text-xl font-bold text-white">
-            {existingBid ? (
-              <span className="text-cyan-400">{formatPoints(existingBid.bidPoints)} PTS allocated</span>
-            ) : (
-              <span className="text-zinc-500 font-normal">NO BID REGISTERED</span>
-            )}
-          </div>
-          {existingBid && (
-            <div className="font-mono text-[10px] text-zinc-400 mt-1">
-              Submitted: {formatTimestamp(existingBid.submittedAtMs)}
-            </div>
-          )}
-        </ControlPanel>
+        <div>
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+            ACTIVE BID
+          </span>
+          <span className="font-mono text-2xl font-bold text-red-400">
+            {existingBid ? `${formatPoints(existingBid.bidPoints)} PTS` : "0 PTS"}
+          </span>
+        </div>
 
-        <ControlPanel title="PRIORITY TUPLE RULE" subtitle="Tie Break Resolution">
-          <div className="font-mono text-[11px] text-zinc-300 space-y-1">
-            <div>1. Total Score (Desc)</div>
-            <div>2. Bid Points (Desc)</div>
-            <div>3. Submission Time (Asc)</div>
-            <div>4. Sequence ID (Asc)</div>
-          </div>
-        </ControlPanel>
+        <div>
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
+            TIE-BREAK PROTOCOL
+          </span>
+          <span className="font-mono text-xs text-zinc-400 block pt-1">
+            Score &rarr; Bid Points &rarr; Time
+          </span>
+        </div>
       </div>
 
       {/* Bidding Form */}
-      <form onSubmit={handleSubmitBid} className="space-y-6">
+      <form onSubmit={handleSubmitBid} className="space-y-10">
         {error && (
-          <div className="border border-red-500/50 bg-red-950/60 p-3 font-mono text-xs text-red-300 flex items-center gap-2">
+          <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
             <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="border border-emerald-500/50 bg-emerald-950/60 p-3 font-mono text-xs text-emerald-300 flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+          <div className="border border-emerald-500/30 bg-emerald-500/10 p-3.5 rounded-xl font-mono text-xs text-emerald-300 flex items-center gap-2.5">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        {/* Theme Selection Grid */}
-        <ControlPanel title="SELECT TARGET CHALLENGE THEME" subtitle="Choose 1 of 4 Revealed Themes">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        {/* Theme Radio Cards */}
+        <div className="space-y-4">
+          <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 block">
+            Select Challenge Theme (1 of 4)
+          </span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {publicThemes.map((theme, idx) => {
               const isSelected = selectedThemeId === (theme.id || theme.themeId);
               return (
                 <label
                   key={theme.id || theme.themeId || idx}
-                  className={`border p-5 cursor-pointer font-mono transition-all duration-160 active:scale-[0.97] block ${
+                  className={`border rounded-2xl p-6 cursor-pointer transition-all duration-150 block relative ${
                     isSelected
-                      ? 'border-cyan-400 bg-cyan-950/40 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                      : 'border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-white/30 hover:bg-zinc-800'
+                      ? 'border-red-500 bg-red-500/10 shadow-[0_0_25px_rgba(220,38,38,0.15)]'
+                      : 'border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="themeSelection"
-                        value={theme.id || theme.themeId}
-                        checked={isSelected}
-                        onChange={() => setSelectedThemeId(theme.id || theme.themeId)}
-                        className="h-4 w-4 accent-cyan-400"
-                      />
-                      <span className="font-bold text-sm uppercase text-white">
-                        THEME 0{theme.themeNumber || idx + 1}: {theme.publicName}
-                      </span>
-                    </div>
-                    {isSelected && <StatusBadge status="SELECTED" variant="cyan" />}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-xs font-bold text-red-500 uppercase tracking-widest">
+                      THEME 0{theme.themeNumber || idx + 1}
+                    </span>
+                    <input
+                      type="radio"
+                      name="themeSelection"
+                      value={theme.id || theme.themeId}
+                      checked={isSelected}
+                      onChange={() => setSelectedThemeId(theme.id || theme.themeId)}
+                      className="h-4 w-4 accent-red-600"
+                    />
                   </div>
 
-                  <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
+                  <h3 className="font-display text-lg font-bold text-white mb-2">
+                    {theme.publicName}
+                  </h3>
+
+                  <p className="text-zinc-400 text-xs font-light leading-relaxed">
                     {theme.publicDescription}
                   </p>
                 </label>
               );
             })}
           </div>
-        </ControlPanel>
+        </div>
 
-        {/* Point Allocation Input & Action */}
-        <ControlPanel title="ALLOCATE BID SCORE POINTS" subtitle="Max Available: Total Quiz Score">
-          <div className="space-y-4 pt-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-              <div>
-                <label className="block font-mono text-xs uppercase font-bold text-zinc-300 mb-1.5">
-                  BID POINTS TO ALLOCATE (0 TO {totalPoints})
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max={totalPoints}
-                  value={bidPoints}
-                  onChange={(e) => setBidPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                  className="w-full border border-zinc-700 bg-black px-4 py-2.5 font-mono text-lg font-bold text-cyan-400 focus:border-cyan-400 focus:outline-none"
-                />
-              </div>
+        {/* Point Input */}
+        <div className="space-y-3 pt-2">
+          <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 block">
+            Bid Points (0 to {totalPoints})
+          </span>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBidPoints(Math.floor(totalPoints / 2))}
-                  className="border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-xs text-zinc-300 hover:text-white"
-                >
-                  50% ({Math.floor(totalPoints / 2)} PTS)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBidPoints(totalPoints)}
-                  className="border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-xs text-zinc-300 hover:text-white"
-                >
-                  MAX ({totalPoints} PTS)
-                </button>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <input
+              type="number"
+              min="0"
+              max={totalPoints}
+              value={bidPoints}
+              onChange={(e) => setBidPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
+              className="w-full sm:w-64 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-red-500"
+            />
 
-            <div className="pt-4 border-t border-zinc-800 flex justify-end">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
-                type="submit"
-                disabled={loading || !selectedThemeId}
-                className="bg-cyan-600 px-8 py-3.5 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all hover:bg-cyan-500 active:scale-[0.97] shadow-[0_0_20px_rgba(6,182,212,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center gap-2"
+                type="button"
+                onClick={() => setBidPoints(Math.floor(totalPoints / 2))}
+                className="font-mono text-xs text-zinc-400 hover:text-white px-4 py-3 border border-white/10 rounded-xl hover:bg-white/[0.05]"
               >
-                <span>{loading ? "REGISTERING BID..." : "EXECUTE SYSTEM BID"}</span>
-                <ArrowRight className="h-4 w-4" />
+                50% ({Math.floor(totalPoints / 2)} PTS)
+              </button>
+              <button
+                type="button"
+                onClick={() => setBidPoints(totalPoints)}
+                className="font-mono text-xs text-zinc-400 hover:text-white px-4 py-3 border border-white/10 rounded-xl hover:bg-white/[0.05]"
+              >
+                Max ({totalPoints} PTS)
               </button>
             </div>
           </div>
-        </ControlPanel>
+        </div>
+
+        {/* Action Button */}
+        <div className="pt-6 border-t border-white/[0.08]">
+          <button
+            type="submit"
+            disabled={loading || !selectedThemeId}
+            className="w-full sm:w-auto bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all active:scale-95 shadow-md disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>PROCESSING BID...</span>
+              </>
+            ) : (
+              <>
+                <span>CONFIRM THEME BID</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

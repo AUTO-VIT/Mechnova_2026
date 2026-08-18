@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ControlPanel } from '../common/ControlPanel';
-import { StatusBadge } from '../common/StatusBadge';
-import { KeyRound, ShieldAlert, ArrowRight, Lock } from 'lucide-react';
+import { KeyRound, ShieldAlert, ArrowRight, Lock, Loader2 } from 'lucide-react';
 
 export function TeamAccessGate() {
   const { signInTeam } = useAuth();
@@ -19,7 +17,7 @@ export function TeamAccessGate() {
     setError('');
 
     if (!teamCode.trim() || !password.trim()) {
-      setError('8-Digit Team Code and Passkey are required.');
+      setError('Team Code and Passkey are required.');
       return;
     }
 
@@ -29,73 +27,89 @@ export function TeamAccessGate() {
       navigate('/dashboard');
     } catch (err) {
       console.error("Login failed:", err);
-      setError(err.message || 'Authentication failed. Please verify Team Code and Passkey.');
+      setError(err.message || 'Authentication failed. Please check Team Code and Passkey.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <ControlPanel
-        title="TEAM ACCESS GATEWAY"
-        subtitle="Authentication Terminal"
-        badge={<StatusBadge status="SECURE GATE" variant="red" />}
-        hazardBorder={true}
-      >
-        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-          {error && (
-            <div className="border border-red-500/50 bg-red-950/60 p-3 font-mono text-xs text-red-300 flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
+    <div className="max-w-md mx-auto px-6 py-12 space-y-8">
+      {/* Title */}
+      <div className="text-center space-y-3">
+        <div className="h-10 w-10 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-zinc-400">
+          <KeyRound className="h-4 w-4" />
+        </div>
+        <h1 className="font-display text-3xl font-extrabold text-white tracking-tight">
+          Team Portal
+        </h1>
+        <p className="text-zinc-400 text-sm font-light">
+          Sign in using your generated Team Code and Passkey.
+        </p>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
+            <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+            Team Code
+          </label>
+          <input
+            type="text"
+            value={teamCode}
+            onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
+            placeholder="e.g. AUTO-7892"
+            required
+            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="block font-mono text-xs text-zinc-400 uppercase tracking-wider">
+            Passkey
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter secret passkey"
+            required
+            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:bg-white/[0.06] transition-all"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-white text-black font-mono text-xs font-bold uppercase tracking-[0.2em] py-3.5 rounded-full hover:bg-zinc-200 transition-all duration-200 shadow-md active:scale-95 disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>AUTHENTICATING...</span>
+            </>
+          ) : (
+            <>
+              <span>SIGN IN</span>
+              <ArrowRight className="h-4 w-4" />
+            </>
           )}
+        </button>
 
-          <div>
-            <label className="block font-mono text-xs font-bold uppercase text-zinc-300 mb-1.5">
-              8-DIGIT TEAM CODE *
-            </label>
-            <input
-              type="text"
-              value={teamCode}
-              onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-              placeholder="e.g. AUTO-7892"
-              required
-              className="w-full border border-zinc-700 bg-black px-4 py-2.5 font-mono text-sm font-bold text-red-400 tracking-wider focus:border-red-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono text-xs font-bold uppercase text-zinc-300 mb-1.5">
-              SECRET PASSKEY *
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter passkey"
-              required
-              className="w-full border border-zinc-700 bg-black px-4 py-2.5 font-mono text-sm text-white focus:border-red-500 focus:outline-none"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 py-3 font-mono text-xs font-extrabold uppercase tracking-widest text-white transition-all hover:bg-red-500 active:scale-[0.97] shadow-[0_0_20px_rgba(220,38,38,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2"
-          >
-            <span>{loading ? "VERIFYING IDENTITY..." : "AUTHENTICATE TEAM GATE"}</span>
-            <ArrowRight className="h-4 w-4" />
-          </button>
-
-          <div className="pt-3 border-t border-zinc-800 flex items-center justify-between font-mono text-[11px]">
-            <span className="text-zinc-500">Unregistered team?</span>
-            <Link to="/register" className="text-red-400 hover:underline font-bold">
-              REGISTER NEW TEAM &rarr;
-            </Link>
-          </div>
-        </form>
-      </ControlPanel>
+        <div className="text-center pt-4 border-t border-white/[0.08] font-mono text-xs text-zinc-500">
+          <span>Need to register? </span>
+          <Link to="/register" className="text-white hover:underline font-semibold ml-1">
+            Register team
+          </Link>
+        </div>
+      </form>
     </div>
   );
 }

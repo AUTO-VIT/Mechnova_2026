@@ -12,7 +12,6 @@ export function OptionGrid({
 }) {
   const letters = ['A', 'B', 'C', 'D'];
 
-  // Keyboard Shortcuts (1-4 or A-D)
   useEffect(() => {
     if (disabled || isReadOnly) return;
 
@@ -35,76 +34,79 @@ export function OptionGrid({
   }, [disabled, isReadOnly, options, onSelectOption]);
 
   return (
-    <div className="relative space-y-3">
-      {/* Visual Overlay when in READ_ONLY phase */}
+    <div className="relative space-y-4">
+      {/* Read Only Sealed Notice */}
       {isReadOnly && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center border border-red-500/40 bg-zinc-950/90 backdrop-blur-xs p-6 bg-hazard-stripes">
-          <Lock className="h-8 w-8 text-red-500 animate-pulse mb-2" />
-          <div className="font-mono text-sm font-bold uppercase tracking-wider text-red-400">
-            OPTIONS SEALED FOR 10-SECOND READ PHASE
+        <div className="py-12 px-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-center space-y-3">
+          <div className="h-10 w-10 rounded-full border border-white/10 bg-white/[0.04] flex items-center justify-center mx-auto text-red-400">
+            <Lock className="h-4 w-4" />
           </div>
-          <div className="font-mono text-xs text-zinc-400 mt-1">
-            Carefully analyze the prompt. Option selection will unlock automatically.
-          </div>
+          <h3 className="font-display text-lg font-bold text-white">
+            Options Sealed
+          </h3>
+          <p className="text-zinc-400 text-xs font-light max-w-sm mx-auto">
+            10-second read period active. Review the prompt carefully. Options will unlock automatically.
+          </p>
         </div>
       )}
 
-      {/* Option Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {options.map((optText, idx) => {
-          const isSelected = selectedOption === idx;
-          const letter = letters[idx];
+      {/* Options Grid */}
+      {!isReadOnly && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {options.map((optText, idx) => {
+            const isSelected = selectedOption === idx;
+            const letter = letters[idx];
 
-          let optionStyle = 'border-zinc-800 bg-zinc-900/60 text-zinc-200 hover:border-white/40 hover:bg-zinc-800';
+            let cardStyle = 'border-white/10 bg-white/[0.03] text-zinc-300 hover:border-white/30 hover:bg-white/[0.06]';
 
-          if (isSelected) {
-            optionStyle = 'border-red-500 bg-red-950/50 text-white shadow-[0_0_15px_rgba(220,38,38,0.3)]';
-          }
-
-          if (submittedOption === idx) {
-            if (isCorrect === true) {
-              optionStyle = 'border-emerald-500 bg-emerald-950/60 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]';
-            } else if (isCorrect === false) {
-              optionStyle = 'border-red-600 bg-red-950/80 text-white';
+            if (isSelected) {
+              cardStyle = 'border-red-500 bg-red-500/10 text-white shadow-[0_0_20px_rgba(220,38,38,0.2)]';
             }
-          }
 
-          return (
-            <button
-              key={idx}
-              type="button"
-              disabled={disabled || isReadOnly}
-              onClick={() => onSelectOption(idx)}
-              className={`flex items-start gap-4 border p-4 text-left font-mono transition-all duration-160 active:scale-[0.97] disabled:cursor-not-allowed ${optionStyle}`}
-            >
-              {/* Monospaced Key Letter Badge */}
-              <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center border font-bold text-xs ${
-                isSelected
-                  ? 'border-red-400 bg-red-600 text-white'
-                  : 'border-zinc-700 bg-black text-zinc-400'
-              }`}>
-                {letter}
-              </div>
+            if (submittedOption === idx) {
+              if (isCorrect === true) {
+                cardStyle = 'border-emerald-500 bg-emerald-500/10 text-white';
+              } else if (isCorrect === false) {
+                cardStyle = 'border-red-600 bg-red-600/20 text-white';
+              }
+            }
 
-              {/* Option Text */}
-              <div className="flex-1 pt-1 text-xs leading-relaxed font-semibold">
-                {optText}
-              </div>
-
-              {/* Result Icon indicator */}
-              {submittedOption === idx && (
-                <div className="flex-shrink-0">
-                  {isCorrect ? (
-                    <Check className="h-5 w-5 text-emerald-400" />
-                  ) : (
-                    <X className="h-5 w-5 text-red-500" />
-                  )}
+            return (
+              <button
+                key={idx}
+                type="button"
+                disabled={disabled || isReadOnly}
+                onClick={() => onSelectOption(idx)}
+                className={`flex items-start gap-4 border rounded-2xl p-5 text-left font-sans transition-all duration-150 active:scale-98 disabled:cursor-not-allowed ${cardStyle}`}
+              >
+                <div
+                  className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold ${
+                    isSelected
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white/10 text-zinc-400'
+                  }`}
+                >
+                  {letter}
                 </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
+
+                <div className="flex-1 pt-0.5 text-sm font-medium leading-relaxed">
+                  {optText}
+                </div>
+
+                {submittedOption === idx && (
+                  <div className="flex-shrink-0 pt-0.5">
+                    {isCorrect ? (
+                      <Check className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
