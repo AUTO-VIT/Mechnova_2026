@@ -15,7 +15,7 @@ export function ThemeRevealPanel() {
           <Layers className="h-3.5 w-3.5" />
           <span>CHALLENGE DOMAINS</span>
         </div>
-        <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+        <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white tracking-tight">
           Hackathon Challenge Themes
         </h1>
         <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
@@ -30,7 +30,7 @@ export function ThemeRevealPanel() {
             <Lock className="h-6 w-6" />
           </div>
           <div className="space-y-2 max-w-lg mx-auto">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
               Themes are currently sealed
             </h2>
             <p className="text-zinc-400 text-sm font-light leading-relaxed">
@@ -58,7 +58,7 @@ export function ThemeRevealPanel() {
                 </span>
               </div>
 
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
+              <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
                 {theme.publicName}
               </h2>
 

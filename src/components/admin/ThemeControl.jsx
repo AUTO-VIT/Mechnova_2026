@@ -95,7 +95,7 @@ export function ThemeControl({ eventData }) {
           <span className="font-mono text-xs text-zinc-400 uppercase tracking-wider block">
             Theme Vault Configuration
           </span>
-          <div className="font-display text-lg font-bold text-white">
+          <div className="font-sans text-lg font-bold text-white">
             {configuredCount} / 4 Slots Configured
           </div>
         </div>
@@ -133,7 +133,7 @@ export function ThemeControl({ eventData }) {
                 </button>
               </div>
 
-              <h3 className="font-display text-lg font-bold text-white">
+              <h3 className="font-sans text-lg font-bold text-white">
                 {configured ? (configured.name || configured.publicName) : slot.name}
               </h3>
 
@@ -157,7 +157,7 @@ export function ThemeControl({ eventData }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-xl">
           <div className="w-full max-w-xl bg-void border border-white/20 rounded-2xl p-8 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <h3 className="font-display text-xl font-bold text-white">
+              <h3 className="font-sans text-xl font-bold text-white">
                 Edit Private Theme
               </h3>
               <button onClick={() => setEditingTheme(null)} className="text-zinc-400 hover:text-white">✕</button>

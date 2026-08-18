@@ -120,7 +120,7 @@ export function BiddingPage() {
           <Award className="h-3.5 w-3.5" />
           <span>ALLOCATION ARENA</span>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        <h1 className="font-sans text-3xl sm:text-5xl font-bold text-white tracking-tight">
           Theme Priority Bidding
         </h1>
         <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
@@ -281,7 +281,7 @@ export function BiddingPage() {
                     />
                   </div>
 
-                  <h3 className="font-display text-2xl font-bold text-white">
+                  <h3 className="font-sans text-2xl font-bold text-white">
                     {theme.publicName}
                   </h3>
 

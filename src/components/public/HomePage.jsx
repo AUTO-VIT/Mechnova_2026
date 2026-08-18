@@ -132,15 +132,15 @@ export function HomePage() {
           <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#855AB4]/20 max-w-xl">
             <div>
               <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">CHALLENGES</span>
-              <span className="font-display text-xl font-bold text-white">4 Domains</span>
+              <span className="font-sans text-xl font-bold text-white">4 Domains</span>
             </div>
             <div>
               <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">QUIZ ENGINE</span>
-              <span className="font-display text-xl font-bold text-white">10s + 10s</span>
+              <span className="font-sans text-xl font-bold text-white">10s + 10s</span>
             </div>
             <div>
               <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">AUTHORITY</span>
-              <span className="font-display text-xl font-bold text-[#B26FCB]">Trusted</span>
+              <span className="font-sans text-xl font-bold text-[#B26FCB]">Trusted</span>
             </div>
           </div>
         </div>
@@ -221,7 +221,7 @@ export function HomePage() {
             <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-[0.25em] block mb-1 font-bold">
               CHALLENGE DOMAINS
             </span>
-            <h2 className="font-display text-2xl md:text-4xl font-bold text-white tracking-tight">
+            <h2 className="font-sans text-2xl md:text-4xl font-bold text-white tracking-tight">
               Engineering Disciplines
             </h2>
           </div>
@@ -239,7 +239,7 @@ export function HomePage() {
               <span className="font-mono text-xs text-[#B26FCB] font-bold tracking-widest block uppercase">
                 {d.code}
               </span>
-              <h3 className="font-display text-xl font-bold text-white group-hover:text-[#B26FCB] transition-colors">
+              <h3 className="font-sans text-xl font-bold text-white group-hover:text-[#B26FCB] transition-colors">
                 {d.title}
               </h3>
               <p className="text-zinc-300 text-xs font-light leading-relaxed">
@@ -257,7 +257,7 @@ export function HomePage() {
             <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-[0.25em] block mb-1 font-bold">
               SYSTEM LIFECYCLE
             </span>
-            <h2 className="font-display text-2xl md:text-4xl font-bold text-white tracking-tight">
+            <h2 className="font-sans text-2xl md:text-4xl font-bold text-white tracking-tight">
               Platform Workflow
             </h2>
           </div>
@@ -272,7 +272,7 @@ export function HomePage() {
               <span className="font-mono text-xs text-zinc-400 group-hover:text-[#B26FCB] font-bold block transition-colors">
                 PHASE {s.num}
               </span>
-              <h3 className="font-display text-xl font-bold text-white">
+              <h3 className="font-sans text-xl font-bold text-white">
                 {s.title}
               </h3>
               <p className="text-zinc-300 text-xs font-light leading-relaxed">

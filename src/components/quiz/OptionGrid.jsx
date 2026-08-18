@@ -41,7 +41,7 @@ export function OptionGrid({
           <div className="h-10 w-10 rounded-full border border-[#855AB4]/40 bg-[#68388D]/30 flex items-center justify-center mx-auto text-[#B26FCB]">
             <Lock className="h-4 w-4" />
           </div>
-          <h3 className="font-display text-lg font-bold text-white">
+          <h3 className="font-sans text-lg font-bold text-white">
             Options Sealed
           </h3>
           <p className="text-zinc-400 text-xs font-light max-w-sm mx-auto">

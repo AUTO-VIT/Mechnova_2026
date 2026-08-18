@@ -44,7 +44,7 @@ export function TeamAccessGate() {
           <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block font-bold">
             PARTICIPANT COCKPIT GATEWAY
           </span>
-          <h1 className="font-display text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="font-sans text-3xl font-bold text-white tracking-tight">
             Team Portal
           </h1>
         </div>

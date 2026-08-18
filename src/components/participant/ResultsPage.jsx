@@ -36,7 +36,7 @@ export function ResultsPage() {
           <Award className="h-3.5 w-3.5" />
           <span>OUTCOME LEDGER</span>
         </div>
-        <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        <h1 className="font-sans text-3xl sm:text-5xl font-bold text-white tracking-tight">
           Allocation Results
         </h1>
         <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
@@ -50,7 +50,7 @@ export function ResultsPage() {
             <Clock className="h-5 w-5 animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h2 className="font-display text-2xl font-bold text-white">
+            <h2 className="font-sans text-2xl font-bold text-white">
               Allocation in Progress
             </h2>
             <p className="text-zinc-400 text-sm font-light leading-relaxed max-w-md mx-auto">
@@ -77,7 +77,7 @@ export function ResultsPage() {
                 <span className="font-mono text-xs text-red-500 uppercase tracking-widest block">
                   THEME 0{assignedTheme.themeNumber}
                 </span>
-                <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+                <h2 className="font-sans text-3xl sm:text-4xl font-bold text-white">
                   {assignedTheme.publicName}
                 </h2>
                 <p className="text-zinc-400 text-sm font-light leading-relaxed">

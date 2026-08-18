@@ -136,7 +136,7 @@ export function RegistrationPage() {
           <div className="h-16 w-16 rounded-full border border-[#855AB4]/40 bg-[#110515]/80 flex items-center justify-center mx-auto text-[#B26FCB]">
             <Lock className="h-7 w-7" />
           </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
+          <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
             Registration is Closed
           </h2>
           <p className="text-zinc-400 font-sans text-sm max-w-md mx-auto font-light">
@@ -295,7 +295,7 @@ export function RegistrationPage() {
               <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block font-bold">
                 CREDENTIALS GENERATED
               </span>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
+              <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
                 Save Your Access Keys
               </h2>
               <p className="text-zinc-300 text-xs font-light">

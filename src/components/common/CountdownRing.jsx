@@ -61,7 +61,7 @@ export function CountdownRing({
 
         {/* Center Telemetry Display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className={`font-mono text-2xl font-extrabold tracking-tight ${textColor} ${glowClass}`}>
+          <span className={`font-mono text-2xl font-bold tracking-tight ${textColor} ${glowClass}`}>
             {formatTimeMs(remainingMs)}
           </span>
           <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 mt-0.5">

@@ -69,7 +69,7 @@ export function AutomationShell({ children }) {
                   to={item.path}
                   className={`text-xs font-mono font-bold tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 ${
                     isActive
-                      ? 'text-white font-extrabold'
+                      ? 'text-white font-bold'
                       : 'text-zinc-400 hover:text-[#B26FCB]'
                   }`}
                 >
@@ -151,7 +151,7 @@ export function AutomationShell({ children }) {
         <div className="max-w-[1720px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
-              <span className="font-display text-white font-bold tracking-widest text-sm">
+              <span className="font-sans text-white font-bold tracking-widest text-sm">
                 MECHNOVA // 2026
               </span>
               <span>&bull;</span>

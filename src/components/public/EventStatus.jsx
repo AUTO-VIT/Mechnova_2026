@@ -54,7 +54,7 @@ export function EventStatus() {
             <Radio className="h-3.5 w-3.5 animate-pulse" />
             <span>REAL-TIME TELEMETRY</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+          <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white tracking-tight">
             System &amp; Event Radar
           </h1>
           <p className="text-zinc-300 font-sans text-base max-w-2xl font-light">
@@ -89,7 +89,7 @@ export function EventStatus() {
                   </span>
                   <div>
                     <div className="flex items-center gap-3">
-                      <h2 className="font-display text-xl sm:text-2xl font-bold text-white">
+                      <h2 className="font-sans text-xl sm:text-2xl font-bold text-white">
                         {p.name}
                       </h2>
                       {isCurrent && (

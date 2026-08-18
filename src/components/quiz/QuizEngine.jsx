@@ -97,7 +97,7 @@ export function QuizEngine() {
     return (
       <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-[#B26FCB] mx-auto" />
-        <h2 className="font-display text-xl font-bold text-white">Initializing Engine</h2>
+        <h2 className="font-sans text-xl font-bold text-white">Initializing Engine</h2>
         <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; question stream...</p>
       </div>
     );
@@ -115,7 +115,7 @@ export function QuizEngine() {
           <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block font-bold">
             EVALUATION COMPLETE
           </span>
-          <h1 className="font-display text-4xl sm:text-5xl font-extrabold text-white">
+          <h1 className="font-sans text-4xl sm:text-5xl font-bold text-white">
             Quiz Phase Finalized
           </h1>
           <p className="text-zinc-300 text-base font-light max-w-xl mx-auto">
@@ -129,7 +129,7 @@ export function QuizEngine() {
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               TOTAL SCORE
             </span>
-            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-white">
+            <span className="font-mono text-3xl sm:text-5xl font-bold text-white">
               {formatPoints(teamScore?.totalPoints || 0)} <span className="text-sm text-[#B26FCB] font-normal">PTS</span>
             </span>
           </div>
@@ -137,7 +137,7 @@ export function QuizEngine() {
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               ANSWERED
             </span>
-            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-zinc-300">
+            <span className="font-mono text-3xl sm:text-5xl font-bold text-zinc-300">
               {teamScore?.answeredCount || 0} <span className="text-sm text-zinc-500 font-normal">/ {session.totalQuestions}</span>
             </span>
           </div>
@@ -145,7 +145,7 @@ export function QuizEngine() {
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
               ACCURACY
             </span>
-            <span className="font-mono text-3xl sm:text-5xl font-extrabold text-[#B26FCB]">
+            <span className="font-mono text-3xl sm:text-5xl font-bold text-[#B26FCB]">
               {teamScore?.correctCount || 0}
             </span>
           </div>
@@ -265,7 +265,7 @@ export function QuizEngine() {
               </span>
             </div>
 
-            <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-white leading-snug">
+            <h2 className="font-sans text-2xl sm:text-4xl font-bold text-white leading-snug">
               {currentQuestion?.prompt || "Loading question prompt..."}
             </h2>
           </div>

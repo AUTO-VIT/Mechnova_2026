@@ -13,7 +13,7 @@ export function LockedPanel({
         <Lock className="h-7 w-7" />
       </div>
 
-      <h3 className="mt-5 font-mono text-lg font-extrabold uppercase tracking-widest text-white">
+      <h3 className="mt-5 font-mono text-lg font-bold uppercase tracking-widest text-white">
         {title}
       </h3>
 

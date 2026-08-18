@@ -21,7 +21,7 @@ export function AdminDashboard() {
           <Lock className="h-7 w-7" />
         </div>
         <div className="space-y-2">
-          <h2 className="font-display text-3xl font-extrabold text-white">
+          <h2 className="font-sans text-3xl font-bold text-white">
             Admin Access Required
           </h2>
           <p className="text-zinc-400 text-sm font-light">
@@ -56,7 +56,7 @@ export function AdminDashboard() {
             <Shield className="h-3.5 w-3.5" />
             <span>ADMINISTRATIVE MISSION CONTROL</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+          <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white tracking-tight">
             Admin Command
           </h1>
           <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">

@@ -58,7 +58,7 @@ export function CmsEditor({ eventData }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#855AB4]/20">
         <div>
-          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
+          <h2 className="font-sans text-2xl font-bold text-white tracking-tight">
             Full Site CMS Content Editor
           </h2>
           <p className="text-zinc-400 text-xs font-light mt-0.5">
@@ -110,7 +110,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 1: NAVBAR */}
         {activeSection === 'navbar' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               Navbar &amp; Top Brand Settings
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -204,7 +204,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 2: HERO & ANNOUNCEMENT */}
         {activeSection === 'hero' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               Hero Section &amp; Announcements
             </h3>
             <div className="space-y-5">
@@ -302,7 +302,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 3: MISSION RADAR STATS */}
         {activeSection === 'radar' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               Mission Radar HUD Metrics (4 Stats)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -384,7 +384,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 4: CHALLENGE DOMAINS */}
         {activeSection === 'domains' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               Challenge Domains Matrix (4 Cards)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -405,7 +405,7 @@ export function CmsEditor({ eventData }) {
                     placeholder="Domain Title"
                     value={formData[`domain${num}Title`] || ''}
                     onChange={(e) => handleChange(`domain${num}Title`, e.target.value)}
-                    className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-3 py-2 font-display text-sm text-white font-bold focus:outline-none focus:border-[#B26FCB]"
+                    className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-3 py-2 font-sans text-sm text-white font-bold focus:outline-none focus:border-[#B26FCB]"
                   />
                   <textarea
                     rows="2"
@@ -430,7 +430,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 5: TIMELINE PHASES */}
         {activeSection === 'timeline' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               4-Phase Sequence Timeline
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -460,7 +460,7 @@ export function CmsEditor({ eventData }) {
                     placeholder="Phase Title"
                     value={formData[`phase${num}Title`] || ''}
                     onChange={(e) => handleChange(`phase${num}Title`, e.target.value)}
-                    className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-3 py-2 font-display text-sm text-white font-bold focus:outline-none focus:border-[#B26FCB]"
+                    className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-3 py-2 font-sans text-sm text-white font-bold focus:outline-none focus:border-[#B26FCB]"
                   />
                   <textarea
                     rows="3"
@@ -478,7 +478,7 @@ export function CmsEditor({ eventData }) {
         {/* SECTION 6: FOOTER & META */}
         {activeSection === 'footer' && (
           <div className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/50 backdrop-blur-xl space-y-6">
-            <h3 className="font-display text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
+            <h3 className="font-sans text-lg font-bold text-white border-b border-[#855AB4]/20 pb-3">
               Footer &amp; Platform Metadata
             </h3>
             <div className="space-y-5">

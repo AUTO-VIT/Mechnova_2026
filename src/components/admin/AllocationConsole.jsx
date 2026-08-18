@@ -66,7 +66,7 @@ export function AllocationConsole({ eventData }) {
           type="button"
           disabled={isFinalized || bids.length === 0}
           onClick={() => setConfirmOpen(true)}
-          className="bg-red-600 px-5 py-2 font-mono text-xs font-extrabold uppercase text-white hover:bg-red-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+          className="bg-red-600 px-5 py-2 font-mono text-xs font-bold uppercase text-white hover:bg-red-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(220,38,38,0.4)]"
         >
           {isFinalized ? "ALLOCATION FINALIZED" : "FINALIZE ALLOCATION"}
         </button>
