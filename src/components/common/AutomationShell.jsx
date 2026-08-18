@@ -72,7 +72,7 @@ export function AutomationShell({ children }) {
         <div className="max-w-[1720px] w-full mx-auto px-6 md:px-12 xl:px-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3.5 group">
-            <span className="font-display text-xl md:text-2xl font-extrabold tracking-[0.2em] text-white group-hover:text-[#B26FCB] transition-colors duration-300">
+            <span className="font-display text-lg md:text-xl font-extrabold tracking-[0.2em] text-white group-hover:text-[#B26FCB] transition-colors duration-300">
               MECHNOVA
             </span>
             <span className="h-2 w-2 rounded-full bg-[#B26FCB] shadow-[0_0_12px_rgba(178,111,203,1)] animate-pulse"></span>
@@ -189,21 +189,21 @@ export function AutomationShell({ children }) {
           <div className="space-y-1 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
               <span className="font-display text-white font-bold tracking-widest text-sm">
-                {cms.footerTitle || "MECHNOVA // 2026"}
+                MECHNOVA // 2026
               </span>
               <span>&bull;</span>
               <span className="text-[#B26FCB]/80 tracking-wider">
-                {cms.footerTagline || "CYBER-PHYSICAL SYSTEMS & AUTONOMOUS ROBOTICS"}
+                CYBER-PHYSICAL SYSTEMS & AUTONOMOUS ROBOTICS
               </span>
             </div>
             <p className="text-zinc-500 text-[11px] font-sans font-light max-w-xl">
-              {cms.footerDescription || "Authoritative autonomous systems competition platform. Built with server-side deterministic state machines, audited theme reveals, and cryptographic credentials."}
+              Authoritative autonomous systems competition platform. Built with server-side deterministic state machines, audited theme reveals, and cryptographic credentials.
             </p>
           </div>
 
           <div className="flex flex-col md:items-end gap-2 text-[11px] tracking-wider text-center md:text-right">
             <div className="text-zinc-500">
-              {cms.footerCopyright || "© 2026 MECHNOVA // ROBOTICS & AUTOMATION PLATFORM. ALL RIGHTS RESERVED."}
+              © 2026 MECHNOVA // ROBOTICS & AUTOMATION PLATFORM. ALL RIGHTS RESERVED.
             </div>
             <div className="flex items-center justify-center md:justify-end gap-2 text-[#B26FCB]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#B26FCB] animate-pulse shadow-[0_0_8px_rgba(178,111,203,0.9)]"></span>
