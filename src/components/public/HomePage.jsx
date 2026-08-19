@@ -1,323 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, BrainCircuit, Check, ChevronRight, CircleDot, Cpu, Eye, Gauge, Megaphone, Orbit, Radio, ShieldCheck, Sparkles, Trophy } from 'lucide-react';
 import { useEvent } from '../../context/EventContext';
-import { useAuth } from '../../context/AuthContext';
-import { subscribeToCmsContent, DEFAULT_HOMEPAGE_CMS } from '../../services/firestoreService';
-import { ArrowRight, ChevronRight, Radio, Orbit, Megaphone } from 'lucide-react';
+import { DEFAULT_HOMEPAGE_CMS, subscribeToCmsContent } from '../../services/firestoreService';
 import { formatTimestamp } from '../../utils/formatters';
+
+const domainIcons = [Cpu, BrainCircuit, Gauge, Orbit];
 
 export function HomePage() {
   const { eventData, publicThemes, serverOffsetMs, eventId } = useEvent();
-  const { currentUser } = useAuth();
-  const currentNow = Date.now() + serverOffsetMs;
   const [cms, setCms] = useState(DEFAULT_HOMEPAGE_CMS);
+  const currentNow = Date.now() + serverOffsetMs;
 
-  useEffect(() => {
-    const unsub = subscribeToCmsContent(eventId || 'default-event', 'homepage', (data) => {
-      if (data) setCms(prev => ({ ...prev, ...data }));
-    });
-    return () => unsub();
-  }, [eventId]);
+  useEffect(() => subscribeToCmsContent(eventId || 'default-event', 'homepage', setCms), [eventId]);
 
   const domains = [
-    {
-      code: cms.domain1Category || 'DOM-01',
-      title: cms.domain1Title || 'Autonomous Kinematics',
-      desc: cms.domain1Desc || 'Trajectory generation, SLAM algorithms, path smoothing, and real-time obstacle avoidance in unstructured environments.'
-    },
-    {
-      code: cms.domain2Category || 'DOM-02',
-      title: cms.domain2Title || 'Perception & Vision',
-      desc: cms.domain2Desc || 'Spatial depth mapping, neural inference at the edge, defect inspection, and low-latency feature tracking.'
-    },
-    {
-      code: cms.domain3Category || 'DOM-03',
-      title: cms.domain3Title || 'Industrial PLC & SCADA',
-      desc: cms.domain3Desc || 'Deterministic ladder logic, state machine interlocking, bus communication protocols, and safety instrumentation.'
-    },
-    {
-      code: cms.domain4Category || 'DOM-04',
-      title: cms.domain4Title || 'Multi-Agent Swarms',
-      desc: cms.domain4Desc || 'Decentralized consensus, fleet telemetry coordination, dynamic load balancing, and fault-tolerant mesh routing.'
-    }
+    [cms.domain1Category, cms.domain1Title, cms.domain1Desc],
+    [cms.domain2Category, cms.domain2Title, cms.domain2Desc],
+    [cms.domain3Category, cms.domain3Title, cms.domain3Desc],
+    [cms.domain4Category, cms.domain4Title, cms.domain4Desc]
   ];
-
   const phases = [
-    {
-      num: cms.phase1Num || '01',
-      badge: cms.phase1Badge || 'PHASE 01',
-      title: cms.phase1Title || 'Synthetic Registration',
-      desc: cms.phase1Desc || 'Teams register 2-4 members and receive cryptographic identifiers. Passkeys are never stored in plaintext.'
-    },
-    {
-      num: cms.phase2Num || '02',
-      badge: cms.phase2Badge || 'PHASE 02',
-      title: cms.phase2Title || 'Authoritative Quiz',
-      desc: cms.phase2Desc || 'Strict 10s prompt analysis followed by 10s option selection. Deadlines evaluated authoritatively by cloud functions.'
-    },
-    {
-      num: cms.phase3Num || '03',
-      badge: cms.phase3Badge || 'PHASE 03',
-      title: cms.phase3Title || 'Theme Reveal',
-      desc: cms.phase3Desc || 'Four secret competition briefs are unlocked simultaneously via an audited administrative trigger.'
-    },
-    {
-      num: cms.phase4Num || '04',
-      badge: cms.phase4Badge || 'PHASE 04',
-      title: cms.phase4Title || 'Priority Allocation',
-      desc: cms.phase4Desc || 'Teams bid earned quiz points. Ranks and theme allocations are assigned deterministically via priority tuple.'
-    }
+    [cms.phase1Num, cms.phase1Title, cms.phase1Desc],
+    [cms.phase2Num, cms.phase2Title, cms.phase2Desc],
+    [cms.phase3Num, cms.phase3Title, cms.phase3Desc],
+    [cms.phase4Num, cms.phase4Title, cms.phase4Desc]
   ];
+  const statusRows = [
+    [cms.statusRegistrationLabel, eventData?.registrationOpen !== false ? cms.statusRegistrationOpen : cms.statusRegistrationClosed, eventData?.registrationOpen !== false],
+    [cms.statusQuizLabel, eventData?.quizOpen ? cms.statusQuizLive : cms.statusQuizStandby, eventData?.quizOpen],
+    [cms.statusThemesLabel, eventData?.themesRevealed ? `${publicThemes.length} ${cms.statusThemesSuffix}` : cms.statusThemesSealed, eventData?.themesRevealed],
+    [cms.statusBiddingLabel, eventData?.biddingOpen ? cms.statusBiddingOpen : cms.statusBiddingClosed, eventData?.biddingOpen]
+  ];
+  const hasRevealedThemes = publicThemes.length > 0;
 
   return (
-    <div className="w-full space-y-28">
-      {/* Live Event Announcements Bulletin (if set) */}
-      {cms.heroAnnouncements && (
-        <div className="border border-[#855AB4]/30 bg-[#221545]/70 backdrop-blur-md rounded-2xl p-4 flex items-center gap-3.5 shadow-[0_0_30px_rgba(104,56,141,0.2)]">
-          <div className="h-8 w-8 rounded-full bg-[#68388D] flex items-center justify-center text-[#B26FCB] flex-shrink-0">
-            <Megaphone className="h-4 w-4 animate-pulse" />
-          </div>
-          <div className="flex-1 font-mono text-xs text-zinc-200">
-            <span className="text-[#B26FCB] font-bold uppercase tracking-wider mr-2">BULLETIN:</span>
-            {cms.heroAnnouncements}
-          </div>
+    <div className="home-stage space-y-24 pb-8 sm:space-y-32">
+      {cms.heroAnnouncements && <div className="home-bulletin animate-rise flex items-center gap-3 rounded-2xl border px-4 py-3.5 sm:px-5"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-[#e4b8f4]"><Megaphone className="h-4 w-4" /></span><p className="font-mono text-xs leading-relaxed text-zinc-200"><span className="mr-2 font-bold uppercase tracking-widest text-[#e4b8f4]">{cms.announcementLabel}</span>{cms.heroAnnouncements}</p></div>}
+
+      <section className="relative grid min-h-[650px] items-center gap-12 lg:grid-cols-[1.04fr_.96fr] lg:gap-8">
+        <div className="relative z-10 max-w-3xl animate-rise">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#d9a7ed]/25 bg-white/[0.06] px-3.5 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#e8c5f6] backdrop-blur-xl"><span className="h-1.5 w-1.5 rounded-full bg-[#e4b8f4] shadow-[0_0_14px_#e4b8f4]" />{cms.heroBadge}</div>
+          <p className="mb-4 font-mono text-xs uppercase tracking-[0.28em] text-[#aa7ccf]">{cms.heroEyebrow}</p>
+          <h1 className="text-balance font-sans text-[3.25rem] font-semibold leading-[0.95] tracking-[-0.055em] text-white sm:text-7xl lg:text-[5.6rem] xl:text-[6.7rem]">{cms.heroTitleLine1}<br />{cms.heroTitleLine2} <span className="text-gradient-orbit">{cms.heroTitleAccent}</span></h1>
+          <p className="mt-7 max-w-xl text-base font-light leading-8 text-zinc-300 sm:text-lg">{cms.heroSubtitle}</p>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"><Link to="/register" className="button-orbit group">{cms.heroPrimaryCtaText} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link><Link to="/themes" className="button-ghost-orbit">{cms.heroSecondaryCtaText} <ChevronRight className="h-4 w-4" /></Link></div>
+          <div className="mt-12 flex flex-wrap gap-x-7 gap-y-4 text-xs text-zinc-400">{[cms.heroBenefit1, cms.heroBenefit2, cms.heroBenefit3].map((item) => <span key={item} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-[#d9a7ed]" />{item}</span>)}</div>
         </div>
-      )}
-
-      {/* Widescreen Hero Section (Exact Match to Target Design) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-16 items-center pt-2 md:pt-6">
-        {/* Left Wing (7 Cols) */}
-        <div className="lg:col-span-7 space-y-8">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#855AB4]/30 bg-[#221545]/60 backdrop-blur-md">
-            <span className="h-2 w-2 rounded-full bg-[#B26FCB] shadow-[0_0_10px_rgba(178,111,203,1)] animate-pulse" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#B26FCB] font-bold">
-              {cms.heroBadge || "MECHNOVA 2026 // ROBOTICS & AUTONOMY"}
-            </span>
-          </div>
-
-          {/* 3-Line Headline */}
-          <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight">
-            Autonomous <br />
-            Systems <span className="text-[#B26FCB] font-light">&amp;</span> <br />
-            Intelligent Control
-          </h1>
-
-          <p className="text-xs sm:text-sm xl:text-base text-zinc-300 font-sans font-light leading-relaxed max-w-2xl">
-            {cms.heroSubtitle || "The next-generation mission control and evaluation platform for engineering teams. Features timed two-phase quiz verification, sealed theme reveals, and deterministic priority bidding."}
-          </p>
-
-          {/* Action Row */}
-          <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4 pt-2">
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2.5 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all duration-200 shadow-[0_0_30px_rgba(178,111,203,0.4)] active:scale-95 border border-[#B26FCB]/40"
-            >
-              <span>REGISTRATION PORTAL</span>
-            </Link>
-            <Link
-              to="/quiz"
-              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
-            >
-              <span>QUIZ PORTAL</span>
-            </Link>
-            <Link
-              to="/bidding"
-              className="inline-flex items-center justify-center w-full sm:w-[240px] gap-2 border border-[#855AB4]/40 bg-[#221545]/40 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full hover:border-[#B26FCB] hover:bg-[#221545]/80 transition-all duration-200 active:scale-95"
-            >
-              <span>BIDDING PORTAL</span>
-            </Link>
-          </div>
-
-          {/* Quick Metrics Ticker */}
-          <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[#855AB4]/20 max-w-xl">
-            <div>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">CHALLENGES</span>
-              <span className="font-sans text-xl font-bold text-white">4 Domains</span>
-            </div>
-            <div>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">QUIZ ENGINE</span>
-              <span className="font-sans text-xl font-bold text-white">10s + 10s</span>
-            </div>
-            <div>
-              <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-0.5">AUTHORITY</span>
-              <span className="font-sans text-xl font-bold text-[#B26FCB]">Trusted</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Wing (5 Cols) - Live Telemetry HUD Card */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="rounded-3xl border border-[#855AB4]/30 bg-[#221545]/70 backdrop-blur-2xl p-8 xl:p-10 space-y-8 shadow-[0_0_50px_rgba(104,56,141,0.25)] relative overflow-hidden">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-[#B26FCB]/15 blur-[100px] rounded-full pointer-events-none -z-10" />
-            <div className="absolute bottom-0 left-0 w-60 h-60 bg-[#68388D]/20 blur-[80px] rounded-full pointer-events-none -z-10" />
-
-            {/* HUD Header */}
-            <div className="flex items-center justify-between border-b border-[#855AB4]/20 pb-5">
-              <div className="flex items-center gap-2.5 font-mono text-xs text-white font-bold tracking-widest uppercase">
-                <Radio className="h-3.5 w-3.5 text-[#B26FCB] animate-pulse" />
-                <span>MISSION RADAR HUD</span>
-              </div>
-              <span className="font-mono text-[10px] text-[#B26FCB]/70 uppercase font-bold">LIVE FEED</span>
-            </div>
-
-            {/* Real-time Status Stream */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-2 border-b border-[#855AB4]/15">
-                <span className="font-mono text-xs text-zinc-300">Team Registration</span>
-                <span className={`font-mono text-xs font-semibold uppercase ${
-                  eventData?.registrationOpen !== false ? "text-emerald-400" : "text-red-400"
-                }`}>
-                  {eventData?.registrationOpen !== false ? "ACTIVE & OPEN" : "CLOSED"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 border-b border-[#855AB4]/15">
-                <span className="font-mono text-xs text-zinc-300">Timed Quiz Channel</span>
-                <span className={`font-mono text-xs uppercase font-semibold ${
-                  eventData?.quizOpen ? "text-[#B26FCB]" : "text-zinc-500"
-                }`}>
-                  {eventData?.quizOpen ? "ONLINE & RUNNING" : "SEALED / STANDBY"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 border-b border-[#855AB4]/15">
-                <span className="font-mono text-xs text-zinc-300">Theme Bidding Channel</span>
-                <span className={`font-mono text-xs uppercase font-semibold ${
-                  eventData?.biddingOpen ? "text-cyan-400" : "text-zinc-500"
-                }`}>
-                  {eventData?.biddingOpen ? "OPEN FOR BIDS" : "LOCKED"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-2">
-                <span className="font-mono text-xs text-zinc-300">Revealed Themes</span>
-                <span className="font-mono text-xs text-white font-bold">
-                  {publicThemes.length} / 4 Published
-                </span>
-              </div>
-            </div>
-
-            {/* Telemetry Footer Callout */}
-            <div className="pt-2">
-              <div className="rounded-2xl border border-[#855AB4]/25 bg-[#110515]/60 p-4 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="font-mono text-[10px] text-zinc-400 uppercase block">ORBITAL NTP TIMESTAMP</span>
-                  <span className="font-mono text-xs text-[#B26FCB] font-bold">{formatTimestamp(currentNow)}</span>
-                </div>
-                <div className="h-8 w-8 rounded-full border border-[#855AB4]/40 flex items-center justify-center text-[#B26FCB] bg-[#221545]/80">
-                  <Orbit className="h-4 w-4 animate-spin" style={{ animationDuration: '12s' }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="relative mx-auto flex w-full max-w-xl items-center justify-center lg:min-h-[590px]"><div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" /><div className="hero-orbit hero-orbit-three" /><div className="hero-core animate-float"><div className="hero-core-inner"><Sparkles className="h-10 w-10 text-[#f3dcfd]" /><span>{cms.heroCoreText}</span></div></div><div className="hero-float-card hero-float-top animate-float-delay"><Radio className="h-4 w-4 text-[#e4b8f4]" /><div><span>{cms.heroStatusLabel}</span><strong>{cms.heroStatusValue}</strong></div></div><div className="hero-float-card hero-float-bottom animate-float"><Trophy className="h-4 w-4 text-[#e4b8f4]" /><div><span>{cms.heroMissionLabel}</span><strong>{cms.heroMissionValue}</strong></div></div></div>
       </section>
 
-      {/* Full-Width 4-Column Domain Exploration */}
-      <section className="space-y-8 pt-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#855AB4]/20 pb-4">
-          <div>
-            <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-[0.25em] block mb-1 font-bold">
-              CHALLENGE DOMAINS
-            </span>
-            <h2 className="font-sans text-2xl md:text-4xl font-bold text-white tracking-tight">
-              Engineering Disciplines
-            </h2>
-          </div>
-          <p className="text-zinc-400 text-xs font-light max-w-md font-sans">
-            Competitors tackle core cyber-physical challenges across robotics, embedded control, computer vision, and autonomous telemetry.
-          </p>
-        </div>
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.1] bg-[#160a22]/75 p-5 shadow-[0_25px_80px_rgba(0,0,0,.25)] backdrop-blur-xl sm:p-7 lg:p-8"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d9a7ed]/70 to-transparent" /><div className="grid gap-7 lg:grid-cols-[.82fr_1.18fr] lg:items-center"><div className="border-b border-white/[0.09] pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-8"><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#d9a7ed]">{cms.liveEyebrow}</p><h2 className="mt-3 text-balance font-sans text-3xl font-semibold tracking-tight text-white">{cms.liveTitle}</h2><p className="mt-3 max-w-sm text-sm leading-6 text-zinc-400">{cms.liveDescription}</p><Link to="/status" className="mt-6 inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-wider text-[#e8c5f6] hover:text-white">{cms.liveLinkText} <ArrowRight className="h-3.5 w-3.5" /></Link></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{statusRows.map(([label, value, active]) => <div key={label} className="rounded-2xl border border-white/[0.08] bg-black/20 p-4"><span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-zinc-500"><CircleDot className={`h-3 w-3 ${active ? 'text-emerald-300' : 'text-zinc-600'}`} />{label}</span><strong className={`mt-3 block text-sm ${active ? 'text-white' : 'text-zinc-400'}`}>{value}</strong></div>)}</div></div></section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {domains.map((d, idx) => (
-            <div
-              key={idx}
-              className="border border-[#855AB4]/25 rounded-2xl p-7 bg-[#221545]/40 hover:border-[#B26FCB]/60 hover:bg-[#221545]/70 transition-all duration-300 space-y-4 group backdrop-blur-sm shadow-sm flex flex-col justify-between"
-            >
-              <span className="font-mono text-xs text-[#B26FCB] font-bold tracking-widest block uppercase">
-                {d.code}
-              </span>
-              <h3 className="font-sans text-xl font-bold text-white group-hover:text-[#B26FCB] transition-colors">
-                {d.title}
-              </h3>
-              <p className="text-zinc-300 text-xs font-light leading-relaxed">
-                {d.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <section><div className="mb-9 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#d9a7ed]">{hasRevealedThemes ? cms.revealedThemesEyebrow : cms.hiddenThemesEyebrow}</p><h2 className="mt-3 text-balance whitespace-pre-line font-sans text-4xl font-semibold tracking-tight text-white sm:text-5xl">{hasRevealedThemes ? cms.revealedThemesTitle : cms.hiddenThemesTitle}</h2></div><p className="max-w-xs text-sm leading-6 text-zinc-400">{hasRevealedThemes ? cms.revealedThemesDescription : cms.hiddenThemesDescription}</p></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{hasRevealedThemes ? publicThemes.map((theme, index) => { const Icon = domainIcons[index % domainIcons.length]; const seats = theme.seatCapacity || theme.capacity || '—'; return <Link key={theme.id || theme.themeId || index} to="/themes" className="domain-card group"><div className="flex items-center justify-between"><span>{cms.themeCardLabel} {String(theme.themeNumber || index + 1).padStart(2, '0')}</span><Icon className="h-5 w-5 text-[#c895dc] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" /></div><h3>{theme.publicName || theme.name}</h3><p>{theme.publicDescription || theme.description || ''}</p><div className="absolute bottom-5 right-5 font-mono text-[10px] uppercase tracking-wider text-[#d9a7ed]">{seats} {cms.themeSeatSuffix}</div><div className="domain-card-arrow"><ArrowRight className="h-4 w-4" /></div></Link>; }) : domains.map(([code, title, description], index) => { const Icon = domainIcons[index]; return <article key={code} className="domain-card group"><div className="flex items-center justify-between"><span>{code}</span><Icon className="h-5 w-5 text-[#c895dc] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" /></div><h3>{title}</h3><p>{description}</p><div className="domain-card-arrow"><ArrowRight className="h-4 w-4" /></div></article>; })}</div></section>
 
-      {/* Full-Width 4-Stage Operational Sequence */}
-      <section className="space-y-8 pt-4">
-        <div className="flex items-center justify-between border-b border-[#855AB4]/20 pb-4">
-          <div>
-            <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-[0.25em] block mb-1 font-bold">
-              SYSTEM LIFECYCLE
-            </span>
-            <h2 className="font-sans text-2xl md:text-4xl font-bold text-white tracking-tight">
-              Platform Workflow
-            </h2>
-          </div>
-          <span className="font-mono text-xs text-zinc-400 uppercase tracking-widest hidden sm:inline font-bold">
-            4 PHASES
-          </span>
-        </div>
+      <section className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-start"><div className="lg:sticky lg:top-32"><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#d9a7ed]">{cms.workflowEyebrow}</p><h2 className="mt-3 text-balance whitespace-pre-line font-sans text-4xl font-semibold tracking-tight text-white sm:text-5xl">{cms.workflowTitle}</h2><p className="mt-5 max-w-md text-sm leading-7 text-zinc-400">{cms.workflowDescription}</p></div><ol className="space-y-3">{phases.map(([number, title, description]) => <li key={number} className="phase-row"><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div><ChevronRight className="ml-auto h-5 w-5 text-[#b57ed2]" /></li>)}</ol></section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {phases.map((s, idx) => (
-            <div key={idx} className="space-y-3 pt-6 border-t border-[#855AB4]/25 group hover:border-[#B26FCB] transition-colors duration-300">
-              <span className="font-mono text-xs text-zinc-400 group-hover:text-[#B26FCB] font-bold block transition-colors">
-                PHASE {s.num}
-              </span>
-              <h3 className="font-sans text-xl font-bold text-white">
-                {s.title}
-              </h3>
-              <p className="text-zinc-300 text-xs font-light leading-relaxed">
-                {s.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Full-Width Panoramic CTA Banner */}
-      <section className="relative rounded-3xl bg-gradient-to-r from-[#221545]/90 via-[#110515]/90 to-[#000000] p-12 lg:p-16 border border-[#855AB4]/30 overflow-hidden shadow-[0_0_50px_rgba(104,56,141,0.3)]">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#B26FCB]/15 blur-[100px] rounded-full pointer-events-none" />
-
-        <div className="max-w-3xl space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 font-mono text-xs text-[#B26FCB]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#B26FCB] animate-pulse shadow-[0_0_8px_rgba(178,111,203,1)]"></span>
-            <span>REGISTRATION WINDOW ACTIVE</span>
-          </div>
-
-          <h2 className="font-sans text-xl sm:text-3xl font-bold text-white tracking-tight">
-            Ready to Compete?
-          </h2>
-
-          <p className="text-zinc-300 text-base font-light leading-relaxed max-w-xl">
-            Register your team today, verify credentials, and prepare for the timed autonomous robotics evaluation.
-          </p>
-
-          <div className="pt-2 flex flex-wrap items-center gap-4">
-            <Link
-              to="/register"
-              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(178,111,203,0.4)] border border-[#B26FCB]/40"
-            >
-              <span>REGISTRATION PORTAL</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/status"
-              className="inline-flex items-center gap-2 border border-[#855AB4]/40 bg-[#221545]/50 text-[#B26FCB] font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-full hover:bg-[#221545]/80 hover:border-[#B26FCB] transition-all active:scale-95"
-            >
-              <span>VIEW SYSTEM RADAR</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <section className="cta-orbit relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16"><div className="relative z-10 max-w-2xl"><p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#f0cdfd]">{cms.ctaEyebrow}</p><h2 className="mt-4 text-balance font-sans text-4xl font-semibold tracking-[-.035em] text-white sm:text-6xl">{cms.ctaTitle}</h2><p className="mt-5 max-w-xl text-base leading-7 text-purple-100/75">{cms.ctaDescription}</p><Link to="/register" className="button-light-orbit mt-8">{cms.ctaButtonText} <ArrowRight className="h-4 w-4" /></Link></div><ShieldCheck className="absolute -bottom-14 -right-8 h-72 w-72 rotate-[-15deg] text-white/[0.08] sm:-right-2" /></section>
+      <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-600">{cms.timestampLabel} · {formatTimestamp(currentNow)}</p>
     </div>
   );
 }

@@ -7,7 +7,8 @@ import { ThemeControl } from './ThemeControl';
 import { AllocationConsole } from './AllocationConsole';
 import { CmsEditor } from './CmsEditor';
 import { AuditLogTable } from './AuditLogTable';
-import { Shield, Sliders, HelpCircle, Eye, Award, FileText, Terminal, Lock } from 'lucide-react';
+import { RegistrationConsole } from './RegistrationConsole';
+import { Shield, Sliders, HelpCircle, Eye, Award, FileText, Terminal, Lock, UsersRound } from 'lucide-react';
 
 export function AdminDashboard() {
   const { isAdmin } = useAuth();
@@ -41,8 +42,9 @@ export function AdminDashboard() {
   const tabs = [
     { id: 'controls', label: 'Operational Controls', icon: Sliders },
     { id: 'quiz', label: 'Quiz Question Bank', icon: HelpCircle },
-    { id: 'themes', label: 'Theme Vault & Reveal', icon: Eye },
-    { id: 'allocation', label: 'Bidding & Allocation Rank', icon: Award },
+    { id: 'themes', label: 'Themes, Seats & Reveal', icon: Eye },
+    { id: 'registrations', label: 'Registrations', icon: UsersRound },
+    { id: 'allocation', label: 'Bids & Allocations', icon: Award },
     { id: 'cms', label: 'CMS Content Editor', icon: FileText },
     { id: 'audit', label: 'Audit Log Ledger', icon: Terminal }
   ];
@@ -60,7 +62,7 @@ export function AdminDashboard() {
             Admin Command
           </h1>
           <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
-            Authoritative event management, question bank authoring, audited theme reveals, and deterministic priority allocation finalization.
+            Control event phases, prepare hidden themes and their seat limits, reveal them when ready, and oversee ranked-preference allocation.
           </p>
         </div>
 
@@ -96,6 +98,7 @@ export function AdminDashboard() {
         {activeTab === 'controls' && <EventControls eventData={eventData} />}
         {activeTab === 'quiz' && <QuizQuestionEditor quizId={eventData?.quizId || 'default-quiz'} />}
         {activeTab === 'themes' && <ThemeControl eventData={eventData} />}
+        {activeTab === 'registrations' && <RegistrationConsole eventData={eventData} />}
         {activeTab === 'allocation' && <AllocationConsole eventData={eventData} />}
         {activeTab === 'cms' && <CmsEditor eventData={eventData} />}
         {activeTab === 'audit' && <AuditLogTable eventData={eventData} />}

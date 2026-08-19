@@ -17,7 +17,9 @@ export function useQuizSession(teamId) {
     const sessionRef = doc(db, 'quizSessions', teamId);
     const unsubSession = onSnapshot(sessionRef, (snap) => {
       if (snap.exists()) {
-        setSession({ id: snap.id, ...snap.data() });
+        const nextSession = { id: snap.id, ...snap.data() };
+        setSession(nextSession);
+        setCurrentQuestion(nextSession.currentQuestion || null);
       } else {
         setSession(null);
       }
@@ -45,7 +47,7 @@ export function useQuizSession(teamId) {
     setLoading(true);
     setError(null);
     try {
-      const res = await startSessionApi({ eventId, quizId });
+      const res = await startSessionApi({ eventId, quizId, teamId });
       if (res.session) setSession(res.session);
       if (res.currentQuestion) setCurrentQuestion(res.currentQuestion);
       return res;
@@ -56,7 +58,7 @@ export function useQuizSession(teamId) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [teamId]);
 
   /**
    * Submit Answer Choice for Current Active Question
@@ -69,6 +71,7 @@ export function useQuizSession(teamId) {
       const res = await submitAnswerApi({
         eventId,
         quizId,
+        sessionId: teamId,
         questionIndex,
         questionId,
         selectedOption
@@ -85,7 +88,7 @@ export function useQuizSession(teamId) {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting]);
+  }, [submitting, teamId]);
 
   return {
     session,

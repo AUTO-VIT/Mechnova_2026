@@ -1,21 +1,29 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AutomationShell } from './components/common/AutomationShell';
-import { HomePage } from './components/public/HomePage';
-import { EventStatus } from './components/public/EventStatus';
-import { ThemeRevealPanel } from './components/public/ThemeRevealPanel';
-import { RegistrationPage } from './components/public/RegistrationPage';
-import { TeamAccessGate } from './components/participant/TeamAccessGate';
-import { QuizPage } from './components/participant/QuizPage';
-import { BiddingPage } from './components/participant/BiddingPage';
-import { ResultsPage } from './components/participant/ResultsPage';
-import { AdminLogin } from './components/admin/AdminLogin';
-import { AdminDashboard } from './components/admin/AdminDashboard';
+
+const loadComponent = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })));
+
+const HomePage = loadComponent(() => import('./components/public/HomePage'), 'HomePage');
+const EventStatus = loadComponent(() => import('./components/public/EventStatus'), 'EventStatus');
+const ThemeRevealPanel = loadComponent(() => import('./components/public/ThemeRevealPanel'), 'ThemeRevealPanel');
+const RegistrationPage = loadComponent(() => import('./components/public/RegistrationPage'), 'RegistrationPage');
+const TeamAccessGate = loadComponent(() => import('./components/participant/TeamAccessGate'), 'TeamAccessGate');
+const QuizPage = loadComponent(() => import('./components/participant/QuizPage'), 'QuizPage');
+const BiddingPage = loadComponent(() => import('./components/participant/BiddingPage'), 'BiddingPage');
+const ResultsPage = loadComponent(() => import('./components/participant/ResultsPage'), 'ResultsPage');
+const AdminLogin = loadComponent(() => import('./components/admin/AdminLogin'), 'AdminLogin');
+const AdminDashboard = loadComponent(() => import('./components/admin/AdminDashboard'), 'AdminDashboard');
+
+function PageLoader() {
+  return <div className="page-loader" role="status" aria-live="polite">Loading workspace…</div>;
+}
 
 export function AppRoutes() {
   return (
     <AutomationShell>
-      <Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
         {/* Public Pages */}
         <Route path="/" element={<HomePage />} />
         <Route path="/status" element={<EventStatus />} />
@@ -34,7 +42,8 @@ export function AppRoutes() {
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </AutomationShell>
   );
 }

@@ -27,21 +27,21 @@ export function EventStatus() {
       name: 'Audited Theme Reveal',
       active: eventData?.themesRevealed === true,
       completed: eventData?.themesRevealed === true,
-      desc: 'Four challenge briefs unlocked simultaneously to all participants.'
+      desc: 'Challenge briefs and administrator-configured seat limits are opened to all participants.'
     },
     {
       key: 'bidding',
-      name: 'Theme Priority Bidding',
+      name: 'Ranked Theme Bidding',
       active: eventData?.biddingOpen === true,
       completed: eventData?.allocationFinalized === true,
-      desc: 'Quiz points allocation via deterministic priority tuple.'
+      desc: 'Teams support a first choice with quiz points and rank every revealed theme.'
     },
     {
       key: 'allocation',
       name: 'Final Allocation Lock',
       active: eventData?.allocationFinalized === true,
       completed: eventData?.allocationFinalized === true,
-      desc: 'Deterministic rank assignment finalized and published.'
+      desc: 'Seat-based assignments are finalized from each team’s ranked preferences.'
     }
   ];
 

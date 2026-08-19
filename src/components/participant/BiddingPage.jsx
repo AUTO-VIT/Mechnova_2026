@@ -1,74 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  Award,
+  CheckCircle2,
+  CircleDashed,
+  GripVertical,
+  Info,
+  Loader2,
+  ShieldAlert,
+  UsersRound
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { submitBidApi } from '../../services/callableApi';
 import { subscribeToTeamBid } from '../../services/firestoreService';
-import { Award, CheckCircle2, ShieldAlert, ArrowRight, Layers, Lock, Loader2, Info, Sparkles } from 'lucide-react';
-import { formatPoints, formatTimestamp } from '../../utils/formatters';
+import { formatPoints } from '../../utils/formatters';
 import { LockedPanel } from '../common/LockedPanel';
-import { Link } from 'react-router-dom';
+
+const getThemeId = (theme) => theme.id || theme.themeId;
 
 export function BiddingPage() {
   const { uid, teamScore } = useAuth();
   const { eventData, publicThemes } = useEvent();
-
   const [existingBid, setExistingBid] = useState(null);
-  const [selectedThemeId, setSelectedThemeId] = useState('');
-  const [bidPoints, setBidPoints] = useState(0);
+  const [preferenceIds, setPreferenceIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const isBiddingOpen = eventData?.biddingOpen === true;
   const totalPoints = teamScore?.totalPoints || 0;
+  const themeById = useMemo(
+    () => new Map(publicThemes.map((theme) => [getThemeId(theme), theme])),
+    [publicThemes]
+  );
+  const rankedThemes = preferenceIds.map((id) => themeById.get(id)).filter(Boolean);
+  const primaryThemeId = preferenceIds[0] || '';
 
   useEffect(() => {
-    if (!uid || !eventData?.id) return;
-    const unsub = subscribeToTeamBid(eventData.id, uid, (bid) => {
-      if (bid) {
-        setExistingBid(bid);
-        setSelectedThemeId(bid.selectedThemeId || '');
-        setBidPoints(bid.bidPoints || 0);
-      }
-    });
-    return () => unsub();
-  }, [uid, eventData?.id]);
+    if (!uid || !eventData?.id) return undefined;
+    return subscribeToTeamBid(eventData.id, uid, (bid) => {
+      if (!bid) return;
+      setExistingBid(bid);
 
-  const handleSubmitBid = async (e) => {
-    e.preventDefault();
+      const visibleIds = publicThemes.map(getThemeId).filter(Boolean);
+      const storedPreferences = Array.isArray(bid.preferenceIds)
+        ? bid.preferenceIds
+        : [bid.selectedThemeId].filter(Boolean);
+      const validPreferences = storedPreferences.filter((id) => visibleIds.includes(id));
+      setPreferenceIds([...validPreferences, ...visibleIds.filter((id) => !validPreferences.includes(id))]);
+    });
+  }, [uid, eventData?.id, publicThemes]);
+
+  const addOrRemoveTheme = (themeId) => {
+    setError('');
+    setPreferenceIds((current) => (
+      current.includes(themeId)
+        ? current.filter((id) => id !== themeId)
+        : [...current, themeId]
+    ));
+  };
+
+  const movePreference = (index, direction) => {
+    setPreferenceIds((current) => {
+      const destination = index + direction;
+      if (destination < 0 || destination >= current.length) return current;
+      const next = [...current];
+      [next[index], next[destination]] = [next[destination], next[index]];
+      return next;
+    });
+  };
+
+  const handleSubmitBid = async (event) => {
+    event.preventDefault();
     setError('');
     setSuccessMsg('');
 
-    if (!selectedThemeId) {
-      setError('Select one of the revealed challenge themes.');
+    if (preferenceIds.length !== publicThemes.length || !primaryThemeId) {
+      setError('Rank every revealed theme before submitting. This ensures you can be considered for your next preference if a theme fills.');
       return;
     }
-
-    if (typeof bidPoints !== 'number' || bidPoints < 0) {
-      setError('Specify a valid non-negative point allocation.');
-      return;
-    }
-
-    if (bidPoints > totalPoints) {
-      setError(`Bid points (${bidPoints}) exceed your available quiz balance (${totalPoints} PTS).`);
-      return;
-    }
-
     setLoading(true);
     try {
-      const res = await submitBidApi({
+      const result = await submitBidApi({
         eventId: eventData?.id || 'default-event',
-        selectedThemeId,
-        bidPoints
+        selectedThemeId: primaryThemeId,
+        preferenceIds
       });
-
-      if (res && res.success) {
-        setSuccessMsg('Bid successfully registered with authority.');
-        setTimeout(() => setSuccessMsg(''), 3000);
+      if (result?.success) {
+        setSuccessMsg('Your ranked theme preferences have been submitted. Your full quiz score is automatically used for allocation priority. You can revise your ranking while the bidding window remains open.');
       }
-    } catch (err) {
-      console.error("Bid submission error:", err);
-      setError(err.message || 'Bid submission failed.');
+    } catch (submitError) {
+      console.error('Bid submission error:', submitError);
+      setError(submitError.message || 'Bid submission failed.');
     } finally {
       setLoading(false);
     }
@@ -79,15 +106,8 @@ export function BiddingPage() {
       <div className="mx-auto max-w-2xl px-4 py-16">
         <LockedPanel
           title="AUTHENTICATION REQUIRED"
-          message="You must authenticate at the Team Access Gate before entering the Bidding Arena."
-          actionButton={
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
-            >
-              AUTHENTICATE NOW
-            </Link>
-          }
+          message="Sign in with your team credentials before entering the Bidding Arena."
+          actionButton={<Link to="/login" className="inline-flex items-center gap-2 rounded-full border border-[#B26FCB]/40 bg-[#68388D] px-8 py-3 font-mono text-xs font-bold tracking-[0.2em] text-white transition hover:bg-[#855AB4]">SIGN IN TO CONTINUE</Link>}
         />
       </div>
     );
@@ -98,212 +118,95 @@ export function BiddingPage() {
       <div className="mx-auto max-w-3xl px-4 py-16">
         <LockedPanel
           title="BIDDING CHANNEL LOCKED"
-          message="Theme bidding is currently closed. The bidding window opens upon completion of quiz evaluations."
-          actionButton={
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
-            >
-              RETURN TO HOME
-            </Link>
-          }
+          message="Bidding opens when the administrator has revealed themes and enabled the allocation phase."
+          actionButton={<Link to="/themes" className="inline-flex items-center gap-2 rounded-full border border-[#B26FCB]/40 bg-[#68388D] px-8 py-3 font-mono text-xs font-bold tracking-[0.2em] text-white transition hover:bg-[#855AB4]">VIEW THEME STATUS</Link>}
         />
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-12">
-      {/* Title */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 text-[#B26FCB] font-mono text-xs tracking-widest uppercase">
-          <Award className="h-3.5 w-3.5" />
-          <span>ALLOCATION ARENA</span>
-        </div>
-        <h1 className="font-sans text-3xl sm:text-5xl font-bold text-white tracking-tight">
-          Theme Priority Bidding
-        </h1>
-        <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
-          Allocate your earned quiz score points towards your preferred challenge theme. Deterministic priority tuples resolve allocations authoritatively.
-        </p>
-      </div>
+    <div className="w-full space-y-10">
+      <header className="max-w-4xl space-y-4">
+        <div className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-[#B26FCB]"><Award className="h-4 w-4" /> Allocation arena</div>
+        <h1 className="text-balance font-sans text-4xl font-bold tracking-tight text-white sm:text-6xl">Rank the themes your team wants most.</h1>
+        <p className="max-w-3xl text-base font-light leading-relaxed text-zinc-300">Your complete quiz score automatically determines priority. Order every revealed theme; if a higher choice fills, the allocation process considers your next preference—never a random theme.</p>
+      </header>
 
-      {/* 1080p Widescreen Dual Wing Bidding Layout */}
-      <form onSubmit={handleSubmitBid} className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
-        {/* Left Bidding Controls Wing (4 Cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="border border-[#855AB4]/30 rounded-3xl p-7 bg-[#221545]/70 backdrop-blur-2xl space-y-6 sticky top-28 shadow-[0_0_40px_rgba(104,56,141,0.2)]">
+      <form onSubmit={handleSubmitBid} className="grid grid-cols-1 gap-8 lg:grid-cols-12 xl:gap-12">
+        <aside className="space-y-6 lg:col-span-4">
+          <div className="surface-orbit sticky top-28 space-y-6 rounded-3xl border border-[#855AB4]/30 p-6 shadow-[0_0_40px_rgba(104,56,141,0.2)] sm:p-7">
             <div className="flex items-center justify-between border-b border-[#855AB4]/20 pb-4">
-              <span className="font-mono text-xs text-white font-bold tracking-widest uppercase">
-                BID CONFIGURATION
-              </span>
-              <span className="font-mono text-[10px] text-[#B26FCB] uppercase font-bold bg-[#68388D]/30 border border-[#855AB4]/40 px-2.5 py-0.5 rounded-full">
-                CHANNEL OPEN
-              </span>
+              <span className="font-mono text-xs font-bold uppercase tracking-widest text-white">Your submission</span>
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-300">Open</span>
             </div>
 
-            {error && (
-              <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
-                <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
+            {error && <div role="alert" className="flex gap-2.5 rounded-xl border border-orange-500/30 bg-orange-500/10 p-3.5 font-mono text-xs leading-relaxed text-orange-200"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />{error}</div>}
+            {successMsg && <div role="status" className="flex gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 font-mono text-xs leading-relaxed text-emerald-200"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{successMsg}</div>}
 
-            {successMsg && (
-              <div className="border border-emerald-500/30 bg-emerald-500/10 p-3.5 rounded-xl font-mono text-xs text-emerald-300 flex items-center gap-2.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-                <span>{successMsg}</span>
-              </div>
-            )}
-
-            {/* Balances */}
-            <div className="grid grid-cols-2 gap-4 py-2 border-b border-[#855AB4]/20">
-              <div>
-                <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
-                  QUIZ BALANCE
-                </span>
-                <span className="font-mono text-2xl font-bold text-white">
-                  {formatPoints(totalPoints)} <span className="text-xs text-[#B26FCB] font-normal">PTS</span>
-                </span>
-              </div>
-
-              <div>
-                <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
-                  ACTIVE BID
-                </span>
-                <span className="font-mono text-2xl font-bold text-[#B26FCB]">
-                  {existingBid ? `${formatPoints(existingBid.bidPoints)} PTS` : "0 PTS"}
-                </span>
-              </div>
+            <div className="grid grid-cols-2 gap-4 border-b border-[#855AB4]/20 pb-5">
+              <div><span className="block font-mono text-[10px] uppercase tracking-widest text-zinc-500">Quiz points</span><span className="font-mono text-2xl font-bold text-white">{formatPoints(totalPoints)} <span className="text-xs font-normal text-[#B26FCB]">PTS</span></span></div>
+              <div><span className="block font-mono text-[10px] uppercase tracking-widest text-zinc-500">Preferences</span><span className="font-mono text-2xl font-bold text-[#B26FCB]">{preferenceIds.length}<span className="text-xs font-normal text-zinc-500">/{publicThemes.length}</span></span></div>
             </div>
 
-            {/* Point Allocation Input */}
-            <div className="space-y-3">
-              <label className="block font-mono text-xs text-zinc-400 uppercase">
-                Points to Allocate (0 to {totalPoints})
-              </label>
-
-              <input
-                type="number"
-                min="0"
-                max={totalPoints}
-                value={bidPoints}
-                onChange={(e) => setBidPoints(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                className="w-full bg-[#110515] border border-[#855AB4]/40 rounded-xl px-4 py-3 font-mono text-lg font-bold text-white focus:outline-none focus:border-[#B26FCB]"
-              />
-
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBidPoints(Math.floor(totalPoints * 0.25))}
-                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
-                >
-                  25%
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBidPoints(Math.floor(totalPoints * 0.50))}
-                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
-                >
-                  50%
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBidPoints(totalPoints)}
-                  className="font-mono text-xs text-zinc-300 hover:text-[#B26FCB] py-2 border border-[#855AB4]/30 rounded-lg hover:bg-[#221545]/80"
-                >
-                  Max
-                </button>
-              </div>
+            <div className="rounded-2xl border border-[#B26FCB]/30 bg-[#68388D]/15 p-4">
+              <span className="block font-mono text-[10px] uppercase tracking-widest text-[#B26FCB]">Allocation priority</span>
+              <span className="mt-1 block font-mono text-lg font-bold text-white">Your full quiz score: {formatPoints(totalPoints)} PTS</span>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">There is no point-spending step. Submit your complete preference order when you are ready.</p>
             </div>
 
-            {/* Action Submit */}
-            <button
-              type="submit"
-              disabled={loading || !selectedThemeId}
-              className="w-full bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] py-4 rounded-full transition-all active:scale-95 shadow-[0_0_30px_rgba(178,111,203,0.4)] disabled:bg-zinc-800 disabled:text-zinc-600 flex items-center justify-center gap-2 border border-[#B26FCB]/40"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>PROCESSING...</span>
-                </>
-              ) : (
-                <>
-                  <span>CONFIRM THEME BID</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+            <button type="submit" disabled={loading || publicThemes.length === 0} className="flex w-full items-center justify-center gap-2 rounded-full border border-[#B26FCB]/40 bg-[#68388D] py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_30px_rgba(178,111,203,0.35)] transition hover:bg-[#855AB4] disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-600">
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving preferences…</> : <><span>{existingBid ? 'Update preferences' : 'Submit preferences'}</span><ArrowRight className="h-4 w-4" /></>}
             </button>
 
-            {/* Rules Info */}
-            <div className="rounded-2xl border border-[#855AB4]/25 bg-[#110515]/60 p-4 font-mono text-[11px] text-zinc-400 space-y-1.5">
-              <div className="flex items-center gap-1.5 text-[#B26FCB] font-bold">
-                <Info className="h-3.5 w-3.5" />
-                <span>Priority Tuple Hierarchy:</span>
-              </div>
-              <p className="text-zinc-400 text-[10px] leading-relaxed">
-                1. Quiz Performance (Desc) &bull; 2. Bid Points (Desc) &bull; 3. Submission Time (Asc)
-              </p>
+            <div className="rounded-2xl border border-[#855AB4]/25 bg-[#110515]/55 p-4 text-[11px] leading-relaxed text-zinc-400">
+              <div className="mb-1.5 flex items-center gap-1.5 font-mono font-bold text-[#B26FCB]"><Info className="h-3.5 w-3.5" /> How allocation works</div>
+              Teams are reviewed by quiz score, then by submission time for score ties. Your ranked list is checked in order against available seats.
             </div>
           </div>
-        </div>
+        </aside>
 
-        {/* Right Themes Selection Wing (8 Cols) */}
-        <div className="lg:col-span-8 space-y-6">
-          <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 block">
-            Select 1 of 4 Revealed Themes
-          </span>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {publicThemes.map((theme, idx) => {
-              const isSelected = selectedThemeId === (theme.id || theme.themeId);
-              return (
-                <label
-                  key={theme.id || theme.themeId || idx}
-                  className={`border rounded-3xl p-8 cursor-pointer transition-all duration-300 block relative space-y-4 ${
-                    isSelected
-                      ? 'border-[#B26FCB] bg-[#68388D]/25 shadow-[0_0_35px_rgba(178,111,203,0.25)]'
-                      : 'border-[#855AB4]/25 bg-[#221545]/50 hover:border-[#B26FCB]/50 hover:bg-[#221545]/70'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#B26FCB] uppercase tracking-widest">
-                      THEME 0{theme.themeNumber || idx + 1}
-                    </span>
-                    <input
-                      type="radio"
-                      name="themeSelection"
-                      value={theme.id || theme.themeId}
-                      checked={isSelected}
-                      onChange={() => setSelectedThemeId(theme.id || theme.themeId)}
-                      className="h-4 w-4 accent-[#B26FCB]"
-                    />
-                  </div>
-
-                  <h3 className="font-sans text-2xl font-bold text-white">
-                    {theme.publicName}
-                  </h3>
-
-                  <p className="text-zinc-300 text-sm font-light leading-relaxed">
-                    {theme.publicDescription}
-                  </p>
-
-                  {theme.brief && (
-                    <div className="text-xs text-[#B26FCB]/90 font-light border-l-2 border-[#855AB4] pl-3 py-1 bg-[#110515]/40 rounded-r-lg">
-                      {theme.brief}
-                    </div>
-                  )}
-
-                  <div className="pt-2 border-t border-[#855AB4]/20 flex items-center justify-between font-mono text-[11px] text-zinc-400">
-                    <span>ELIGIBILITY</span>
-                    <span className="text-[#B26FCB] font-medium">{theme.eligibility || "All Teams"}</span>
-                  </div>
-                </label>
-              );
-            })}
+        <section className="space-y-8 lg:col-span-8">
+          <div className="surface-orbit rounded-3xl border border-[#855AB4]/30 p-6 sm:p-8">
+            <div className="mb-5 flex flex-col justify-between gap-2 border-b border-[#855AB4]/20 pb-5 sm:flex-row sm:items-end">
+              <div><h2 className="font-sans text-2xl font-bold text-white">Your ranking</h2><p className="mt-1 text-sm text-zinc-400">Add every theme, then use the arrows to set first through last preference.</p></div>
+              <span className="font-mono text-xs uppercase tracking-widest text-[#B26FCB]">{preferenceIds.length === publicThemes.length ? 'Ranking complete' : `${publicThemes.length - preferenceIds.length} left to rank`}</span>
+            </div>
+            <div aria-live="polite" className="space-y-3">
+              {rankedThemes.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-[#855AB4]/40 px-5 py-10 text-center"><CircleDashed className="mx-auto mb-3 h-6 w-6 text-[#B26FCB]" /><p className="text-sm text-zinc-400">Choose themes below to build your ranking.</p></div>
+              ) : rankedThemes.map((theme, index) => (
+                <div key={getThemeId(theme)} className="flex items-center gap-3 rounded-2xl border border-[#855AB4]/30 bg-[#110515]/60 p-3 sm:p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#B26FCB]/40 bg-[#68388D]/35 font-mono text-sm font-bold text-white">{index + 1}</div>
+                  <GripVertical className="hidden h-4 w-4 text-zinc-600 sm:block" />
+                  <div className="min-w-0 flex-1"><p className="truncate font-sans text-sm font-bold text-white">{theme.publicName || theme.name}</p><p className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-500">Theme {theme.themeNumber || index + 1} · {theme.seatCapacity || theme.capacity || '—'} seats</p></div>
+                  <div className="flex gap-1"><button type="button" onClick={() => movePreference(index, -1)} disabled={index === 0} aria-label={`Move ${theme.publicName || theme.name} up`} className="rounded-lg p-2 text-zinc-400 transition hover:bg-white/5 hover:text-white disabled:opacity-30"><ArrowUp className="h-4 w-4" /></button><button type="button" onClick={() => movePreference(index, 1)} disabled={index === rankedThemes.length - 1} aria-label={`Move ${theme.publicName || theme.name} down`} className="rounded-lg p-2 text-zinc-400 transition hover:bg-white/5 hover:text-white disabled:opacity-30"><ArrowDown className="h-4 w-4" /></button></div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+
+          <div className="space-y-4">
+            <div><h2 className="font-sans text-2xl font-bold text-white">Revealed themes</h2><p className="mt-1 text-sm text-zinc-400">Select each card once. Seats are configured by the administrator.</p></div>
+            {publicThemes.length === 0 ? <div className="rounded-3xl border border-dashed border-[#855AB4]/35 p-10 text-center text-sm text-zinc-400">No themes have been revealed yet.</div> : (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {publicThemes.map((theme, index) => {
+                  const themeId = getThemeId(theme);
+                  const rank = preferenceIds.indexOf(themeId);
+                  const selected = rank >= 0;
+                  return (
+                    <button key={themeId || index} type="button" onClick={() => addOrRemoveTheme(themeId)} aria-pressed={selected} className={`group relative min-h-64 rounded-3xl border p-6 text-left transition sm:p-7 ${selected ? 'border-[#B26FCB] bg-[#68388D]/25 shadow-[0_0_30px_rgba(178,111,203,0.18)]' : 'border-[#855AB4]/25 bg-[#221545]/50 hover:border-[#B26FCB]/55 hover:bg-[#221545]/75'}`}>
+                      <div className="mb-5 flex items-center justify-between"><span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#B26FCB]">Theme {String(theme.themeNumber || index + 1).padStart(2, '0')}</span><span className={`rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${selected ? 'border-[#B26FCB]/45 bg-[#68388D]/60 text-white' : 'border-[#855AB4]/30 text-zinc-400'}`}>{selected ? `Rank ${rank + 1}` : 'Add to ranking'}</span></div>
+                      <h3 className="font-sans text-xl font-bold text-white">{theme.publicName || theme.name}</h3>
+                      <p className="mt-3 text-sm font-light leading-relaxed text-zinc-300">{theme.publicDescription || theme.description || 'Challenge brief will be available here.'}</p>
+                      <div className="absolute bottom-6 left-6 right-6 flex items-center gap-2 border-t border-[#855AB4]/20 pt-4 font-mono text-[11px] text-zinc-400"><UsersRound className="h-3.5 w-3.5 text-[#B26FCB]" />{theme.seatCapacity || theme.capacity || '—'} team seat{Number(theme.seatCapacity || theme.capacity) === 1 ? '' : 's'}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
       </form>
     </div>
   );

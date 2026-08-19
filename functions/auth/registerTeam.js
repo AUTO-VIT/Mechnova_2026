@@ -43,8 +43,8 @@ async function registerTeamHandler(data, context, admin) {
   }
 
   for (const m of members) {
-    if (!m.name || !m.email) {
-      throw new HttpsError("invalid-argument", "Every team member must provide a name and email.");
+    if (!m.name || !m.email || !m.registrationProofUrl) {
+      throw new HttpsError("invalid-argument", "Every team member must provide a name, email, and registration proof link.");
     }
   }
 
@@ -96,7 +96,7 @@ async function registerTeamHandler(data, context, admin) {
       name: m.name.trim(),
       email: m.email.trim(),
       phone: m.phone ? m.phone.trim() : "",
-      role: m.role || "Member",
+      registrationProofUrl: m.registrationProofUrl.trim(),
     })),
     status: "APPROVED",
     createdAtMs: nowMs,

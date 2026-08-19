@@ -1,98 +1,167 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper Functions
-    function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
-    }
     function isAuthenticated() {
       return request.auth != null;
     }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
     function isTeam(teamId) {
       return isAuthenticated() && request.auth.uid == teamId;
     }
 
-    // Default Deny
+    function eventBiddingIsOpen(eventId) {
+      return exists(/databases/$(database)/documents/events/$(eventId)) &&
+        get(/databases/$(database)/documents/events/$(eventId)).data.biddingOpen == true;
+    }
+
+    function publicThemeIsVisible(eventId, themeId) {
+      return exists(/databases/$(database)/documents/themesPublic/$(eventId)/items/$(themeId)) &&
+        get(/databases/$(database)/documents/themesPublic/$(eventId)/items/$(themeId)).data.visible == true;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Public Events & CMS
+    match /admins/{uid} {
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == uid);
+      // Bootstrap this document from the Firebase Console only. Public clients
+      // must never be able to grant themselves administrator access.
+      allow create, update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
     match /events/{eventId} {
       allow read: if true;
       allow write: if isAdmin();
-      
+
       match /publicContent/{pageId} {
-        allow read: if resource.data.published == true || isAdmin();
+        allow read: if true;
         allow write: if isAdmin();
       }
+
       match /adminSettings/runtime {
         allow read, write: if isAdmin();
       }
     }
 
-    // Team Profiles
     match /teams/{teamId} {
-      allow read: if isAdmin() || isTeam(teamId) || (isAuthenticated() && resource.data.authUid == request.auth.uid);
-      allow write: if false; // All creation/updates via Cloud Functions
+      allow read: if isAdmin() || isTeam(teamId);
+      allow create: if isTeam(teamId) &&
+        request.resource.data.teamId == teamId &&
+        request.resource.data.authUid == request.auth.uid;
+      allow update: if isAdmin() || (isTeam(teamId) &&
+        request.resource.data.teamId == teamId &&
+        request.resource.data.authUid == resource.data.authUid);
+      allow delete: if isAdmin();
     }
 
-    // Team Credentials (Admin Only - raw pass keys never stored)
     match /teamCredentials/{teamId} {
       allow read, write: if isAdmin();
     }
 
-    // Quizzes (Sanitized metadata)
     match /quizzes/{quizId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
-      
+
       match /questions/{questionId} {
-        allow read, write: if isAdmin(); // Raw questions with answerKey are admin-only
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
       }
     }
 
-    // Quiz Sessions & Answers
-    match /quizSessions/{sessionId} {
-      allow read: if isAuthenticated() && (resource.data.teamId == request.auth.uid || isAdmin());
-      allow write: if false; // Server authoritative only
-      
-      match /answers/{attemptId} {
-        allow read: if isAuthenticated() && (get(/databases/$(database)/documents/quizSessions/$(sessionId)).data.teamId == request.auth.uid || isAdmin());
-        allow write: if false;
+    match /quizSessions/{teamId} {
+      allow read: if isAdmin() || isTeam(teamId);
+      allow create: if isAdmin() || (isTeam(teamId) &&
+        request.resource.data.teamId == request.auth.uid);
+      allow update: if isAdmin() || (isTeam(teamId) &&
+        resource.data.teamId == request.auth.uid &&
+        request.resource.data.teamId == resource.data.teamId &&
+        request.resource.data.questionIndex >= resource.data.questionIndex &&
+        request.resource.data.questionIndex <= request.resource.data.totalQuestions);
+      allow delete: if isAdmin();
+
+      match /answers/{questionId} {
+        allow read: if isAdmin() || isTeam(teamId);
+        allow create: if isTeam(teamId) &&
+          get(/databases/$(database)/documents/quizSessions/$(teamId)).data.teamId == request.auth.uid &&
+          request.resource.data.questionId == questionId &&
+          request.resource.data.questionIndex is int &&
+          (request.resource.data.selectedOption == null || request.resource.data.selectedOption is int) &&
+          request.resource.data.isCorrect is bool &&
+          request.resource.data.earnedPoints is int &&
+          request.resource.data.submittedAt == request.time;
+        allow update, delete: if false;
       }
     }
 
-    // Scores
     match /scores/{teamId} {
-      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
-      allow write: if false;
+      allow read: if isAdmin() || isTeam(teamId);
+      allow create: if isTeam(teamId) &&
+        request.resource.data.teamId == teamId &&
+        request.resource.data.totalPoints == 0 &&
+        request.resource.data.answeredCount == 0 &&
+        request.resource.data.correctCount == 0 &&
+        request.resource.data.finalized == false;
+      allow update: if isAdmin() || (isTeam(teamId) &&
+        request.resource.data.teamId == resource.data.teamId &&
+        request.resource.data.answeredCount == resource.data.answeredCount + 1 &&
+        ((request.resource.data.totalPoints == resource.data.totalPoints &&
+          request.resource.data.correctCount == resource.data.correctCount) ||
+         (request.resource.data.totalPoints == resource.data.totalPoints + 100 &&
+          request.resource.data.correctCount == resource.data.correctCount + 1)) &&
+        request.resource.data.finalized is bool);
+      allow delete: if isAdmin();
     }
 
-    // Themes (Private vs Public)
     match /themesPrivate/{eventId}/items/{themeId} {
-      allow read, write: if isAdmin(); // Strictly locked from participants
+      allow read, write: if isAdmin();
     }
+
     match /themesPublic/{eventId}/items/{themeId} {
-      allow read: if resource.data.visible == true || isAdmin();
+      allow read: if isAdmin() || resource.data.visible == true;
       allow write: if isAdmin();
     }
 
-    // Bids & Allocations
     match /bids/{eventId}/items/{teamId} {
-      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
-      allow write: if false;
-    }
-    match /allocations/{eventId}/items/{teamId} {
-      allow read: if isAuthenticated() && (request.auth.uid == teamId || isAdmin());
-      allow write: if false;
+      allow read: if isAdmin() || isTeam(teamId);
+      allow create: if isTeam(teamId) && eventBiddingIsOpen(eventId) &&
+        publicThemeIsVisible(eventId, request.resource.data.selectedThemeId) &&
+        request.resource.data.teamId == teamId &&
+        request.resource.data.preferenceIds is list &&
+        request.resource.data.preferenceIds.size() > 0 &&
+        request.resource.data.preferenceIds[0] == request.resource.data.selectedThemeId &&
+        request.resource.data.bidPoints is int &&
+        request.resource.data.bidPoints == get(/databases/$(database)/documents/scores/$(teamId)).data.totalPoints &&
+        request.resource.data.scoreSnapshot == get(/databases/$(database)/documents/scores/$(teamId)).data.totalPoints;
+      allow update: if isTeam(teamId) && eventBiddingIsOpen(eventId) &&
+        publicThemeIsVisible(eventId, request.resource.data.selectedThemeId) &&
+        request.resource.data.teamId == teamId &&
+        request.resource.data.preferenceIds is list &&
+        request.resource.data.preferenceIds.size() > 0 &&
+        request.resource.data.preferenceIds[0] == request.resource.data.selectedThemeId &&
+        request.resource.data.bidPoints is int &&
+        request.resource.data.bidPoints == get(/databases/$(database)/documents/scores/$(teamId)).data.totalPoints &&
+        request.resource.data.scoreSnapshot == get(/databases/$(database)/documents/scores/$(teamId)).data.totalPoints;
+      allow delete: if false;
     }
 
-    // Audit Logs
+    match /allocations/{eventId}/items/{teamId} {
+      allow read: if isAdmin() || isTeam(teamId);
+      allow write: if isAdmin();
+    }
+
     match /auditLogs/{eventId}/items/{logId} {
-      allow read: if isAdmin();
-      allow write: if false; // Cloud Functions append-only
+      allow read, write: if isAdmin();
     }
   }
 }

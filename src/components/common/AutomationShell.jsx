@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, UserCheck, Shield, Menu, X } from 'lucide-react';
-import ParticleCanvas from './ParticleCanvas';
+
+const ParticleCanvas = lazy(() => import('./ParticleCanvas'));
 
 export function AutomationShell({ children }) {
   const { currentUser, isAdmin, teamData, logout } = useAuth();
@@ -21,9 +22,11 @@ export function AutomationShell({ children }) {
   }, []);
 
   const navItems = [
-    { label: 'REGISTRATION PORTAL', path: '/register' },
-    { label: 'QUIZ PORTAL', path: '/quiz' },
-    { label: 'BIDDING PORTAL', path: '/bidding' }
+    { label: 'HOME', path: '/' },
+    { label: 'THEMES', path: '/themes' },
+    { label: 'QUIZ', path: '/quiz' },
+    { label: 'BIDDING', path: '/bidding' },
+    { label: 'RESULTS', path: '/results' }
   ];
 
 
@@ -34,9 +37,11 @@ export function AutomationShell({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#110515] text-zinc-100 font-sans flex flex-col antialiased selection:bg-[#B26FCB] selection:text-black relative w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#110515] text-zinc-100 font-sans flex flex-col antialiased selection:bg-[#B26FCB] selection:text-[#110515] relative w-full overflow-x-hidden">
       {/* 3D Cosmic Wireframe & Stardust Canvas */}
-      <ParticleCanvas />
+      <Suspense fallback={null}>
+        <ParticleCanvas />
+      </Suspense>
 
       {/* Floating Header Across 1080p Screen */}
       <header
@@ -104,6 +109,7 @@ export function AutomationShell({ children }) {
                 <button
                   onClick={handleLogout}
                   title="Sign Out"
+                  aria-label="Sign out"
                   className="h-8 w-8 rounded-full border border-[#855AB4]/30 bg-[#221545]/40 flex items-center justify-center text-zinc-400 hover:text-[#B26FCB] hover:border-[#B26FCB]/50 transition-all duration-150 active:scale-95"
                 >
                   <LogOut className="h-3.5 w-3.5" />
@@ -114,6 +120,8 @@ export function AutomationShell({ children }) {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
               className="lg:hidden text-zinc-400 hover:text-white p-1"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

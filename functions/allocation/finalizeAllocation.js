@@ -20,17 +20,13 @@ async function finalizeAllocationHandler(data, context, admin) {
     ...d.data(),
   }));
 
-  // Priority Tuple Comparator: (scoreSnapshot desc, bidPoints desc, submittedAtMs asc, tieBreakValue asc)
+  // Priority Tuple Comparator: (scoreSnapshot desc, submittedAtMs asc, tieBreakValue asc)
   const priorityComparator = (a, b) => {
     // 1. scoreSnapshot Descending
     if ((b.scoreSnapshot || 0) !== (a.scoreSnapshot || 0)) {
       return (b.scoreSnapshot || 0) - (a.scoreSnapshot || 0);
     }
-    // 2. bidPoints Descending
-    if ((b.bidPoints || 0) !== (a.bidPoints || 0)) {
-      return (b.bidPoints || 0) - (a.bidPoints || 0);
-    }
-    // 3. submittedAtMs Ascending (earlier submission wins)
+    // 2. submittedAtMs Ascending (earlier submission wins)
     if ((a.submittedAtMs || 0) !== (b.submittedAtMs || 0)) {
       return (a.submittedAtMs || 0) - (b.submittedAtMs || 0);
     }
@@ -66,7 +62,7 @@ async function finalizeAllocationHandler(data, context, admin) {
         themeId: bid.selectedThemeId,
         rank,
         scoreSnapshot: bid.scoreSnapshot || 0,
-        bidPoints: bid.bidPoints || 0,
+        bidPoints: bid.scoreSnapshot || 0,
         submittedAtMs: bid.submittedAtMs || nowMs,
         finalizedAtMs: nowMs,
       };

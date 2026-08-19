@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { subscribeToQuizQuestions, saveQuizQuestion, deleteQuizQuestion } from '../../services/firestoreService';
+import { subscribeToQuizQuestions, ensureQuizQuestionOrder, saveQuizQuestion, deleteQuizQuestion } from '../../services/firestoreService';
 import { ControlPanel } from '../common/ControlPanel';
 import { StatusBadge } from '../common/StatusBadge';
 import { Plus, Edit2, Trash2, CheckCircle, HelpCircle } from 'lucide-react';
@@ -19,6 +19,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
   useEffect(() => {
     const unsub = subscribeToQuizQuestions(quizId, (qs) => {
       setQuestions(qs || []);
+      ensureQuizQuestionOrder(quizId, qs).catch((err) => console.warn('Quiz order sync notice:', err.message));
     });
     return () => unsub();
   }, [quizId]);
@@ -42,7 +43,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
     setOpt1(options[1] || '');
     setOpt2(options[2] || '');
     setOpt3(options[3] || '');
-    setAnswerKey(typeof q.answerKey === 'number' ? q.answerKey : 0);
+    setAnswerKey(typeof q.answerKey === 'number' ? q.answerKey : (typeof q.correctOption === 'number' ? q.correctOption : 0));
     setCategory(q.category || 'Robotics & Kinematics');
   };
 
@@ -56,16 +57,19 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
     setLoading(true);
     try {
       const qId = editingQ.id || `q_${Date.now()}`;
+      const correctOptionValue = parseInt(answerKey, 10);
       await saveQuizQuestion(quizId, qId, {
         order: editingQ.order || questions.length + 1,
         prompt: prompt.trim(),
         options: [opt0.trim(), opt1.trim(), opt2.trim(), opt3.trim()],
-        answerKey: parseInt(answerKey, 10),
+        answerKey: correctOptionValue,
+        correctOption: correctOptionValue,
         category: category.trim()
       });
       setEditingQ(null);
     } catch (err) {
-      console.error(err);
+      console.error("Save question error:", err);
+      window.alert(`Failed to save question: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -84,7 +88,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
         <button
           type="button"
           onClick={handleOpenNew}
-          className="flex items-center gap-1 bg-red-600 px-3 py-1.5 font-mono text-xs font-bold text-white hover:bg-red-500 active:scale-[0.97]"
+          className="flex items-center gap-1 bg-orange-600 px-3 py-1.5 font-mono text-xs font-bold text-white hover:bg-orange-500 active:scale-[0.97]"
         >
           <Plus className="h-4 w-4" />
           <span>ADD QUESTION</span>
@@ -101,19 +105,23 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
             {questions.map((q, idx) => (
               <div key={q.id} className="border border-zinc-800 bg-zinc-900/60 p-4 font-mono space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-red-400">
+                  <span className="font-bold text-xs text-orange-400">
                     Q0{idx + 1} &bull; [{q.category || 'General'}]
                   </span>
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
+                      aria-label={`Edit question ${idx + 1}`}
                       onClick={() => handleOpenEdit(q)}
                       className="text-zinc-400 hover:text-white"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
+                      type="button"
+                      aria-label={`Delete question ${idx + 1}`}
                       onClick={() => handleDelete(q.id)}
-                      className="text-zinc-500 hover:text-red-400"
+                      className="text-zinc-500 hover:text-orange-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -127,12 +135,12 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                     <div
                       key={oIdx}
                       className={`p-2 border ${
-                        q.answerKey === oIdx
+                        (q.answerKey ?? q.correctOption) === oIdx
                           ? 'border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold'
-                          : 'border-zinc-800 bg-black text-zinc-400'
+                          : 'border-zinc-800 bg-[#0a030d] text-zinc-400'
                       }`}
                     >
-                      [{['A', 'B', 'C', 'D'][oIdx]}] {opt} {q.answerKey === oIdx ? '(ANSWER KEY)' : ''}
+                      [{['A', 'B', 'C', 'D'][oIdx]}] {opt} {(q.answerKey ?? q.correctOption) === oIdx ? '(ANSWER KEY)' : ''}
                     </div>
                   ))}
                 </div>
@@ -144,10 +152,10 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
 
       {/* Add / Edit Question Modal */}
       {editingQ && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div className="w-full max-w-2xl border border-red-600 bg-zinc-950 p-6 space-y-5 font-mono">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a030d]/80 p-4 backdrop-blur-md">
+          <div className="w-full max-w-2xl border border-orange-600 bg-zinc-950 p-6 space-y-5 font-mono">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-bold text-base text-red-400">
+              <h3 className="font-bold text-base text-orange-400">
                 {editingQ.id ? "EDIT QUESTION ITEM" : "CREATE NEW QUESTION"}
               </h3>
               <button onClick={() => setEditingQ(null)} className="text-zinc-500 hover:text-white">✕</button>
@@ -160,7 +168,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-zinc-700 bg-black px-3 py-1.5 text-xs text-white"
+                  className="w-full border border-zinc-700 bg-[#0a030d] px-3 py-1.5 text-xs text-white"
                 />
               </div>
 
@@ -170,7 +178,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                   rows="3"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full border border-zinc-700 bg-black p-3 text-xs text-white"
+                  className="w-full border border-zinc-700 bg-[#0a030d] p-3 text-xs text-white"
                   required
                 />
               </div>
@@ -182,7 +190,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                     type="text"
                     value={opt0}
                     onChange={(e) => setOpt0(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black px-3 py-1.5 text-xs text-white"
+                    className="w-full border border-zinc-700 bg-[#0a030d] px-3 py-1.5 text-xs text-white"
                     required
                   />
                 </div>
@@ -192,7 +200,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                     type="text"
                     value={opt1}
                     onChange={(e) => setOpt1(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black px-3 py-1.5 text-xs text-white"
+                    className="w-full border border-zinc-700 bg-[#0a030d] px-3 py-1.5 text-xs text-white"
                     required
                   />
                 </div>
@@ -202,7 +210,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                     type="text"
                     value={opt2}
                     onChange={(e) => setOpt2(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black px-3 py-1.5 text-xs text-white"
+                    className="w-full border border-zinc-700 bg-[#0a030d] px-3 py-1.5 text-xs text-white"
                     required
                   />
                 </div>
@@ -212,7 +220,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                     type="text"
                     value={opt3}
                     onChange={(e) => setOpt3(e.target.value)}
-                    className="w-full border border-zinc-700 bg-black px-3 py-1.5 text-xs text-white"
+                    className="w-full border border-zinc-700 bg-[#0a030d] px-3 py-1.5 text-xs text-white"
                     required
                   />
                 </div>
@@ -223,7 +231,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                 <select
                   value={answerKey}
                   onChange={(e) => setAnswerKey(parseInt(e.target.value, 10))}
-                  className="w-full border border-emerald-500/50 bg-black px-3 py-2 text-xs text-emerald-300 font-bold"
+                  className="w-full border border-emerald-500/50 bg-[#0a030d] px-3 py-2 text-xs text-emerald-300 font-bold"
                 >
                   <option value={0}>OPTION [ A ] - {opt0 || "First Option"}</option>
                   <option value={1}>OPTION [ B ] - {opt1 || "Second Option"}</option>
@@ -243,7 +251,7 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-red-600 px-5 py-2 text-xs font-bold text-white hover:bg-red-500"
+                  className="bg-orange-600 px-5 py-2 text-xs font-bold text-white hover:bg-orange-500"
                 >
                   SAVE QUESTION ITEM
                 </button>

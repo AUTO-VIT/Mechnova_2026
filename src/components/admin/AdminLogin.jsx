@@ -59,8 +59,8 @@ export function AdminLogin() {
 
       <form onSubmit={handleSubmit} className="border border-[#855AB4]/30 rounded-3xl p-8 bg-[#221545]/60 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(104,56,141,0.25)]">
         {error && (
-          <div className="border border-red-500/30 bg-red-500/10 p-3.5 rounded-xl font-mono text-xs text-red-300 flex items-center gap-2.5">
-            <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+          <div className="border border-orange-500/30 bg-orange-500/10 p-3.5 rounded-xl font-mono text-xs text-orange-300 flex items-center gap-2.5">
+            <ShieldAlert className="h-4 w-4 text-orange-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}

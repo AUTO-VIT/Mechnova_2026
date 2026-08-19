@@ -23,16 +23,31 @@ export function QuizEngine() {
     submitAnswerChoice
   } = useQuizSession(uid);
 
+  const [quizAlreadyDone, setQuizAlreadyDone] = useState(false);
+
   const [selectedOption, setSelectedOption] = useState(null);
   const [lastSubmissionResult, setLastSubmissionResult] = useState(null);
   const [localPhase, setLocalPhase] = useState('READ_ONLY');
   const [localDeadline, setLocalDeadline] = useState(null);
 
+  // Check if team already completed the quiz (finalized score)
   useEffect(() => {
-    if (!session && uid) {
-      startQuiz(eventData?.id || 'default-event', eventData?.quizId || 'default-quiz').catch(console.error);
+    if (teamScore?.finalized === true) {
+      setQuizAlreadyDone(true);
     }
-  }, [uid, session, startQuiz, eventData]);
+  }, [teamScore]);
+
+  useEffect(() => {
+    if (!session && uid && !quizAlreadyDone) {
+      startQuiz(eventData?.id || 'default-event', eventData?.quizId || 'default-quiz')
+        .then(res => {
+          if (res?.alreadyCompleted) {
+            setQuizAlreadyDone(true);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [uid, session, startQuiz, eventData, quizAlreadyDone]);
 
   useEffect(() => {
     if (session) {
@@ -93,18 +108,8 @@ export function QuizEngine() {
     }
   };
 
-  if (loading || !session) {
-    return (
-      <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#B26FCB] mx-auto" />
-        <h2 className="font-sans text-xl font-bold text-white">Initializing Engine</h2>
-        <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; question stream...</p>
-      </div>
-    );
-  }
-
-  // Quiz Completed View
-  if (session.status === 'COMPLETED') {
+  // Show completed screen if team already finished the quiz
+  if (quizAlreadyDone || (session && session.status === 'COMPLETED')) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-10 text-center">
         <div className="h-20 w-20 rounded-full border border-[#B26FCB]/40 bg-[#221545]/80 flex items-center justify-center mx-auto text-[#B26FCB] shadow-[0_0_30px_rgba(178,111,203,0.3)]">
@@ -119,7 +124,7 @@ export function QuizEngine() {
             Quiz Phase Finalized
           </h1>
           <p className="text-zinc-300 text-base font-light max-w-xl mx-auto">
-            Your results have been authenticated and recorded in the immutable score ledger.
+            Your team has already completed the quiz evaluation. Results have been recorded in the immutable score ledger. Each team may only attempt the quiz once.
           </p>
         </div>
 
@@ -138,12 +143,12 @@ export function QuizEngine() {
               ANSWERED
             </span>
             <span className="font-mono text-3xl sm:text-5xl font-bold text-zinc-300">
-              {teamScore?.answeredCount || 0} <span className="text-sm text-zinc-500 font-normal">/ {session.totalQuestions}</span>
+              {teamScore?.answeredCount || 0}
             </span>
           </div>
           <div>
             <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest block mb-2">
-              ACCURACY
+              CORRECT
             </span>
             <span className="font-mono text-3xl sm:text-5xl font-bold text-[#B26FCB]">
               {teamScore?.correctCount || 0}
@@ -168,6 +173,16 @@ export function QuizEngine() {
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (loading || !session) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-24 text-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[#B26FCB] mx-auto" />
+        <h2 className="font-sans text-xl font-bold text-white">Initializing Engine</h2>
+        <p className="text-zinc-400 text-xs font-mono">Synchronizing authoritative time &amp; question stream...</p>
       </div>
     );
   }
@@ -248,8 +263,8 @@ export function QuizEngine() {
         {/* Right Main Arena (8 Cols) */}
         <div className="lg:col-span-8 space-y-8">
           {error && (
-            <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-2xl font-mono text-xs text-red-300 flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0" />
+            <div className="border border-orange-500/30 bg-orange-500/10 p-4 rounded-2xl font-mono text-xs text-orange-300 flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-orange-400 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}

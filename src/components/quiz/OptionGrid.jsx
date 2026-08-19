@@ -67,7 +67,7 @@ export function OptionGrid({
               if (isCorrect === true) {
                 cardStyle = 'border-emerald-500 bg-emerald-500/15 text-white';
               } else if (isCorrect === false) {
-                cardStyle = 'border-red-600 bg-red-600/20 text-white';
+                cardStyle = 'border-orange-600 bg-orange-600/20 text-white';
               }
             }
 

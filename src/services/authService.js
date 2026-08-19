@@ -3,7 +3,7 @@ import {
   signOut,
   onIdTokenChanged
 } from 'firebase/auth';
-import { auth, db } from './firebase';
+import { auth, db, isDummyConfig } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 const ADMIN_STORAGE_KEY = 'mechathon_admin_session';
@@ -40,38 +40,33 @@ export async function signInWithTeamCode(teamCode, password) {
   }
 
   sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+  // Legacy builds stored unauthenticated demo identities here. Never reuse them.
+  sessionStorage.removeItem(TEAM_STORAGE_KEY);
   const cleanCode = teamCode.trim().toUpperCase();
   const cleanPass = password.trim();
 
-  // 1. Try Firebase Auth
+  if (isDummyConfig) {
+    throw new Error('Firebase is not configured. Team login is unavailable until Firebase credentials are set.');
+  }
+
   try {
     const syntheticEmail = formatTeamEmail(cleanCode);
     const userCredential = await signInWithEmailAndPassword(auth, syntheticEmail, cleanPass);
     sessionStorage.removeItem(TEAM_STORAGE_KEY);
     return userCredential.user;
   } catch (err) {
-    console.warn("Firebase Auth direct team sign-in fallback:", err.message);
+    console.warn("Firebase Auth team sign-in failed:", err.message);
+    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      throw new Error('Invalid Team Code or Passkey. Use the credentials generated during team registration.');
+    }
+    throw new Error(err.message || 'Team authentication failed.');
   }
-
-  // 2. Authoritative Local Team Session Fallback
-  const teamSession = {
-    uid: `team_${cleanCode.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
-    teamCode: cleanCode,
-    email: formatTeamEmail(cleanCode),
-    displayName: `Team ${cleanCode}`,
-    role: 'TEAM',
-    isAdmin: false
-  };
-
-  sessionStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(teamSession));
-  window.dispatchEvent(new Event('storage'));
-  return teamSession;
 }
 
 /**
  * Sign in Admin with Email/Login and Password
- * Supports both live Firebase Auth accounts created in Firebase Console
- * AND master administrator credentials (Smec@clubs26 / Smec@2026).
+ * Administrators are real Firebase Authentication users with an accompanying
+ * admins/{uid} Firestore role document. No credentials are embedded in the client.
  */
 export async function signInWithAdminCredentials(login, password) {
   if (!login || !password) {
@@ -79,77 +74,46 @@ export async function signInWithAdminCredentials(login, password) {
   }
 
   const rawLogin = login.trim();
-  const cleanLogin = rawLogin.toLowerCase();
   const cleanPass = password.trim();
 
   // 1. Try direct live Firebase Auth sign-in first (for accounts created in Firebase Console)
-  try {
-    const emailToUse = rawLogin.includes('@') && rawLogin.includes('.') ? rawLogin : normalizeAdminEmail(rawLogin);
-    const userCredential = await signInWithEmailAndPassword(auth, emailToUse, cleanPass);
-    
-    // Automatically grant Admin session for successfully authenticated admin console users
-    const adminSession = {
-      uid: userCredential.user.uid,
-      email: userCredential.user.email || rawLogin,
-      displayName: userCredential.user.displayName || 'Firebase Console Administrator',
-      isAdmin: true,
-      role: 'ADMIN',
-      token: await userCredential.user.getIdToken().catch(() => 'firebase_admin_token')
-    };
-    
-    sessionStorage.removeItem(TEAM_STORAGE_KEY);
-    sessionStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminSession));
-    window.dispatchEvent(new Event('storage'));
-    return adminSession;
-  } catch (firebaseErr) {
-    console.warn("Firebase Auth live sign-in note:", firebaseErr.message);
+  if (!isDummyConfig) {
+    try {
+      const emailToUse = rawLogin.includes('@') && rawLogin.includes('.') ? rawLogin : normalizeAdminEmail(rawLogin);
+      const userCredential = await signInWithEmailAndPassword(auth, emailToUse, cleanPass);
+      
+      const adminSnap = await getDoc(doc(db, 'admins', userCredential.user.uid));
+      if (!adminSnap.exists()) {
+        await signOut(auth);
+        throw new Error('This account is not authorized for administrator access.');
+      }
+
+      // Automatically grant Admin session for successfully authenticated admin console users
+      const adminSession = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email || rawLogin,
+        displayName: userCredential.user.displayName || 'Firebase Console Administrator',
+        isAdmin: true,
+        role: 'ADMIN',
+        token: await userCredential.user.getIdToken().catch(() => 'firebase_admin_token')
+      };
+      
+      sessionStorage.removeItem(TEAM_STORAGE_KEY);
+      sessionStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminSession));
+      window.dispatchEvent(new Event('storage'));
+      return adminSession;
+    } catch (firebaseErr) {
+      console.warn("Firebase Auth live sign-in note:", firebaseErr.message);
+      if (firebaseErr.code === 'permission-denied') {
+        throw new Error('Firebase Auth succeeded, but this account cannot read its admin record. Deploy the current Firestore rules and create admins/{uid}.');
+      }
+      if (firebaseErr.message === 'This account is not authorized for administrator access.') {
+        throw firebaseErr;
+      }
+    }
   }
 
-  // 2. Root Administrator Master Credentials Verification
-  const isMasterLogin = (
-    cleanLogin === 'smec@clubs26' ||
-    cleanLogin === 'smec@clubs26.internal' ||
-    cleanLogin === 'smec@clubs26.com' ||
-    cleanLogin === 'smec' ||
-    cleanLogin === 'admin'
-  );
-
-  const isMasterPassword = (
-    cleanPass === 'Smec@2026' ||
-    cleanPass === 'smec@2026' ||
-    cleanPass === 'Smec2026'
-  );
-
-  if (isMasterLogin && isMasterPassword) {
-    sessionStorage.removeItem(TEAM_STORAGE_KEY);
-    const adminSession = {
-      uid: 'admin_smec_root',
-      email: rawLogin,
-      displayName: 'SMEC Root Administrator',
-      isAdmin: true,
-      role: 'ADMIN',
-      token: 'smec_admin_master_token_' + Date.now()
-    };
-    sessionStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(adminSession));
-    window.dispatchEvent(new Event('storage'));
-    return adminSession;
-  }
-
-  // 3. Fallback: If user created credentials in Firebase Console but Firebase Web API key is not yet set in .env
-  // Allow direct sign-in for the custom credentials they set up
-  const customAdminSession = {
-    uid: `admin_${cleanLogin.replace(/[^a-z0-9]/g, '_')}`,
-    email: rawLogin,
-    displayName: 'Authorized Administrator',
-    isAdmin: true,
-    role: 'ADMIN',
-    token: 'custom_admin_session_' + Date.now()
-  };
-
-  sessionStorage.removeItem(TEAM_STORAGE_KEY);
-  sessionStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(customAdminSession));
-  window.dispatchEvent(new Event('storage'));
-  return customAdminSession;
+  throw new Error('Invalid administrator credentials or account is not authorized.');
 }
 
 /**
@@ -208,42 +172,27 @@ export function subscribeToAuthState(callback) {
       return;
     }
 
-    // 2. Check local team session
+    // 2. Clear any legacy local team session. Team access now requires Firebase Auth.
     const localTeam = getActiveTeamSession();
     if (localTeam) {
-      callback({
-        user: localTeam,
-        uid: localTeam.uid,
-        email: localTeam.email,
-        displayName: localTeam.displayName,
-        isAdmin: false,
-        role: 'TEAM'
-      });
-      return;
+      sessionStorage.removeItem(TEAM_STORAGE_KEY);
     }
 
-    // 3. Fallback to Firebase current user or Visitor
+    // 3. Resolve Firebase users against the same admin/team documents used by rules.
     if (auth.currentUser) {
-      auth.currentUser.getIdTokenResult().then(tokenResult => {
-        const isAdmin = tokenResult.claims && tokenResult.claims.admin === true;
-        callback({
-          user: auth.currentUser,
-          uid: auth.currentUser.uid,
-          email: auth.currentUser.email,
-          displayName: auth.currentUser.displayName,
-          isAdmin: true, // Allow direct admin privileges for authenticated console accounts
-          role: 'ADMIN'
-        });
-      }).catch(() => {
-        callback({
-          user: auth.currentUser,
-          uid: auth.currentUser.uid,
-          email: auth.currentUser.email,
-          displayName: auth.currentUser.displayName,
-          isAdmin: true,
-          role: 'ADMIN'
-        });
-      });
+      const user = auth.currentUser;
+      Promise.all([
+        getDoc(doc(db, 'admins', user.uid)),
+        getDoc(doc(db, 'teams', user.uid))
+      ]).then(([adminSnap, teamSnap]) => {
+        if (adminSnap.exists()) {
+          callback({ user, uid: user.uid, email: user.email, displayName: user.displayName, isAdmin: true, role: 'ADMIN' });
+        } else if (teamSnap.exists()) {
+          callback({ user, uid: user.uid, email: user.email, displayName: user.displayName, isAdmin: false, role: 'TEAM' });
+        } else {
+          callback({ user: null, uid: null, role: 'VISITOR', isAdmin: false });
+        }
+      }).catch(() => callback({ user: null, uid: null, role: 'VISITOR', isAdmin: false }));
     } else {
       callback({ user: null, uid: null, role: 'VISITOR', isAdmin: false });
     }
@@ -264,18 +213,7 @@ export function subscribeToAuthState(callback) {
     const teamSession = getActiveTeamSession();
     if (teamSession) return;
 
-    if (user) {
-      callback({
-        user,
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        isAdmin: true,
-        role: 'ADMIN'
-      });
-    } else {
-      callback({ user: null, uid: null, role: 'VISITOR', isAdmin: false });
-    }
+    syncState();
   });
 
   return () => {

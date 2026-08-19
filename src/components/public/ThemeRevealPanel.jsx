@@ -1,7 +1,6 @@
 import React from 'react';
 import { useEvent } from '../../context/EventContext';
-import { Layers, Lock, Sparkles, ArrowUpRight } from 'lucide-react';
-import { formatTimestamp } from '../../utils/formatters';
+import { Layers, Lock, UsersRound } from 'lucide-react';
 
 export function ThemeRevealPanel() {
   const { eventData, publicThemes } = useEvent();
@@ -19,7 +18,7 @@ export function ThemeRevealPanel() {
           Hackathon Challenge Themes
         </h1>
         <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
-          Problem statements and robotics competition domains. Bids are submitted during the allocation phase using earned quiz score points.
+          These challenge briefs are revealed by the administrator. During bidding, teams rank every revealed theme and use their earned quiz points to support their first choice.
         </p>
       </div>
 
@@ -34,7 +33,7 @@ export function ThemeRevealPanel() {
               Themes are currently sealed
             </h2>
             <p className="text-zinc-400 text-sm font-light leading-relaxed">
-              Themes will be revealed prior to the event. Problem briefs are securely isolated in the encrypted backend vault.
+              The administrator will reveal the challenge briefs when the event is ready. Until then, they are visible only in the admin dashboard.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 font-mono text-xs text-[#B26FCB] border border-[#855AB4]/40 px-5 py-2 rounded-full bg-[#221545]/60">
@@ -59,11 +58,11 @@ export function ThemeRevealPanel() {
               </div>
 
               <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
-                {theme.publicName}
+                {theme.publicName || theme.name}
               </h2>
 
               <p className="text-zinc-300 text-sm font-light leading-relaxed">
-                {theme.publicDescription || "Autonomous robotics problem statement and engineering domain specifications."}
+                {theme.publicDescription || theme.description || "Autonomous robotics problem statement and engineering domain specifications."}
               </p>
 
               {theme.brief && (
@@ -75,6 +74,11 @@ export function ThemeRevealPanel() {
               <div className="pt-4 border-t border-[#855AB4]/20 flex items-center justify-between font-mono text-xs text-zinc-400">
                 <span>ELIGIBILITY</span>
                 <span className="text-[#B26FCB] font-medium">{theme.eligibility || "All Registered Teams"}</span>
+              </div>
+
+              <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
+                <UsersRound className="h-3.5 w-3.5 text-[#B26FCB]" />
+                <span>{theme.seatCapacity || theme.capacity || '—'} team seat{Number(theme.seatCapacity || theme.capacity) === 1 ? '' : 's'} available</span>
               </div>
             </div>
           ))}

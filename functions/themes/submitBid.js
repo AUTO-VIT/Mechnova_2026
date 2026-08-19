@@ -8,10 +8,10 @@ async function submitBidHandler(data, context, admin) {
   const teamId = context.auth.uid;
   const db = admin.firestore();
 
-  const { eventId = "default-event", selectedThemeId, bidPoints } = data || {};
+  const { eventId = "default-event", selectedThemeId } = data || {};
 
-  if (!selectedThemeId || typeof bidPoints !== "number" || bidPoints < 0) {
-    throw new HttpsError("invalid-argument", "Valid selectedThemeId and non-negative bidPoints are required.");
+  if (!selectedThemeId) {
+    throw new HttpsError("invalid-argument", "A selectedThemeId is required.");
   }
 
   // Verify event bidding status
@@ -30,13 +30,6 @@ async function submitBidHandler(data, context, admin) {
   const scoreDoc = await db.collection("scores").doc(teamId).get();
   const scoreSnapshot = scoreDoc.exists ? scoreDoc.data().totalPoints || 0 : 0;
 
-  if (bidPoints > scoreSnapshot) {
-    throw new HttpsError(
-      "invalid-argument",
-      `Bid points (${bidPoints}) exceed team score balance (${scoreSnapshot}).`
-    );
-  }
-
   const nowMs = Date.now();
   const bidRef = db.collection("bids").doc(eventId).collection("items").doc(teamId);
 
@@ -48,7 +41,7 @@ async function submitBidHandler(data, context, admin) {
   const bidData = {
     teamId,
     selectedThemeId,
-    bidPoints,
+    bidPoints: scoreSnapshot,
     scoreSnapshot,
     submittedAtMs: nowMs,
     tieBreakValue,

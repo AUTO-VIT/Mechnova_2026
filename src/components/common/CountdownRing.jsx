@@ -20,9 +20,9 @@ export function CountdownRing({
   let glowClass = '';
 
   if (secondsLeft <= 3) {
-    strokeColor = '#ef4444'; // crimson red
-    textColor = 'text-red-500 animate-pulse';
-    glowClass = 'drop-shadow-[0_0_12px_rgba(239,68,68,0.8)]';
+    strokeColor = '#f97316'; // crimson red
+    textColor = 'text-orange-500 animate-pulse';
+    glowClass = 'drop-shadow-[0_0_12px_rgba(249,115,22,0.8)]';
   } else if (secondsLeft <= 6) {
     strokeColor = '#f59e0b'; // amber
     textColor = 'text-amber-400';

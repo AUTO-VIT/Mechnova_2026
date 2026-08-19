@@ -28,7 +28,7 @@ export function QuizPhaseView({
 
         {/* Phase Pill */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
-          <span className={`h-2 w-2 rounded-full ${isReadOnly ? 'bg-red-500 animate-pulse' : 'bg-emerald-400'}`} />
+          <span className={`h-2 w-2 rounded-full ${isReadOnly ? 'bg-orange-500 animate-pulse' : 'bg-emerald-400'}`} />
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-white">
             {isReadOnly ? 'READ ONLY (10S)' : 'ANSWER MODE (10S)'}
           </span>
@@ -39,7 +39,7 @@ export function QuizPhaseView({
           <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
             CURRENT POINTS
           </span>
-          <span className="font-mono text-xl font-bold text-red-400">
+          <span className="font-mono text-xl font-bold text-orange-400">
             {formatPoints(score)} <span className="text-xs text-zinc-500 font-normal">PTS</span>
           </span>
         </div>
@@ -56,7 +56,7 @@ export function QuizPhaseView({
         <div className="h-1.5 w-full bg-white/[0.05] rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-100 ease-linear rounded-full ${
-              isReadOnly ? 'bg-red-500 shadow-[0_0_8px_rgba(220,38,38,0.8)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]'
+              isReadOnly ? 'bg-orange-500 shadow-[0_0_8px_rgba(234,88,12,0.8)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]'
             }`}
             style={{ width: `${progressPercent}%` }}
           />

@@ -3,21 +3,24 @@ import {
   collection,
   onSnapshot,
   query,
+  where,
   orderBy,
   setDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  getDoc,
+  getDocs,
+  writeBatch
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth, isDummyConfig } from './firebase';
 
-const CMS_STORAGE_KEY_PREFIX = 'mechathon_cms_';
 const CONTROLS_STORAGE_KEY = 'mechathon_event_controls';
 
 /**
  * Subscribe to Event status document
  */
 export function subscribeToEvent(eventId = 'default-event', callback) {
-  const getMergedEvent = (remoteData) => {
+  const getMergedEvent = (remoteData, includeLocalControls = false) => {
     let localControls = {};
     try {
       const stored = localStorage.getItem(CONTROLS_STORAGE_KEY);
@@ -33,17 +36,18 @@ export function subscribeToEvent(eventId = 'default-event', callback) {
       themesRevealed: false,
       biddingOpen: false,
       allocationFinalized: false,
+      resultsRevealed: false,
       quizId: "default-quiz"
     };
 
-    return { ...base, ...localControls };
+    return includeLocalControls ? { ...base, ...localControls } : base;
   };
 
   // Initial call with cached/default data
-  callback(getMergedEvent(null));
+  callback(getMergedEvent(null, true));
 
   const handleControlsEvent = () => {
-    callback(getMergedEvent(null));
+    callback(getMergedEvent(null, true));
   };
   window.addEventListener('mechathon_controls_changed', handleControlsEvent);
   window.addEventListener('storage', handleControlsEvent);
@@ -95,59 +99,34 @@ export function subscribeToScore(teamId, callback) {
 }
 
 /**
+ * Subscribe to all registered teams for an event (admin only).
+ */
+export function subscribeToRegisteredTeams(eventId = 'default-event', callback) {
+  const teamsQuery = query(collection(db, 'teams'), where('eventId', '==', eventId));
+  return onSnapshot(teamsQuery, (snap) => {
+    const teams = snap.docs
+      .map((team) => ({ id: team.id, ...team.data() }))
+      .sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+    callback(teams);
+  }, (err) => console.warn('Registration snapshot notice:', err.message));
+}
+
+/**
  * Subscribe to Public Revealed Themes
  */
 export function subscribeToPublicThemes(eventId, callback) {
-  const defaultThemes = [
-    {
-      id: 'theme-1',
-      themeNumber: 1,
-      publicName: 'Autonomous Kinematics & Orbital Trajectory Planning',
-      publicDescription: 'Design trajectory optimization algorithms, SLAM routines, and dynamic collision avoidance for robotic vehicles operating in GPS-denied environments.',
-      brief: 'Deliver inverse kinematics models, simulated ROS2 nodes, and latency benchmarking.',
-      eligibility: 'All Registered Robotics Teams'
-    },
-    {
-      id: 'theme-2',
-      themeNumber: 2,
-      publicName: 'Perception & Neural Edge Inspection',
-      publicDescription: 'Implement low-latency spatial depth estimation, feature extraction, and automated surface defect classification using edge AI accelerators.',
-      brief: 'Must include inference profiling under 15ms and confidence calibration.',
-      eligibility: 'All Registered Robotics Teams'
-    },
-    {
-      id: 'theme-3',
-      themeNumber: 3,
-      publicName: 'Industrial PLC Logic & Deterministic SCADA Automation',
-      publicDescription: 'Develop deterministic IEC 61131-3 ladder logic, safety interlocking state machines, and industrial bus communications.',
-      brief: 'Requires structured text definitions, safety interlock proofs, and telemetry dashboards.',
-      eligibility: 'All Registered Robotics Teams'
-    },
-    {
-      id: 'theme-4',
-      themeNumber: 4,
-      publicName: 'Satellite Swarm Telemetry & Distributed Consensus',
-      publicDescription: 'Architect decentralized peer-to-peer fleet coordination, mesh telemetry routing, and fault-tolerant consensus for multi-agent swarm deployments.',
-      brief: 'Must demonstrate consensus retention during 40% packet degradation.',
-      eligibility: 'All Registered Robotics Teams'
-    }
-  ];
-
   const q = query(
     collection(db, 'themesPublic', eventId, 'items'),
+    where('visible', '==', true),
     orderBy('themeNumber', 'asc')
   );
 
   const unsub = onSnapshot(q, (snap) => {
-    if (snap && snap.docs && snap.docs.length > 0) {
-      const themes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      callback(themes);
-    } else {
-      callback(defaultThemes);
-    }
+    const themes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(themes);
   }, (err) => {
-    console.warn("Public themes fallback notice:", err.message);
-    callback(defaultThemes);
+    console.warn("Public themes snapshot notice:", err.message);
+    callback([]);
   });
 
   return unsub;
@@ -223,6 +202,11 @@ export function subscribeToAllAllocations(eventId, callback) {
  * Subscribe to Audit Logs (Admin)
  */
 export function subscribeToAuditLogs(eventId, callback) {
+  // Skip Firestore listener if no authenticated user (prevents permission errors)
+  if (!auth.currentUser) {
+    callback([]);
+    return () => {};
+  }
   const q = query(
     collection(db, 'auditLogs', eventId, 'items'),
     orderBy('createdAtMs', 'desc')
@@ -247,13 +231,13 @@ export const DEFAULT_HOMEPAGE_CMS = {
   navCtaText: "Team Portal",
 
   // Hero Section
-  heroBadge: "MECHNOVA 2026 // ROBOTICS & AUTONOMY",
-  heroTitleLine1: "AUTONOMOUS",
-  heroTitleLine2: "HACKATHON",
-  heroSubtitle: "The next-generation mission control and evaluation platform for engineering teams. Features timed two-phase quiz verification, sealed theme reveals, and deterministic priority bidding.",
-  heroPrimaryCtaText: "REGISTER TEAM",
+  heroBadge: "MECHNOVA 2026 · VIT CHENNAI",
+  heroTitleLine1: "Think bold.",
+  heroTitleLine2: "Build",
+  heroSubtitle: "MechNova is the live arena for teams designing the next generation of autonomous systems, intelligent machines, and human-first technology.",
+  heroPrimaryCtaText: "Create your team",
   heroPrimaryCtaLink: "/register",
-  heroSecondaryCtaText: "TEAM GATEWAY",
+  heroSecondaryCtaText: "Explore the event",
   heroSecondaryCtaLink: "/login",
   heroAnnouncements: "",
 
@@ -268,46 +252,91 @@ export const DEFAULT_HOMEPAGE_CMS = {
   stat4Label: "TIME SYNCHRONIZED",
 
   // Challenge Domains
-  domain1Category: "KINEMATICS // SLAM",
-  domain1Title: "Autonomous Motion & Spatial SLAM",
-  domain1Desc: "Inverse kinematics, trajectory optimization, and point-cloud feature mapping under sensor noise.",
+  domain1Category: "DOM-01",
+  domain1Title: "Autonomous Kinematics",
+  domain1Desc: "Build machines that perceive, plan, and move through uncertainty.",
   domain1Stat: "6-DOF ROBOTIC MANIPULATORS",
 
-  domain2Category: "EDGE AI // PERCEPTION",
-  domain2Title: "Neural Vision & Surface Inspection",
-  domain2Desc: "Low-latency edge AI inference, real-time depth mapping, and defect segmentation pipelines.",
+  domain2Category: "DOM-02",
+  domain2Title: "Perception & Vision",
+  domain2Desc: "Turn visual signals into decisions at the edge.",
   domain2Stat: "<15MS LATENCY BOUND",
 
-  domain3Category: "PLC // DETERMINISTIC SCADA",
-  domain3Title: "Deterministic SCADA & Safety Logic",
-  domain3Desc: "IEC 61131-3 structured control, fail-safe interlocking, and deterministic industrial communications.",
+  domain3Category: "DOM-03",
+  domain3Title: "Industrial Intelligence",
+  domain3Desc: "Design safe, deterministic automation systems.",
   domain3Stat: "SIL-3 SAFETY ARCHITECTURE",
 
-  domain4Category: "FLEET // MESH TELEMETRY",
-  domain4Title: "Swarm Coordination & Fleet Mesh",
-  domain4Desc: "Distributed consensus, fault-tolerant state replication, and peer-to-peer packet routing.",
+  domain4Category: "DOM-04",
+  domain4Title: "Swarm Coordination",
+  domain4Desc: "Coordinate systems that think better together.",
   domain4Stat: "BYZANTINE FAULT TOLERANCE",
 
   // 4-Phase Sequence Timeline
   phase1Num: "01",
-  phase1Title: "Synthetic Roster Intake",
+  phase1Title: "Register",
   phase1Badge: "PHASE 01",
-  phase1Desc: "Teams register 2-4 member engineering units and obtain single-use passkeys and unique Team Codes.",
+  phase1Desc: "Create your team and keep your one-time credentials safe.",
 
   phase2Num: "02",
-  phase2Title: "Server-Authoritative Evaluation",
+  phase2Title: "Earn",
   phase2Badge: "PHASE 02",
-  phase2Desc: "Two-stage timed quiz (10s read prompt + 10s answer mode) with server timestamp enforcement.",
+  phase2Desc: "Complete the timed quiz to earn your bidding power.",
 
   phase3Num: "03",
-  phase3Title: "Audited Theme Reveal",
+  phase3Title: "Discover",
   phase3Badge: "PHASE 03",
-  phase3Desc: "Theme briefs transition from encrypted storage to public distribution in a single atomic commit.",
+  phase3Desc: "Explore themes after the administrator reveals them.",
 
   phase4Num: "04",
-  phase4Title: "Priority Tuple Bidding & Lock",
+  phase4Title: "Choose",
   phase4Badge: "PHASE 04",
-  phase4Desc: "Deterministic priority ranking allocates challenge themes strictly by score, bid points, and time.",
+  phase4Desc: "Rank every theme; available seats decide your assignment.",
+
+  // Content used by the current redesigned homepage
+  heroEyebrow: "Engineering beyond the expected",
+  heroTitleAccent: "beyond.",
+  heroBenefit1: "2–4 innovators per team",
+  heroBenefit2: "Timed quiz",
+  heroBenefit3: "Seat-based theme allocation",
+  heroCoreText: "MN",
+  heroStatusLabel: "Event status",
+  heroStatusValue: "Connected",
+  heroMissionLabel: "Mission",
+  heroMissionValue: "Build the future",
+  announcementLabel: "Live bulletin",
+  liveEyebrow: "Live event signal",
+  liveTitle: "Know exactly where the event is.",
+  liveDescription: "Every phase changes here in real time. No guesswork, no missed moments.",
+  liveLinkText: "Open event radar",
+  statusRegistrationLabel: "Registration",
+  statusRegistrationOpen: "Open",
+  statusRegistrationClosed: "Closed",
+  statusQuizLabel: "Quiz channel",
+  statusQuizLive: "Live",
+  statusQuizStandby: "Standby",
+  statusThemesLabel: "Theme reveal",
+  statusThemesSealed: "Sealed",
+  statusThemesSuffix: "revealed",
+  statusBiddingLabel: "Bidding",
+  statusBiddingOpen: "Open",
+  statusBiddingClosed: "Locked",
+  hiddenThemesEyebrow: "The playground",
+  hiddenThemesTitle: "Four ways to make an impact.",
+  hiddenThemesDescription: "Choose the problem that makes your team want to open the laptop again at 2 AM.",
+  revealedThemesEyebrow: "Now revealed",
+  revealedThemesTitle: "Choose the challenge you want to own.",
+  revealedThemesDescription: "These are the live challenge themes released by event administration.",
+  themeCardLabel: "Theme",
+  themeSeatSuffix: "seats",
+  workflowEyebrow: "Your route in",
+  workflowTitle: "From a team idea to a real build.",
+  workflowDescription: "The platform is deliberately simple: focus on your team, your performance, and the problem you want to own.",
+  ctaEyebrow: "MechNova 2026",
+  ctaTitle: "Your next great build starts here.",
+  ctaDescription: "Bring the team. Earn your edge. Choose the challenge that you want to solve.",
+  ctaButtonText: "Start registration",
+  timestampLabel: "Live synchronization",
 
   // Footer
   footerTitle: "MECHNOVA // 2026",
@@ -320,38 +349,17 @@ export const DEFAULT_HOMEPAGE_CMS = {
  * Subscribe to CMS Page Content (Homepage & Navbar)
  */
 export function subscribeToCmsContent(eventId = 'default-event', pageId = 'homepage', callback) {
-  const getMergedCms = (remoteData) => {
-    let localCms = {};
-    try {
-      const stored = localStorage.getItem(`${CMS_STORAGE_KEY_PREFIX}${pageId}`);
-      if (stored) localCms = JSON.parse(stored);
-    } catch (e) {}
-
-    return { ...DEFAULT_HOMEPAGE_CMS, ...(remoteData || {}), ...localCms };
-  };
-
-  // Initial call with defaults / cache
-  callback(getMergedCms(null));
-
-  const handleCmsEvent = () => {
-    callback(getMergedCms(null));
-  };
-  window.addEventListener('mechathon_cms_changed', handleCmsEvent);
-  window.addEventListener('storage', handleCmsEvent);
+  callback({ ...DEFAULT_HOMEPAGE_CMS });
 
   const cmsRef = doc(db, 'events', eventId, 'publicContent', pageId);
   const unsub = onSnapshot(cmsRef, (snap) => {
-    if (snap.exists()) {
-      callback(getMergedCms(snap.data()));
-    }
+    callback({ ...DEFAULT_HOMEPAGE_CMS, ...(snap.exists() ? snap.data() : {}) });
   }, (err) => {
     console.warn("CMS snapshot notice:", err.message);
   });
 
   return () => {
     unsub();
-    window.removeEventListener('mechathon_cms_changed', handleCmsEvent);
-    window.removeEventListener('storage', handleCmsEvent);
   };
 }
 
@@ -369,44 +377,71 @@ export function subscribeToQuizQuestions(quizId, callback) {
   }, (err) => console.warn("Quiz questions snapshot notice:", err.message));
 }
 
+export async function ensureQuizQuestionOrder(quizId, questions) {
+  const questionIds = (questions || []).map((question) => question.id);
+  const quizRef = doc(db, 'quizzes', quizId);
+  const quizSnap = await getDoc(quizRef);
+  const existingIds = quizSnap.exists() ? (quizSnap.data().questionIds || []) : [];
+  if (JSON.stringify(existingIds) === JSON.stringify(questionIds)) return;
+  await setDoc(quizRef, { questionIds, updatedAtMs: Date.now() }, { merge: true });
+}
+
 /**
  * Save CMS Page Content
  */
 export async function saveCmsPage(eventId = 'default-event', pageId = 'homepage', data) {
-  // 1. Cache immediately in localStorage & broadcast event for zero-latency instant updates
-  try {
-    const current = localStorage.getItem(`${CMS_STORAGE_KEY_PREFIX}${pageId}`);
-    const existing = current ? JSON.parse(current) : {};
-    const merged = { ...DEFAULT_HOMEPAGE_CMS, ...existing, ...data, updatedAtMs: Date.now() };
-    localStorage.setItem(`${CMS_STORAGE_KEY_PREFIX}${pageId}`, JSON.stringify(merged));
-    window.dispatchEvent(new Event('mechathon_cms_changed'));
-    window.dispatchEvent(new Event('storage'));
-  } catch (e) {
-    console.warn("Local storage CMS cache notice:", e);
-  }
-
-  // 2. Persist to Firestore
-  try {
-    const ref = doc(db, 'events', eventId, 'publicContent', pageId);
-    await setDoc(ref, { pageId, ...data, updatedAtMs: Date.now() }, { merge: true });
-  } catch (err) {
-    console.warn("Firestore CMS sync notice:", err.message);
-  }
+  const ref = doc(db, 'events', eventId, 'publicContent', pageId);
+  await setDoc(ref, { pageId, ...data, updatedAtMs: Date.now() }, { merge: true });
 }
 
 export async function savePrivateTheme(eventId, themeId, themeData) {
   const ref = doc(db, 'themesPrivate', eventId, 'items', themeId);
-  await setDoc(ref, { themeId, ...themeData, updatedAtMs: Date.now() }, { merge: true });
+  const ownerUid = auth && auth.currentUser ? auth.currentUser.uid : null;
+  await setDoc(ref, { themeId, ...themeData, ownerUid, updatedAtMs: Date.now() }, { merge: true });
 }
 
 export async function saveQuizQuestion(quizId, questionId, questionData) {
   const ref = doc(db, 'quizzes', quizId, 'questions', questionId);
-  await setDoc(ref, { id: questionId, ...questionData, updatedAtMs: Date.now() }, { merge: true });
+  // Map 'answerKey' to 'correctOption' for consistent grading in callableApi
+  const dataToSave = { ...questionData };
+  if (dataToSave.answerKey !== undefined && dataToSave.correctOption === undefined) {
+    dataToSave.correctOption = dataToSave.answerKey;
+  }
+  const existingSnap = await getDocs(query(
+    collection(db, 'quizzes', quizId, 'questions'),
+    orderBy('order', 'asc')
+  ));
+  const orderedQuestions = existingSnap.docs
+    .filter((question) => question.id !== questionId)
+    .map((question) => ({ id: question.id, ...question.data() }))
+    .concat({ id: questionId, ...dataToSave });
+  orderedQuestions.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const batch = writeBatch(db);
+  batch.set(ref, { id: questionId, ...dataToSave, updatedAtMs: Date.now() }, { merge: true });
+  const quizRef = doc(db, 'quizzes', quizId);
+  batch.set(quizRef, {
+    questionIds: orderedQuestions.map((question) => question.id),
+    updatedAtMs: Date.now()
+  }, { merge: true });
+  await batch.commit();
 }
 
 export async function deleteQuizQuestion(quizId, questionId) {
   const ref = doc(db, 'quizzes', quizId, 'questions', questionId);
-  await deleteDoc(ref);
+  const existingSnap = await getDocs(query(
+    collection(db, 'quizzes', quizId, 'questions'),
+    orderBy('order', 'asc')
+  ));
+  const remainingIds = existingSnap.docs
+    .filter((question) => question.id !== questionId)
+    .map((question) => question.id);
+
+  const batch = writeBatch(db);
+  batch.delete(ref);
+  const quizRef = doc(db, 'quizzes', quizId);
+  batch.set(quizRef, { questionIds: remainingIds, updatedAtMs: Date.now() }, { merge: true });
+  await batch.commit();
 }
 
 /**
@@ -431,5 +466,6 @@ export async function updateEventControls(eventId = 'default-event', controlsDat
     await setDoc(ref, { ...controlsData, updatedAtMs: Date.now() }, { merge: true });
   } catch (err) {
     console.warn("Firestore Event Controls sync notice:", err.message);
+    if (!isDummyConfig) throw err;
   }
 }

@@ -11,8 +11,8 @@ export function RegistrationPage() {
 
   const [teamName, setTeamName] = useState('');
   const [members, setMembers] = useState([
-    { name: '', email: '', phone: '', role: 'Team Lead' },
-    { name: '', email: '', phone: '', role: 'Hardware Lead' }
+    { name: '', email: '', phone: '', registrationProofUrl: '' },
+    { name: '', email: '', phone: '', registrationProofUrl: '' }
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export function RegistrationPage() {
 
   const handleAddMember = () => {
     if (members.length >= 4) return;
-    setMembers([...members, { name: '', email: '', phone: '', role: 'Developer' }]);
+    setMembers([...members, { name: '', email: '', phone: '', registrationProofUrl: '' }]);
   };
 
   const handleRemoveMember = (idx) => {
@@ -60,8 +60,14 @@ export function RegistrationPage() {
     }
 
     for (let i = 0; i < members.length; i++) {
-      if (!members[i].name.trim() || !members[i].email.trim()) {
-        setError(`Member ${i + 1} requires a valid Name and Email.`);
+      if (!members[i].name.trim() || !members[i].email.trim() || !members[i].registrationProofUrl.trim()) {
+        setError(`Member ${i + 1} requires a Name, Email, and Google Drive registration-proof link.`);
+        return;
+      }
+      try {
+        new URL(members[i].registrationProofUrl.trim());
+      } catch {
+        setError(`Member ${i + 1} has an invalid registration-proof link.`);
         return;
       }
     }
@@ -164,7 +170,8 @@ export function RegistrationPage() {
               <div className="space-y-3 text-xs text-zinc-300 font-light leading-relaxed">
                 <p>1. Teams require <strong>2 to 4 registered participants</strong>.</p>
                 <p>2. Passkeys are displayed <strong>only once</strong> upon creation.</p>
-                <p>3. The generated Transponder Code and Passkey grant access to the Quiz Arena and Theme Bidding.</p>
+                <p>3. Every member must submit a shareable Google Drive registration-proof image link.</p>
+                <p>4. The generated Transponder Code and Passkey grant access to the Quiz Arena and Theme Bidding.</p>
               </div>
 
               <div className="pt-4 border-t border-[#855AB4]/20 font-mono text-[11px] text-[#B26FCB]/80">
@@ -176,8 +183,8 @@ export function RegistrationPage() {
           {/* Right Form Wing (8 cols) */}
           <div className="lg:col-span-8 space-y-8">
             {error && (
-              <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-2xl font-mono text-xs text-red-300 flex items-center gap-3">
-                <ShieldAlert className="h-4 w-4 text-red-400 flex-shrink-0" />
+              <div className="border border-orange-500/30 bg-orange-500/10 p-4 rounded-2xl font-mono text-xs text-orange-300 flex items-center gap-3">
+                <ShieldAlert className="h-4 w-4 text-orange-400 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -226,7 +233,7 @@ export function RegistrationPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveMember(idx)}
-                          className="text-zinc-500 hover:text-red-400 transition-colors"
+                          className="text-zinc-500 hover:text-orange-400 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -251,10 +258,11 @@ export function RegistrationPage() {
                         className="bg-[#221545]/60 border border-[#855AB4]/40 rounded-xl px-4 py-3 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#B26FCB]"
                       />
                       <input
-                        type="text"
-                        value={m.role}
-                        onChange={(e) => handleMemberChange(idx, 'role', e.target.value)}
-                        placeholder="Role (e.g. Navigation)"
+                        type="url"
+                        value={m.registrationProofUrl}
+                        onChange={(e) => handleMemberChange(idx, 'registrationProofUrl', e.target.value)}
+                        placeholder="Google Drive proof image link *"
+                        required
                         className="bg-[#221545]/60 border border-[#855AB4]/40 rounded-xl px-4 py-3 font-sans text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#B26FCB]"
                       />
                     </div>
@@ -289,7 +297,7 @@ export function RegistrationPage() {
 
       {/* CREDENTIAL MODAL */}
       {credResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 backdrop-blur-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a030d]/90 p-6 backdrop-blur-2xl">
           <div className="w-full max-w-xl bg-[#221545] border border-[#855AB4]/50 rounded-3xl p-8 sm:p-10 space-y-6 shadow-[0_0_60px_rgba(104,56,141,0.4)]">
             <div className="space-y-2">
               <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block font-bold">

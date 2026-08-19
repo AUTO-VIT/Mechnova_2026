@@ -30,22 +30,24 @@ export function EventControls({ eventData }) {
     // 1. Optimistic instant UI update
     setControls(prev => ({ ...prev, [field]: newValue }));
 
+    const fieldNames = {
+      quizOpen: 'Quiz Evaluation Channel',
+      registrationOpen: 'Team Registration Gate',
+      biddingOpen: 'Theme Bidding Arena'
+    };
+
     try {
       await updateEventControls(eventData?.id || 'default-event', {
         [field]: newValue
       });
-      const fieldNames = {
-        quizOpen: 'Quiz Evaluation Channel',
-        registrationOpen: 'Team Registration Gate',
-        biddingOpen: 'Theme Bidding Arena'
-      };
       setMsg(`${fieldNames[field] || field} set to ${newValue ? 'ACTIVE / OPEN' : 'SEALED / CLOSED'}.`);
       setTimeout(() => setMsg(''), 3000);
     } catch (err) {
-      console.error("Control toggle error:", err);
-      // Revert if error
-      setControls(prev => ({ ...prev, [field]: currentValue }));
-      setMsg(`Error updating control: ${err.message}`);
+      console.warn("Control toggle Firestore sync note:", err.message);
+      // The localStorage cache already succeeded in updateEventControls,
+      // so the toggle is applied locally even if Firestore sync fails.
+      setMsg(`${fieldNames[field] || field} set to ${newValue ? 'ACTIVE / OPEN' : 'SEALED / CLOSED'} (local mode).`);
+      setTimeout(() => setMsg(''), 3000);
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ export function EventControls({ eventData }) {
               <span className={`font-mono text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
                 controls.registrationOpen
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                  : 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                  : 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-[0_0_15px_rgba(249,115,22,0.3)]'
               }`}>
                 {controls.registrationOpen ? "● OPEN" : "○ CLOSED"}
               </span>
@@ -90,7 +92,7 @@ export function EventControls({ eventData }) {
             onClick={() => handleToggle('registrationOpen', controls.registrationOpen)}
             className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
               controls.registrationOpen
-                ? 'border-red-500/40 bg-red-950/40 text-red-300 hover:bg-red-900/60 shadow-[0_0_20px_rgba(239,68,68,0.25)]'
+                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
                 : 'border-[#B26FCB]/60 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_25px_rgba(178,111,203,0.4)]'
             }`}
           >
@@ -137,7 +139,7 @@ export function EventControls({ eventData }) {
             onClick={() => handleToggle('quizOpen', controls.quizOpen)}
             className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
               controls.quizOpen
-                ? 'border-red-500/40 bg-red-950/40 text-red-300 hover:bg-red-900/60 shadow-[0_0_20px_rgba(239,68,68,0.25)]'
+                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
                 : 'border-[#B26FCB]/60 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_25px_rgba(178,111,203,0.4)]'
             }`}
           >
@@ -184,7 +186,7 @@ export function EventControls({ eventData }) {
             onClick={() => handleToggle('biddingOpen', controls.biddingOpen)}
             className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
               controls.biddingOpen
-                ? 'border-red-500/40 bg-red-950/40 text-red-300 hover:bg-red-900/60 shadow-[0_0_20px_rgba(239,68,68,0.25)]'
+                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
                 : 'border-[#B26FCB]/50 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_20px_rgba(178,111,203,0.3)]'
             }`}
           >

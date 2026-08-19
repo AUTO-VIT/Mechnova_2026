@@ -12,7 +12,7 @@ export function printCredentialSheet({ teamName, teamCode, password, syntheticEm
     <tr style="border-bottom: 1px solid #ddd;">
       <td style="padding: 8px; font-weight: 500;">${m.name}</td>
       <td style="padding: 8px;">${m.email}</td>
-      <td style="padding: 8px;">${m.role || 'Member'}</td>
+      <td style="padding: 8px;">${m.registrationProofUrl ? 'Submitted' : 'Not provided'}</td>
     </tr>
   `).join('');
 
@@ -142,7 +142,7 @@ export function printCredentialSheet({ teamName, teamCode, password, syntheticEm
               <tr>
                 <th>Member Name</th>
                 <th>Email Address</th>
-                <th>Role</th>
+                <th>Registration Proof</th>
               </tr>
             </thead>
             <tbody>

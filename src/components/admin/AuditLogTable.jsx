@@ -28,7 +28,7 @@ export function AuditLogTable({ eventData }) {
       subtitle="Immutable Append-Only Log Feed"
       badge={<StatusBadge status={`${logs.length} RECORDS`} variant="zinc" />}
       action={
-        <div className="flex items-center gap-2 border border-zinc-800 bg-black px-3 py-1 font-mono text-xs">
+        <div className="flex items-center gap-2 border border-zinc-800 bg-[#0a030d] px-3 py-1 font-mono text-xs">
           <Search className="h-3.5 w-3.5 text-zinc-500" />
           <input
             type="text"
@@ -51,7 +51,7 @@ export function AuditLogTable({ eventData }) {
               <th className="p-3">Entity Target Path</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800 bg-black">
+          <tbody className="divide-y divide-zinc-800 bg-[#0a030d]">
             {filteredLogs.length === 0 ? (
               <tr>
                 <td colSpan="5" className="p-6 text-center text-zinc-500">

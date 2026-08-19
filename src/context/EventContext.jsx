@@ -50,6 +50,7 @@ export function EventProvider({ children, eventId = 'default-event' }) {
           themesRevealed: false,
           biddingOpen: false,
           allocationFinalized: false,
+          resultsRevealed: false,
           quizId: "default-quiz"
         });
       }

@@ -14,7 +14,8 @@
       "collectionGroup": "items",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "createdAtMs", "order": "DESCENDING" }
+        { "fieldPath": "visible", "order": "ASCENDING" },
+        { "fieldPath": "themeNumber", "order": "ASCENDING" }
       ]
     }
   ],

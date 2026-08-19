@@ -5,3 +5,5 @@ dist
 .DS_Store
 functions/node_modules
 *.log
+.firebase/
+Credentials_test.txt
