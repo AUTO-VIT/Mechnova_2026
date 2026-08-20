@@ -2,14 +2,63 @@ import React, { useEffect, useState } from 'react';
 import { Activity, ArrowRight, ArrowUpRight, ChevronRight, Cpu, Radio, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEvent } from '../../context/EventContext';
-import { DEFAULT_HOMEPAGE_CMS, subscribeToCmsContent } from '../../services/firestoreService';
+import { subscribeToCmsContent } from '../../services/firestoreService';
 import { formatTimestamp } from '../../utils/formatters';
+
+function HomepageContentLoader({ failed = false }) {
+  if (failed) {
+    return (
+      <div className="mn-empty mx-auto min-h-[34rem] max-w-3xl" role="alert">
+        <div>
+          <h1 className="font-['Syne'] text-3xl font-semibold">Event content is temporarily unavailable.</h1>
+          <p className="mt-3 text-sm text-[var(--mn-muted)]">Refresh the page to try loading the latest homepage content again.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mn-page home-stage" role="status" aria-label="Loading the latest event content">
+      <section className="mn-hero min-h-[34rem]" aria-hidden="true">
+        <div className="mn-hero-copy motion-safe:animate-pulse">
+          <div className="h-3 w-44 bg-white/10" />
+          <div className="mt-8 h-16 w-full max-w-xl bg-white/10" />
+          <div className="mt-4 h-16 w-4/5 max-w-lg bg-white/10" />
+          <div className="mt-8 h-5 w-full max-w-2xl bg-white/5" />
+          <div className="mt-3 h-5 w-3/4 max-w-xl bg-white/5" />
+          <div className="mt-9 flex gap-3">
+            <div className="h-11 w-40 bg-white/10" />
+            <div className="h-11 w-36 bg-white/5" />
+          </div>
+        </div>
+        <div className="mn-hero-board min-h-96 motion-safe:animate-pulse" />
+      </section>
+      <span className="sr-only">Loading the latest event content.</span>
+    </div>
+  );
+}
 
 export function HomePage() {
   const { eventData, publicThemes, serverOffsetMs, eventId } = useEvent();
-  const [cms, setCms] = useState(DEFAULT_HOMEPAGE_CMS);
+  const [cms, setCms] = useState(null);
+  const [cmsLoadFailed, setCmsLoadFailed] = useState(false);
+  const cmsEventId = eventId || 'default-event';
 
-  useEffect(() => subscribeToCmsContent(eventId || 'default-event', 'homepage', setCms), [eventId]);
+  useEffect(() => {
+    setCms(null);
+    setCmsLoadFailed(false);
+    return subscribeToCmsContent(
+      cmsEventId,
+      'homepage',
+      (content) => {
+        setCms(content);
+        setCmsLoadFailed(false);
+      },
+      () => setCmsLoadFailed(true)
+    );
+  }, [cmsEventId]);
+
+  if (!cms) return <HomepageContentLoader failed={cmsLoadFailed} />;
 
   const domains = [
     [cms.domain1Category, cms.domain1Title, cms.domain1Desc],

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Eye, Home, Radio, RefreshCw, Save, Sparkles } from 'lucide-react';
 import { DEFAULT_HOMEPAGE_CMS, saveCmsPage, subscribeToCmsContent } from '../../services/firestoreService';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 
 const sections = [
   {
@@ -51,12 +52,21 @@ const sections = [
 
 export function CmsEditor({ eventData }) {
   const eventId = eventData?.id || 'default-event';
-  const [formData, setFormData] = useState(DEFAULT_HOMEPAGE_CMS);
+  const [formData, setFormData] = useState(null);
   const [activeSection, setActiveSection] = useState('hero');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => subscribeToCmsContent(eventId, 'homepage', (content) => setFormData({ ...DEFAULT_HOMEPAGE_CMS, ...content })), [eventId]);
+  useEffect(() => {
+    setFormData(null);
+    setMessage('');
+    return subscribeToCmsContent(
+      eventId,
+      'homepage',
+      (content) => setFormData(content),
+      () => setMessage('Could not load the current homepage content. Refresh and try again.')
+    );
+  }, [eventId]);
   const section = sections.find((item) => item.id === activeSection);
   const updateField = (field, value) => setFormData((current) => ({ ...current, [field]: value }));
 
@@ -73,6 +83,11 @@ export function CmsEditor({ eventData }) {
       setLoading(false);
     }
   };
+
+  if (!formData) {
+    if (message) return <div className="mn-alert mn-alert-error" role="alert">{message}</div>;
+    return <DataLoadingPanel label="Loading the current homepage content…" />;
+  }
 
   return (
     <div className="space-y-7">

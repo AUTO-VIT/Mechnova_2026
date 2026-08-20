@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Check, Edit2, Plus, Trash2, X } from 'lucide-react';
 import { deleteQuizQuestion, ensureQuizQuestionOrder, saveQuizQuestion, subscribeToQuizQuestions } from '../../services/firestoreService';
 import { ControlPanel } from '../common/ControlPanel';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 import { ModalLayer } from '../common/ModalLayer';
 import { StatusBadge } from '../common/StatusBadge';
 
@@ -9,6 +10,8 @@ const optionLetters = ['A', 'B', 'C', 'D'];
 
 export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
   const [questions, setQuestions] = useState([]);
+  const [questionsResolved, setQuestionsResolved] = useState(false);
+  const [questionsLoadFailed, setQuestionsLoadFailed] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [prompt, setPrompt] = useState('');
   const [options, setOptions] = useState(['', '', '', '']);
@@ -16,11 +19,20 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
   const [category, setCategory] = useState('Robotics & Kinematics');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => subscribeToQuizQuestions(quizId, (nextQuestions) => {
-    const normalized = nextQuestions || [];
-    setQuestions(normalized);
-    ensureQuizQuestionOrder(quizId, normalized).catch((error) => console.warn('Quiz order sync notice:', error.message));
-  }), [quizId]);
+  useEffect(() => {
+    setQuestions([]);
+    setQuestionsResolved(false);
+    setQuestionsLoadFailed(false);
+    return subscribeToQuizQuestions(quizId, (nextQuestions) => {
+      const normalized = nextQuestions || [];
+      setQuestions(normalized);
+      setQuestionsResolved(true);
+      ensureQuizQuestionOrder(quizId, normalized).catch((error) => console.warn('Quiz order sync notice:', error.message));
+    }, () => {
+      setQuestionsLoadFailed(true);
+      setQuestionsResolved(true);
+    });
+  }, [quizId]);
 
   const openNew = () => {
     setEditingQuestion({ id: `q_${Date.now()}`, isNew: true });
@@ -73,8 +85,12 @@ export function QuizQuestionEditor({ quizId = 'default-quiz' }) {
   };
 
   return (
-    <ControlPanel title="Quiz question bank" subtitle={`Quiz ID: ${quizId}`} badge={<StatusBadge status={`${questions.length} questions`} variant="zinc" />} action={<button type="button" onClick={openNew} className="mn-button mn-button-primary min-h-10"><Plus className="h-4 w-4" />Add question</button>}>
-      {questions.length === 0 ? (
+    <ControlPanel title="Quiz question bank" subtitle={`Quiz ID: ${quizId}`} badge={<StatusBadge status={questionsResolved ? `${questions.length} questions` : 'Loading'} variant="zinc" />} action={questionsResolved && !questionsLoadFailed ? <button type="button" onClick={openNew} className="mn-button mn-button-primary min-h-10"><Plus className="h-4 w-4" />Add question</button> : null}>
+      {!questionsResolved ? (
+        <DataLoadingPanel label="Loading the current question bank…" />
+      ) : questionsLoadFailed ? (
+        <div className="mn-alert mn-alert-error" role="alert">Could not load the question bank. Refresh and try again.</div>
+      ) : questions.length === 0 ? (
         <div className="mn-empty min-h-60"><div><h3 className="text-lg font-semibold">No questions yet</h3><p className="mt-2 text-sm text-[var(--mn-muted)]">Add the first question to prepare the quiz.</p></div></div>
       ) : (
         <div className="mn-rank-list">

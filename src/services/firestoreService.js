@@ -19,7 +19,10 @@ const CONTROLS_STORAGE_KEY = 'mechathon_event_controls';
 /**
  * Subscribe to Event status document
  */
-export function subscribeToEvent(eventId = 'default-event', callback) {
+export function subscribeToEvent(eventId = 'default-event', callback, onError) {
+  let currentEvent = null;
+  let hasResolvedEvent = false;
+
   const getMergedEvent = (remoteData, includeLocalControls = false) => {
     let localControls = {};
     try {
@@ -43,22 +46,20 @@ export function subscribeToEvent(eventId = 'default-event', callback) {
     return includeLocalControls ? { ...base, ...localControls } : base;
   };
 
-  // Initial call with cached/default data
-  callback(getMergedEvent(null, true));
-
   const handleControlsEvent = () => {
-    callback(getMergedEvent(null, true));
+    if (hasResolvedEvent) callback(getMergedEvent(currentEvent, true));
   };
   window.addEventListener('mechathon_controls_changed', handleControlsEvent);
   window.addEventListener('storage', handleControlsEvent);
 
   const eventRef = doc(db, 'events', eventId);
   const unsub = onSnapshot(eventRef, (snap) => {
-    if (snap.exists()) {
-      callback(getMergedEvent({ id: snap.id, ...snap.data() }));
-    }
+    hasResolvedEvent = true;
+    currentEvent = snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    callback(getMergedEvent(currentEvent, !snap.exists()));
   }, (err) => {
     console.warn("Event snapshot notice:", err.message);
+    onError?.(err);
   });
 
   return () => {
@@ -101,20 +102,23 @@ export function subscribeToScore(teamId, callback) {
 /**
  * Subscribe to all registered teams for an event (admin only).
  */
-export function subscribeToRegisteredTeams(eventId = 'default-event', callback) {
+export function subscribeToRegisteredTeams(eventId = 'default-event', callback, onError) {
   const teamsQuery = query(collection(db, 'teams'), where('eventId', '==', eventId));
   return onSnapshot(teamsQuery, (snap) => {
     const teams = snap.docs
       .map((team) => ({ id: team.id, ...team.data() }))
       .sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
     callback(teams);
-  }, (err) => console.warn('Registration snapshot notice:', err.message));
+  }, (err) => {
+    console.warn('Registration snapshot notice:', err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to Public Revealed Themes
  */
-export function subscribeToPublicThemes(eventId, callback) {
+export function subscribeToPublicThemes(eventId, callback, onError) {
   const q = query(
     collection(db, 'themesPublic', eventId, 'items'),
     where('visible', '==', true),
@@ -126,7 +130,7 @@ export function subscribeToPublicThemes(eventId, callback) {
     callback(themes);
   }, (err) => {
     console.warn("Public themes snapshot notice:", err.message);
-    callback([]);
+    onError?.(err);
   });
 
   return unsub;
@@ -135,7 +139,7 @@ export function subscribeToPublicThemes(eventId, callback) {
 /**
  * Subscribe to Private Themes (Admin only)
  */
-export function subscribeToPrivateThemes(eventId, callback) {
+export function subscribeToPrivateThemes(eventId, callback, onError) {
   const q = query(
     collection(db, 'themesPrivate', eventId, 'items'),
     orderBy('themeNumber', 'asc')
@@ -143,13 +147,16 @@ export function subscribeToPrivateThemes(eventId, callback) {
   return onSnapshot(q, (snap) => {
     const themes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(themes);
-  }, (err) => console.warn("Private themes snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("Private themes snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to Team's Bid
  */
-export function subscribeToTeamBid(eventId, teamId, callback) {
+export function subscribeToTeamBid(eventId, teamId, callback, onError) {
   if (!teamId) return () => {};
   const bidRef = doc(db, 'bids', eventId, 'items', teamId);
   return onSnapshot(bidRef, (snap) => {
@@ -158,24 +165,30 @@ export function subscribeToTeamBid(eventId, teamId, callback) {
     } else {
       callback(null);
     }
-  }, (err) => console.warn("Bid snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("Bid snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to All Bids (Admin)
  */
-export function subscribeToAllBids(eventId, callback) {
+export function subscribeToAllBids(eventId, callback, onError) {
   const q = query(collection(db, 'bids', eventId, 'items'));
   return onSnapshot(q, (snap) => {
     const bids = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(bids);
-  }, (err) => console.warn("All bids snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("All bids snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to Team Allocation Result
  */
-export function subscribeToTeamAllocation(eventId, teamId, callback) {
+export function subscribeToTeamAllocation(eventId, teamId, callback, onError) {
   if (!teamId) return () => {};
   const allocRef = doc(db, 'allocations', eventId, 'items', teamId);
   return onSnapshot(allocRef, (snap) => {
@@ -184,24 +197,30 @@ export function subscribeToTeamAllocation(eventId, teamId, callback) {
     } else {
       callback(null);
     }
-  }, (err) => console.warn("Allocation snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("Allocation snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to All Allocations (Admin)
  */
-export function subscribeToAllAllocations(eventId, callback) {
+export function subscribeToAllAllocations(eventId, callback, onError) {
   const q = query(collection(db, 'allocations', eventId, 'items'));
   return onSnapshot(q, (snap) => {
     const allocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(allocs);
-  }, (err) => console.warn("All allocations snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("All allocations snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
  * Subscribe to Audit Logs (Admin)
  */
-export function subscribeToAuditLogs(eventId, callback) {
+export function subscribeToAuditLogs(eventId, callback, onError) {
   // Skip Firestore listener if no authenticated user (prevents permission errors)
   if (!auth.currentUser) {
     callback([]);
@@ -214,7 +233,10 @@ export function subscribeToAuditLogs(eventId, callback) {
   return onSnapshot(q, (snap) => {
     const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(logs);
-  }, (err) => console.warn("Audit logs snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("Audit logs snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 /**
@@ -348,14 +370,13 @@ export const DEFAULT_HOMEPAGE_CMS = {
 /**
  * Subscribe to CMS Page Content (Homepage & Navbar)
  */
-export function subscribeToCmsContent(eventId = 'default-event', pageId = 'homepage', callback) {
-  callback({ ...DEFAULT_HOMEPAGE_CMS });
-
+export function subscribeToCmsContent(eventId = 'default-event', pageId = 'homepage', callback, onError) {
   const cmsRef = doc(db, 'events', eventId, 'publicContent', pageId);
   const unsub = onSnapshot(cmsRef, (snap) => {
     callback({ ...DEFAULT_HOMEPAGE_CMS, ...(snap.exists() ? snap.data() : {}) });
   }, (err) => {
     console.warn("CMS snapshot notice:", err.message);
+    onError?.(err);
   });
 
   return () => {
@@ -366,7 +387,7 @@ export function subscribeToCmsContent(eventId = 'default-event', pageId = 'homep
 /**
  * Subscribe to Quiz Questions (Admin Bank)
  */
-export function subscribeToQuizQuestions(quizId, callback) {
+export function subscribeToQuizQuestions(quizId, callback, onError) {
   const q = query(
     collection(db, 'quizzes', quizId, 'questions'),
     orderBy('order', 'asc')
@@ -374,7 +395,10 @@ export function subscribeToQuizQuestions(quizId, callback) {
   return onSnapshot(q, (snap) => {
     const questions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(questions);
-  }, (err) => console.warn("Quiz questions snapshot notice:", err.message));
+  }, (err) => {
+    console.warn("Quiz questions snapshot notice:", err.message);
+    onError?.(err);
+  });
 }
 
 export async function ensureQuizQuestionOrder(quizId, questions) {

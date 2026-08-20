@@ -6,6 +6,7 @@ import { useEvent } from '../../context/EventContext';
 import { submitBidApi } from '../../services/callableApi';
 import { subscribeToTeamBid } from '../../services/firestoreService';
 import { formatPoints } from '../../utils/formatters';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 import { LockedPanel } from '../common/LockedPanel';
 
 const getThemeId = (theme) => theme.id || theme.themeId;
@@ -15,6 +16,8 @@ export function BiddingPage() {
   const { eventData, publicThemes } = useEvent();
   const [existingBid, setExistingBid] = useState(null);
   const [preferenceIds, setPreferenceIds] = useState([]);
+  const [bidResolved, setBidResolved] = useState(false);
+  const [bidLoadFailed, setBidLoadFailed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -27,14 +30,26 @@ export function BiddingPage() {
   const rankingComplete = publicThemes.length > 0 && preferenceIds.length === publicThemes.length;
 
   useEffect(() => {
-    if (role !== 'TEAM' || !uid || !eventData?.id) return undefined;
+    if (role !== 'TEAM' || !uid || !eventData?.id) {
+      setBidResolved(true);
+      return undefined;
+    }
+    setExistingBid(null);
+    setPreferenceIds([]);
+    setBidResolved(false);
+    setBidLoadFailed(false);
     return subscribeToTeamBid(eventData.id, uid, (bid) => {
-      if (!bid) return;
-      setExistingBid(bid);
-      const visibleIds = publicThemes.map(getThemeId).filter(Boolean);
-      const storedPreferences = Array.isArray(bid.preferenceIds) ? bid.preferenceIds : [bid.selectedThemeId].filter(Boolean);
-      const validPreferences = storedPreferences.filter((id) => visibleIds.includes(id));
-      setPreferenceIds([...validPreferences, ...visibleIds.filter((id) => !validPreferences.includes(id))]);
+      if (bid) {
+        setExistingBid(bid);
+        const visibleIds = publicThemes.map(getThemeId).filter(Boolean);
+        const storedPreferences = Array.isArray(bid.preferenceIds) ? bid.preferenceIds : [bid.selectedThemeId].filter(Boolean);
+        const validPreferences = storedPreferences.filter((id) => visibleIds.includes(id));
+        setPreferenceIds([...validPreferences, ...visibleIds.filter((id) => !validPreferences.includes(id))]);
+      }
+      setBidResolved(true);
+    }, () => {
+      setBidLoadFailed(true);
+      setBidResolved(true);
     });
   }, [role, uid, eventData?.id, publicThemes]);
 
@@ -85,6 +100,9 @@ export function BiddingPage() {
   if (!isBiddingOpen) {
     return <div className="mx-auto max-w-3xl py-12"><LockedPanel title="Bidding is not open" message="Theme ranking becomes available after the themes are revealed and the administrator opens bidding." actionButton={<Link to="/themes" className="mn-button mn-button-secondary">View themes</Link>} /></div>;
   }
+
+  if (!bidResolved) return <DataLoadingPanel label="Loading your current theme preferences…" className="mx-auto max-w-3xl" />;
+  if (bidLoadFailed) return <div className="mn-alert mn-alert-error mx-auto max-w-3xl" role="alert">Could not load your saved preferences. Refresh and try again.</div>;
 
   return (
     <div className="mn-page">

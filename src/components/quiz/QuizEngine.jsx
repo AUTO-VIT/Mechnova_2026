@@ -138,7 +138,7 @@ export function QuizEngine() {
               <h1 className="mt-5 font-['Syne'] text-4xl font-semibold tracking-[-.05em] sm:text-6xl">Start only when your whole team is ready.</h1>
               <p className="mt-5 max-w-2xl text-base font-light leading-7 text-[var(--mn-muted)]">Opening this page does not start the timer. The first question begins only after you press Start Quiz. Once started, the attempt keeps running and resumes from the stored deadline if this page is refreshed.</p>
             </div>
-            <div className="min-w-64 space-y-4">
+            <div className="w-full space-y-4 sm:min-w-64 lg:w-auto">
               <div className="mn-panel-soft grid grid-cols-2 gap-px overflow-hidden p-1"><div className="p-4"><span className="mn-label">Read</span><strong className="mt-2 block text-xl">10 sec</strong></div><div className="border-l border-[var(--mn-line)] p-4"><span className="mn-label">Answer</span><strong className="mt-2 block text-xl">10 sec</strong></div></div>
               <button type="button" onClick={handleStartQuiz} disabled={loading} className="mn-button mn-button-accent w-full">{loading ? <><Loader2 className="h-4 w-4 animate-spin" />Starting quiz…</> : <><Play className="h-4 w-4 fill-current" />Start Quiz</>}</button>
             </div>

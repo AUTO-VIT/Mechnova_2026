@@ -3,6 +3,7 @@ import { CheckCircle2, Edit2, Eye, EyeOff, UsersRound, X } from 'lucide-react';
 import { setThemeRevealApi } from '../../services/callableApi';
 import { savePrivateTheme, subscribeToPrivateThemes } from '../../services/firestoreService';
 import { ConfirmDialog } from '../common/ConfirmDialog';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 import { ModalLayer } from '../common/ModalLayer';
 
 const defaultThemeSlots = [
@@ -16,6 +17,8 @@ const defaultThemeSlots = [
 export function ThemeControl({ eventData }) {
   const eventId = eventData?.id || 'default-event';
   const [privateThemes, setPrivateThemes] = useState([]);
+  const [themesResolved, setThemesResolved] = useState(false);
+  const [themesLoadFailed, setThemesLoadFailed] = useState(false);
   const [editingTheme, setEditingTheme] = useState(null);
   const [themeName, setThemeName] = useState('');
   const [themeDesc, setThemeDesc] = useState('');
@@ -26,7 +29,18 @@ export function ThemeControl({ eventData }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => subscribeToPrivateThemes(eventId, (themes) => setPrivateThemes(themes || [])), [eventId]);
+  useEffect(() => {
+    setPrivateThemes([]);
+    setThemesResolved(false);
+    setThemesLoadFailed(false);
+    return subscribeToPrivateThemes(eventId, (themes) => {
+      setPrivateThemes(themes || []);
+      setThemesResolved(true);
+    }, () => {
+      setThemesLoadFailed(true);
+      setThemesResolved(true);
+    });
+  }, [eventId]);
 
   const handleEdit = (slot) => {
     const existing = privateThemes.find((theme) => (theme.id || theme.themeId) === slot.id) || slot;
@@ -81,13 +95,16 @@ export function ThemeControl({ eventData }) {
     }
   };
 
+  if (!themesResolved) return <DataLoadingPanel label="Loading the configured themes…" />;
+  if (themesLoadFailed) return <div className="mn-alert mn-alert-error" role="alert">Could not load the configured themes. Refresh and try again.</div>;
+
   return (
     <div className="space-y-7">
       {message && <div role="status" className={`mn-alert ${message.startsWith('Could not') ? 'mn-alert-error' : 'mn-alert-success'}`}><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />{message}</div>}
 
       <section className="mn-panel flex flex-col justify-between gap-6 border-t-[3px] border-t-[var(--mn-violet)] lg:flex-row lg:items-center">
         <div><span className="mn-label">Participant visibility</span><h2 className="mt-2 font-['Syne'] text-2xl font-semibold">{isRevealed ? 'Themes are visible' : 'Themes are hidden'}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--mn-muted)]">Theme details stay private until you reveal them. Hiding them later never deletes the saved content or capacities.</p></div>
-        <button type="button" role="switch" aria-checked={isRevealed} disabled={configuredCount < 5 || loading} onClick={() => setConfirmOpen(true)} className={`mn-button min-w-56 ${isRevealed ? 'mn-button-danger' : 'mn-button-accent'}`}>{isRevealed ? <><EyeOff className="h-4 w-4" />Hide themes</> : <><Eye className="h-4 w-4" />Reveal themes</>}</button>
+        <button type="button" role="switch" aria-checked={isRevealed} disabled={configuredCount < 5 || loading} onClick={() => setConfirmOpen(true)} className={`mn-button w-full sm:w-auto sm:min-w-56 ${isRevealed ? 'mn-button-danger' : 'mn-button-accent'}`}>{isRevealed ? <><EyeOff className="h-4 w-4" />Hide themes</> : <><Eye className="h-4 w-4" />Reveal themes</>}</button>
       </section>
 
       <div className="flex items-end justify-between gap-4"><div><span className="mn-kicker">Theme setup</span><h2 className="mt-3 font-['Syne'] text-3xl font-semibold">Challenge themes</h2></div><span className={`mn-status ${configuredCount >= 5 ? 'is-live' : ''}`}>{configuredCount} / 5 configured</span></div>

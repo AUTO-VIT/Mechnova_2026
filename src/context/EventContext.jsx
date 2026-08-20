@@ -8,7 +8,9 @@ export function EventProvider({ children, eventId = 'default-event' }) {
   const [eventData, setEventData] = useState(null);
   const [publicThemes, setPublicThemes] = useState([]);
   const [serverOffsetMs, setServerOffsetMs] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [eventLoading, setEventLoading] = useState(true);
+  const [themesLoading, setThemesLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   // Sync Server Clock Offset
   const refreshClockOffset = useCallback(async () => {
@@ -36,29 +38,25 @@ export function EventProvider({ children, eventId = 'default-event' }) {
 
   // Subscribe to Event Document
   useEffect(() => {
-    setLoading(true);
+    setEventData(null);
+    setPublicThemes([]);
+    setEventLoading(true);
+    setThemesLoading(true);
+    setLoadFailed(false);
     const unsubEvent = subscribeToEvent(eventId, (data) => {
-      if (data) {
-        setEventData(data);
-      } else {
-        setEventData({
-          id: eventId,
-          name: "AUTOMATION & ROBOTICS HACKATHON 2026",
-          status: "ACTIVE",
-          registrationOpen: true,
-          quizOpen: true,
-          themesRevealed: false,
-          biddingOpen: false,
-          allocationFinalized: false,
-          resultsRevealed: false,
-          quizId: "default-quiz"
-        });
-      }
-      setLoading(false);
+      setEventData(data);
+      setEventLoading(false);
+    }, () => {
+      setLoadFailed(true);
+      setEventLoading(false);
     });
 
     const unsubThemes = subscribeToPublicThemes(eventId, (themes) => {
       setPublicThemes(themes || []);
+      setThemesLoading(false);
+    }, () => {
+      setLoadFailed(true);
+      setThemesLoading(false);
     });
 
     return () => {
@@ -73,7 +71,8 @@ export function EventProvider({ children, eventId = 'default-event' }) {
     publicThemes,
     serverOffsetMs,
     refreshClockOffset,
-    loading
+    loading: eventLoading || themesLoading,
+    loadFailed
   };
 
   return (

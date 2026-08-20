@@ -5,12 +5,16 @@ import { subscribeToAllAllocations, subscribeToAllBids } from '../../services/fi
 import { formatPoints, formatTimestamp } from '../../utils/formatters';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { ControlPanel } from '../common/ControlPanel';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 import { StatusBadge } from '../common/StatusBadge';
 
 export function AllocationConsole({ eventData }) {
   const eventId = eventData?.id || 'default-event';
   const [bids, setBids] = useState([]);
   const [allocations, setAllocations] = useState([]);
+  const [bidsResolved, setBidsResolved] = useState(false);
+  const [allocationsResolved, setAllocationsResolved] = useState(false);
+  const [dataLoadFailed, setDataLoadFailed] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -18,10 +22,29 @@ export function AllocationConsole({ eventData }) {
   const resultsRevealed = eventData?.resultsRevealed === true;
 
   useEffect(() => {
-    const unsubscribeBids = subscribeToAllBids(eventId, (nextBids) => setBids(nextBids || []));
-    const unsubscribeAllocations = subscribeToAllAllocations(eventId, (nextAllocations) => setAllocations(nextAllocations || []));
+    setBids([]);
+    setAllocations([]);
+    setBidsResolved(false);
+    setAllocationsResolved(false);
+    setDataLoadFailed(false);
+    const unsubscribeBids = subscribeToAllBids(eventId, (nextBids) => {
+      setBids(nextBids || []);
+      setBidsResolved(true);
+    }, () => {
+      setDataLoadFailed(true);
+      setBidsResolved(true);
+    });
+    const unsubscribeAllocations = subscribeToAllAllocations(eventId, (nextAllocations) => {
+      setAllocations(nextAllocations || []);
+      setAllocationsResolved(true);
+    }, () => {
+      setDataLoadFailed(true);
+      setAllocationsResolved(true);
+    });
     return () => { unsubscribeBids(); unsubscribeAllocations(); };
   }, [eventId]);
+
+  const dataResolved = bidsResolved && allocationsResolved;
 
   const sortedBids = useMemo(() => [...bids].sort((a, b) => {
     if ((b.scoreSnapshot || 0) !== (a.scoreSnapshot || 0)) return (b.scoreSnapshot || 0) - (a.scoreSnapshot || 0);
@@ -65,9 +88,9 @@ export function AllocationConsole({ eventData }) {
       title="Theme allocation"
       subtitle="Review preference submissions, finalize assignments, and control result visibility."
       badge={<StatusBadge status={isFinalized ? 'Finalized' : 'Awaiting finalization'} variant={isFinalized ? 'emerald' : 'amber'} />}
-      action={<div className="flex flex-wrap gap-2"><button type="button" disabled={isFinalized || bids.length === 0 || loading} onClick={() => setConfirmOpen(true)} className="mn-button mn-button-danger min-h-10">{isFinalized ? 'Allocation finalized' : 'Finalize allocation'}</button><button type="button" disabled={!isFinalized || loading} onClick={handleResultsReveal} className="mn-button mn-button-secondary min-h-10">{resultsRevealed ? <><EyeOff className="h-4 w-4" />Hide results</> : <><Eye className="h-4 w-4" />Reveal results</>}</button></div>}
+      action={dataResolved && !dataLoadFailed ? <div className="flex flex-wrap gap-2"><button type="button" disabled={isFinalized || bids.length === 0 || loading} onClick={() => setConfirmOpen(true)} className="mn-button mn-button-danger min-h-10">{isFinalized ? 'Allocation finalized' : 'Finalize allocation'}</button><button type="button" disabled={!isFinalized || loading} onClick={handleResultsReveal} className="mn-button mn-button-secondary min-h-10">{resultsRevealed ? <><EyeOff className="h-4 w-4" />Hide results</> : <><Eye className="h-4 w-4" />Reveal results</>}</button></div> : null}
     >
-      <div className="space-y-7">
+      {!dataResolved ? <DataLoadingPanel label="Loading current bids and allocations…" /> : dataLoadFailed ? <div className="mn-alert mn-alert-error" role="alert">Could not load bids and allocations. Refresh and try again.</div> : <div className="space-y-7">
         {message && <div role="status" className="mn-alert mn-alert-success">{message}</div>}
         <div className="mn-stat-grid">
           <div className="mn-stat"><label>Submitted rankings</label><strong>{bids.length}</strong></div>
@@ -93,7 +116,7 @@ export function AllocationConsole({ eventData }) {
         </div>
 
         <ConfirmDialog isOpen={confirmOpen} title="Finalize theme allocation?" message="This runs the seat-based allocation using each team’s quiz score and ranked preferences, writes the assignments, and closes bidding." confirmLabel="Finalize allocation" requireInputMatch="FINALIZE" onConfirm={handleExecuteFinalize} onClose={() => setConfirmOpen(false)} loading={loading} />
-      </div>
+      </div>}
     </ControlPanel>
   );
 }

@@ -3,6 +3,7 @@ import { Download, ExternalLink, UsersRound } from 'lucide-react';
 import { subscribeToRegisteredTeams } from '../../services/firestoreService';
 import { formatTimestamp } from '../../utils/formatters';
 import { ControlPanel } from '../common/ControlPanel';
+import { DataLoadingPanel } from '../common/DataLoadingPanel';
 
 function csvValue(value) {
   return `"${String(value ?? '').replace(/"/g, '""')}"`;
@@ -20,7 +21,20 @@ function buildRegistrationRows(teams) {
 export function RegistrationConsole({ eventData }) {
   const eventId = eventData?.id || 'default-event';
   const [teams, setTeams] = useState([]);
-  useEffect(() => subscribeToRegisteredTeams(eventId, setTeams), [eventId]);
+  const [teamsResolved, setTeamsResolved] = useState(false);
+  const [teamsLoadFailed, setTeamsLoadFailed] = useState(false);
+  useEffect(() => {
+    setTeams([]);
+    setTeamsResolved(false);
+    setTeamsLoadFailed(false);
+    return subscribeToRegisteredTeams(eventId, (nextTeams) => {
+      setTeams(nextTeams);
+      setTeamsResolved(true);
+    }, () => {
+      setTeamsLoadFailed(true);
+      setTeamsResolved(true);
+    });
+  }, [eventId]);
   const memberCount = useMemo(() => teams.reduce((total, team) => total + (Array.isArray(team.members) ? team.members.length : 0), 0), [teams]);
 
   const downloadExcelCsv = () => {
@@ -37,8 +51,8 @@ export function RegistrationConsole({ eventData }) {
   };
 
   return (
-    <ControlPanel title="Team registrations" subtitle="Review registered teams, member details, and proof links." action={<button type="button" onClick={downloadExcelCsv} disabled={teams.length === 0} className="mn-button mn-button-primary min-h-10"><Download className="h-4 w-4" />Download CSV for Excel</button>}>
-      <div className="space-y-7">
+    <ControlPanel title="Team registrations" subtitle="Review registered teams, member details, and proof links." action={teamsResolved && !teamsLoadFailed ? <button type="button" onClick={downloadExcelCsv} disabled={teams.length === 0} className="mn-button mn-button-primary min-h-10"><Download className="h-4 w-4" />Download CSV for Excel</button> : null}>
+      {!teamsResolved ? <DataLoadingPanel label="Loading current registrations…" /> : teamsLoadFailed ? <div className="mn-alert mn-alert-error" role="alert">Could not load registrations. Refresh and try again.</div> : <div className="space-y-7">
         <div className="mn-stat-grid is-two"><div className="mn-stat"><label>Registered teams</label><strong>{teams.length}</strong></div><div className="mn-stat"><label>Registered members</label><strong className="text-[var(--mn-violet)]">{memberCount}</strong></div></div>
         <div className="mn-table-wrap">
           <table className="mn-table min-w-[980px]">
@@ -51,7 +65,7 @@ export function RegistrationConsole({ eventData }) {
           </table>
         </div>
         <p className="flex gap-2 text-xs leading-5 text-[var(--mn-faint)]"><UsersRound className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-violet)]" />The export contains one row per member, including the team code and Google Drive proof URL.</p>
-      </div>
+      </div>}
     </ControlPanel>
   );
 }

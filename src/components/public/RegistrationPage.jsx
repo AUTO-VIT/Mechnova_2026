@@ -104,7 +104,7 @@ export function RegistrationPage() {
               ))}
             </div>
 
-            <div className="flex justify-end border-t border-[var(--mn-line)] pt-6"><button type="submit" disabled={loading} className="mn-button mn-button-primary min-w-64">{loading ? <><Loader2 className="h-4 w-4 animate-spin" />Creating team…</> : <>Create team &amp; credentials<ArrowRight className="h-4 w-4" /></>}</button></div>
+            <div className="flex justify-end border-t border-[var(--mn-line)] pt-6"><button type="submit" disabled={loading} className="mn-button mn-button-primary w-full sm:w-auto sm:min-w-64">{loading ? <><Loader2 className="h-4 w-4 animate-spin" />Creating team…</> : <>Create team &amp; credentials<ArrowRight className="h-4 w-4" /></>}</button></div>
           </div>
         </form>
       )}

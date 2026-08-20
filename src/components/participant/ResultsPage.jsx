@@ -12,6 +12,7 @@ export function ResultsPage() {
   const { eventData, publicThemes } = useEvent();
   const [allocation, setAllocation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [allocationLoadFailed, setAllocationLoadFailed] = useState(false);
 
   const isFinalized = eventData?.allocationFinalized === true;
   const resultsRevealed = eventData?.resultsRevealed === true;
@@ -22,8 +23,12 @@ export function ResultsPage() {
       return undefined;
     }
     setLoading(true);
+    setAllocationLoadFailed(false);
     const unsubscribe = subscribeToTeamAllocation(eventData.id, uid, (nextAllocation) => {
       setAllocation(nextAllocation);
+      setLoading(false);
+    }, () => {
+      setAllocationLoadFailed(true);
       setLoading(false);
     });
     return () => unsubscribe();
@@ -43,6 +48,8 @@ export function ResultsPage() {
     const adminActive = role === 'ADMIN';
     return <div className="mx-auto max-w-2xl py-12"><LockedPanel title={adminActive ? 'A team account is required' : 'Team sign-in required'} message={adminActive ? 'Administrator accounts cannot view a participant assignment. Switch to the registered team account you want to check.' : 'Sign in with your team code and passkey to view your team result.'} actionButton={<Link to="/login" className="mn-button mn-button-primary">{adminActive ? 'Switch to team sign in' : 'Sign in'}</Link>} /></div>;
   }
+
+  if (allocationLoadFailed) return <div className="mn-alert mn-alert-error mx-auto max-w-3xl" role="alert">Could not load your result. Refresh and try again.</div>;
 
   return (
     <div className="mn-page">
