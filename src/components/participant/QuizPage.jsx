@@ -7,23 +7,23 @@ import { Link } from 'react-router-dom';
 
 export function QuizPage() {
   const { eventData } = useEvent();
-  const { currentUser } = useAuth();
+  const { role, loading } = useAuth();
 
   const isQuizOpen = eventData?.quizOpen === true;
 
-  if (!currentUser) {
+  if (loading) {
+    return <div className="mn-empty mx-auto max-w-2xl py-12" role="status">Verifying team access…</div>;
+  }
+
+  if (role !== 'TEAM') {
+    const adminActive = role === 'ADMIN';
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16">
+      <div className="mx-auto max-w-2xl py-12">
         <LockedPanel
-          title="AUTHENTICATION REQUIRED"
-          message="You must authenticate at the Team Access Gate before entering the Quiz Engine."
+          title={adminActive ? 'A team account is required' : 'Team sign-in required'}
+          message={adminActive ? 'Administrator accounts manage the quiz but cannot attempt it. Switch to a registered team using its team code and passkey.' : 'Sign in with your team code and passkey before starting the quiz.'}
           actionButton={
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
-            >
-              AUTHENTICATE NOW
-            </Link>
+            <Link to="/login" className="mn-button mn-button-primary">{adminActive ? 'Switch to team sign in' : 'Sign in'}</Link>
           }
         />
       </div>
@@ -32,17 +32,12 @@ export function QuizPage() {
 
   if (!isQuizOpen) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16">
+      <div className="mx-auto max-w-3xl py-12">
         <LockedPanel
-          title="QUIZ CHANNEL IS SEALED"
-          message="The Authoritative Quiz phase is currently CLOSED by administrative directive. Please check back when admin opens the quiz channel."
+          title="The quiz is not open"
+          message="The administrator has not opened the quiz yet. This page will be ready as soon as the quiz begins."
           actionButton={
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 bg-[#68388D] hover:bg-[#855AB4] text-white font-mono text-xs font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all active:scale-95 shadow-[0_0_20px_rgba(178,111,203,0.3)] border border-[#B26FCB]/40"
-            >
-              RETURN TO HOME
-            </Link>
+            <Link to="/" className="mn-button mn-button-secondary">Return home</Link>
           }
         />
       </div>

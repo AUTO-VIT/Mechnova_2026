@@ -14,10 +14,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubAuth = subscribeToAuthState((state) => {
       setAuthState(state);
-      if (!state.user) {
+      if (state.role !== 'TEAM') {
         setTeamData(null);
         setTeamScore({ totalPoints: 0, answeredCount: 0, correctCount: 0 });
         setLoading(false);
+      } else {
+        setLoading(true);
       }
     });
 
@@ -26,8 +28,8 @@ export function AuthProvider({ children }) {
 
   // Subscribe to Team data when authenticated as Team
   useEffect(() => {
-    if (!authState.uid || authState.isAdmin) {
-      if (!authState.uid) setLoading(false);
+    if (!authState.uid || authState.role !== 'TEAM') {
+      setLoading(false);
       return;
     }
 
@@ -45,7 +47,7 @@ export function AuthProvider({ children }) {
       unsubTeam();
       unsubScore();
     };
-  }, [authState.uid, authState.isAdmin]);
+  }, [authState.uid, authState.role]);
 
   const value = {
     currentUser: authState.user,

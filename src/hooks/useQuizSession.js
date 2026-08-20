@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { startSessionApi, submitAnswerApi } from '../services/callableApi';
 import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -10,10 +10,18 @@ export function useQuizSession(teamId) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [sessionResolved, setSessionResolved] = useState(false);
+  const submittingRef = useRef(false);
 
   // Subscribe to real-time session updates
   useEffect(() => {
-    if (!teamId) return;
+    if (!teamId) {
+      setSession(null);
+      setCurrentQuestion(null);
+      setSessionResolved(true);
+      return undefined;
+    }
+    setSessionResolved(false);
     const sessionRef = doc(db, 'quizSessions', teamId);
     const unsubSession = onSnapshot(sessionRef, (snap) => {
       if (snap.exists()) {
@@ -22,8 +30,13 @@ export function useQuizSession(teamId) {
         setCurrentQuestion(nextSession.currentQuestion || null);
       } else {
         setSession(null);
+        setCurrentQuestion(null);
       }
-    }, (err) => setError(err.message));
+      setSessionResolved(true);
+    }, (err) => {
+      setError(err.message);
+      setSessionResolved(true);
+    });
 
     const answersCol = collection(db, 'quizSessions', teamId, 'answers');
     const unsubAnswers = onSnapshot(answersCol, (snap) => {
@@ -50,6 +63,7 @@ export function useQuizSession(teamId) {
       const res = await startSessionApi({ eventId, quizId, teamId });
       if (res.session) setSession(res.session);
       if (res.currentQuestion) setCurrentQuestion(res.currentQuestion);
+      setSessionResolved(true);
       return res;
     } catch (err) {
       console.error("Failed to start quiz session:", err);
@@ -64,7 +78,8 @@ export function useQuizSession(teamId) {
    * Submit Answer Choice for Current Active Question
    */
   const submitAnswerChoice = useCallback(async ({ eventId = 'default-event', quizId = 'default-quiz', questionIndex, questionId, selectedOption }) => {
-    if (submitting) return;
+    if (submittingRef.current) return null;
+    submittingRef.current = true;
     setSubmitting(true);
     setError(null);
     try {
@@ -74,7 +89,7 @@ export function useQuizSession(teamId) {
         sessionId: teamId,
         questionIndex,
         questionId,
-        selectedOption
+        selectedOption: selectedOption ?? null
       });
 
       if (res.session) setSession(res.session);
@@ -86,9 +101,10 @@ export function useQuizSession(teamId) {
       setError(err.message || "Answer submission failed.");
       throw err;
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
-  }, [submitting, teamId]);
+  }, [teamId]);
 
   return {
     session,
@@ -98,6 +114,7 @@ export function useQuizSession(teamId) {
     loading,
     submitting,
     error,
+    sessionResolved,
     setError,
     startQuiz,
     submitAnswerChoice

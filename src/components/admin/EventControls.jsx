@@ -1,209 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { CheckCircle2, ClipboardList, Play, Square, Trophy, UsersRound } from 'lucide-react';
 import { updateEventControls } from '../../services/firestoreService';
-import { Radio, ShieldAlert, CheckCircle2, Play, Square, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 
 export function EventControls({ eventData }) {
-  // Local state initialized with eventData and instantly updated on toggle
   const [controls, setControls] = useState({
     registrationOpen: eventData?.registrationOpen !== false,
     quizOpen: eventData?.quizOpen === true,
     biddingOpen: eventData?.biddingOpen === true
   });
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (eventData) {
-      setControls({
-        registrationOpen: eventData.registrationOpen !== false,
-        quizOpen: eventData.quizOpen === true,
-        biddingOpen: eventData.biddingOpen === true
-      });
-    }
+    if (eventData) setControls({ registrationOpen: eventData.registrationOpen !== false, quizOpen: eventData.quizOpen === true, biddingOpen: eventData.biddingOpen === true });
   }, [eventData]);
+
+  const controlItems = [
+    { field: 'registrationOpen', label: 'Registration', icon: UsersRound, openCopy: 'Teams can submit registrations and receive their access credentials.', closedCopy: 'New team registrations are paused.' },
+    { field: 'quizOpen', label: 'Quiz', icon: ClipboardList, openCopy: 'Signed-in teams can start the timed quiz.', closedCopy: 'Teams cannot start or submit quiz attempts.' },
+    { field: 'biddingOpen', label: 'Theme preferences', icon: Trophy, openCopy: 'Teams can rank every revealed theme and submit their order.', closedCopy: 'Theme preference submissions are paused.' }
+  ];
 
   const handleToggle = async (field, currentValue) => {
     setLoading(true);
-    setMsg('');
-    const newValue = !currentValue;
-    
-    // 1. Optimistic instant UI update
-    setControls(prev => ({ ...prev, [field]: newValue }));
-
-    const fieldNames = {
-      quizOpen: 'Quiz Evaluation Channel',
-      registrationOpen: 'Team Registration Gate',
-      biddingOpen: 'Theme Bidding Arena'
-    };
-
+    setMessage('');
+    const nextValue = !currentValue;
+    setControls((current) => ({ ...current, [field]: nextValue }));
     try {
-      await updateEventControls(eventData?.id || 'default-event', {
-        [field]: newValue
-      });
-      setMsg(`${fieldNames[field] || field} set to ${newValue ? 'ACTIVE / OPEN' : 'SEALED / CLOSED'}.`);
-      setTimeout(() => setMsg(''), 3000);
-    } catch (err) {
-      console.warn("Control toggle Firestore sync note:", err.message);
-      // The localStorage cache already succeeded in updateEventControls,
-      // so the toggle is applied locally even if Firestore sync fails.
-      setMsg(`${fieldNames[field] || field} set to ${newValue ? 'ACTIVE / OPEN' : 'SEALED / CLOSED'} (local mode).`);
-      setTimeout(() => setMsg(''), 3000);
+      await updateEventControls(eventData?.id || 'default-event', { [field]: nextValue });
+      setMessage(`${controlItems.find((item) => item.field === field)?.label} is now ${nextValue ? 'open' : 'closed'}.`);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.warn('Control toggle Firestore sync note:', error.message);
+      setMessage(`${controlItems.find((item) => item.field === field)?.label} changed locally; Firebase sync needs attention.`);
+      setTimeout(() => setMessage(''), 4000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-8">
-      {msg && (
-        <div className="border border-emerald-500/40 bg-emerald-500/15 p-4 rounded-2xl font-mono text-xs text-emerald-300 flex items-center gap-3 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
-          <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />
-          <span className="font-semibold">{msg}</span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Registration Gate Control Card */}
-        <div className="border border-[#855AB4]/30 rounded-3xl p-6 bg-[#221545]/60 backdrop-blur-xl space-y-5 shadow-[0_0_35px_rgba(104,56,141,0.15)] flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-300 uppercase tracking-wider font-bold">
-                Registration Gate
-              </span>
-              <span className={`font-mono text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
-                controls.registrationOpen
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                  : 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-[0_0_15px_rgba(249,115,22,0.3)]'
-              }`}>
-                {controls.registrationOpen ? "● OPEN" : "○ CLOSED"}
-              </span>
-            </div>
-
-            <p className="text-zinc-300 text-xs font-light leading-relaxed">
-              {controls.registrationOpen
-                ? "Participant teams can register 2-4 members and receive synthetic passkeys."
-                : "Registration is currently CLOSED. Participants cannot submit new rosters."}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => handleToggle('registrationOpen', controls.registrationOpen)}
-            className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
-              controls.registrationOpen
-                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
-                : 'border-[#B26FCB]/60 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_25px_rgba(178,111,203,0.4)]'
-            }`}
-          >
-            {controls.registrationOpen ? (
-              <>
-                <Square className="h-3.5 w-3.5" />
-                <span>CLOSE REGISTRATION</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3.5 w-3.5" />
-                <span>OPEN REGISTRATION</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Quiz Channel Control Card */}
-        <div className="border border-[#855AB4]/30 rounded-3xl p-6 bg-[#221545]/60 backdrop-blur-xl space-y-5 shadow-[0_0_35px_rgba(104,56,141,0.15)] flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-300 uppercase tracking-wider font-bold">
-                Quiz Channel
-              </span>
-              <span className={`font-mono text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
-                controls.quizOpen
-                  ? 'bg-[#B26FCB]/20 text-[#B26FCB] border border-[#B26FCB]/50 shadow-[0_0_15px_rgba(178,111,203,0.35)]'
-                  : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-              }`}>
-                {controls.quizOpen ? "● ACTIVE" : "○ SEALED"}
-              </span>
-            </div>
-
-            <p className="text-zinc-300 text-xs font-light leading-relaxed">
-              {controls.quizOpen
-                ? "10s Read + 10s Answer authoritative timed quiz engine is LIVE for all teams."
-                : "Quiz channel is SEALED. Teams cannot start or submit quiz sessions."}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => handleToggle('quizOpen', controls.quizOpen)}
-            className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
-              controls.quizOpen
-                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
-                : 'border-[#B26FCB]/60 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_25px_rgba(178,111,203,0.4)]'
-            }`}
-          >
-            {controls.quizOpen ? (
-              <>
-                <Square className="h-3.5 w-3.5" />
-                <span>CLOSE QUIZ CHANNEL</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3.5 w-3.5" />
-                <span>OPEN QUIZ CHANNEL</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Theme Bidding Control Card */}
-        <div className="border border-[#855AB4]/30 rounded-3xl p-6 bg-[#221545]/60 backdrop-blur-xl space-y-5 shadow-[0_0_35px_rgba(104,56,141,0.15)] flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-zinc-300 uppercase tracking-wider font-bold">
-                Theme Bidding
-              </span>
-              <span className={`font-mono text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
-                controls.biddingOpen
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                  : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-              }`}>
-                {controls.biddingOpen ? "● OPEN" : "○ CLOSED"}
-              </span>
-            </div>
-
-            <p className="text-zinc-300 text-xs font-light leading-relaxed">
-              {controls.biddingOpen
-                ? "Theme bidding arena is OPEN. Teams can allocate quiz points to themes."
-                : "Theme bidding is LOCKED. Bids cannot be submitted."}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => handleToggle('biddingOpen', controls.biddingOpen)}
-            className={`w-full font-mono text-xs font-bold uppercase tracking-[0.15em] py-3.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border cursor-pointer ${
-              controls.biddingOpen
-                ? 'border-orange-500/40 bg-orange-950/40 text-orange-300 hover:bg-orange-900/60 shadow-[0_0_20px_rgba(249,115,22,0.25)]'
-                : 'border-[#B26FCB]/50 bg-[#68388D] text-white hover:bg-[#855AB4] shadow-[0_0_20px_rgba(178,111,203,0.3)]'
-            }`}
-          >
-            {controls.biddingOpen ? (
-              <>
-                <Square className="h-3.5 w-3.5" />
-                <span>CLOSE BIDDING ARENA</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3.5 w-3.5" />
-                <span>OPEN BIDDING ARENA</span>
-              </>
-            )}
-          </button>
-        </div>
+    <div className="space-y-6">
+      {message && <div role="status" className="mn-alert mn-alert-success"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />{message}</div>}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {controlItems.map((item, index) => {
+          const Icon = item.icon;
+          const isOpen = controls[item.field];
+          return (
+            <section key={item.field} className="mn-panel flex min-h-[300px] flex-col justify-between" data-tilt>
+              <div>
+                <div className="flex items-center justify-between gap-4"><span className="grid h-11 w-11 place-items-center border border-[var(--mn-line-strong)] text-[var(--mn-violet)]"><Icon className="h-5 w-5" /></span><span className={`mn-status ${isOpen ? 'is-live' : ''}`}><span className="mn-live-dot" />{isOpen ? 'Open' : 'Closed'}</span></div>
+                <span className="mn-label mt-8 block">Phase 0{index + 1}</span>
+                <h3 className="mt-2 font-['Syne'] text-2xl font-semibold">{item.label}</h3>
+                <p className="mt-3 text-sm leading-6 text-[var(--mn-muted)]">{isOpen ? item.openCopy : item.closedCopy}</p>
+              </div>
+              <button type="button" disabled={loading} onClick={() => handleToggle(item.field, isOpen)} className={`mn-button mt-8 w-full ${isOpen ? 'mn-button-danger' : 'mn-button-accent'}`}>{isOpen ? <><Square className="h-3.5 w-3.5" />Close {item.label.toLowerCase()}</> : <><Play className="h-3.5 w-3.5" />Open {item.label.toLowerCase()}</>}</button>
+            </section>
+          );
+        })}
       </div>
+      <p className="text-xs leading-5 text-[var(--mn-faint)]">Changes take effect immediately for participant pages. Close a phase only when you are ready to stop new submissions.</p>
     </div>
   );
 }

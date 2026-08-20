@@ -1,88 +1,47 @@
 import React from 'react';
+import { Lock, UsersRound } from 'lucide-react';
 import { useEvent } from '../../context/EventContext';
-import { Layers, Lock, UsersRound } from 'lucide-react';
 
 export function ThemeRevealPanel() {
   const { eventData, publicThemes } = useEvent();
   const isRevealed = eventData?.themesRevealed === true || publicThemes.length > 0;
 
   return (
-    <div className="w-full space-y-16">
-      {/* Header Across 1080p */}
-      <div className="space-y-3 pb-6 border-b border-[#855AB4]/20">
-        <div className="inline-flex items-center gap-2 text-[#B26FCB] font-mono text-xs tracking-widest uppercase">
-          <Layers className="h-3.5 w-3.5" />
-          <span>CHALLENGE DOMAINS</span>
-        </div>
-        <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white tracking-tight">
-          Hackathon Challenge Themes
-        </h1>
-        <p className="text-zinc-300 font-sans text-base max-w-3xl font-light">
-          These challenge briefs are revealed by the administrator. During bidding, teams rank every revealed theme and use their earned quiz points to support their first choice.
-        </p>
-      </div>
+    <div className="mn-page">
+      <header className="mn-page-head">
+        <div className="mn-kicker">Challenge themes</div>
+        <h1 className="mn-title">The problems teams will build around.</h1>
+        <p className="mn-lede">Themes stay private until the event team releases them. Once visible, every team ranks the complete list before allocation.</p>
+      </header>
 
-      {/* Pre-reveal Locked State vs Post-reveal Grid */}
       {!isRevealed ? (
-        <div className="py-28 text-center border border-[#855AB4]/30 rounded-3xl bg-[#221545]/40 space-y-6 shadow-[0_0_50px_rgba(104,56,141,0.2)]">
-          <div className="h-16 w-16 rounded-full border border-[#855AB4]/40 bg-[#68388D]/30 flex items-center justify-center mx-auto text-[#B26FCB]">
-            <Lock className="h-6 w-6" />
-          </div>
-          <div className="space-y-2 max-w-lg mx-auto">
-            <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
-              Themes are currently sealed
-            </h2>
-            <p className="text-zinc-400 text-sm font-light leading-relaxed">
-              The administrator will reveal the challenge briefs when the event is ready. Until then, they are visible only in the admin dashboard.
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-2 font-mono text-xs text-[#B26FCB] border border-[#855AB4]/40 px-5 py-2 rounded-full bg-[#221545]/60">
-            <span className="h-2 w-2 rounded-full bg-[#B26FCB] animate-pulse shadow-[0_0_8px_rgba(178,111,203,1)]"></span>
-            <span>AWAITING AUDITED REVEAL</span>
-          </div>
-        </div>
+        <section className="mn-panel mn-theme-vault py-20 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center border border-[var(--mn-line-strong)] text-[var(--mn-violet)]"><Lock className="h-5 w-5" /></div>
+          <h2 className="mt-7 font-['Syne'] text-3xl font-semibold tracking-[-.04em]">Themes have not been released.</h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-zinc-400">The challenge list will appear here when the administrator reveals it. No participant can see the private briefs before then.</p>
+          <span className="mn-status mt-7">Waiting for release</span>
+        </section>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {publicThemes.map((theme, idx) => (
-            <div
-              key={theme.id || theme.themeId || idx}
-              className="border border-[#855AB4]/30 rounded-3xl p-8 lg:p-10 bg-[#221545]/40 space-y-5 hover:border-[#B26FCB] hover:bg-[#221545]/70 transition-all duration-300 shadow-[0_0_30px_rgba(104,56,141,0.15)]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-[#B26FCB] font-bold tracking-widest uppercase">
-                  THEME 0{theme.themeNumber || idx + 1}
-                </span>
-                <span className="font-mono text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full uppercase tracking-wider font-bold">
-                  REVEALED
-                </span>
-              </div>
-
-              <h2 className="font-sans text-2xl sm:text-3xl font-bold text-white">
-                {theme.publicName || theme.name}
-              </h2>
-
-              <p className="text-zinc-300 text-sm font-light leading-relaxed">
-                {theme.publicDescription || theme.description || "Autonomous robotics problem statement and engineering domain specifications."}
-              </p>
-
-              {theme.brief && (
-                <div className="text-xs text-[#B26FCB] font-light border-l-2 border-[#855AB4] pl-4 py-2 bg-[#110515]/60 rounded-r-xl">
-                  {theme.brief}
+        <section aria-label="Revealed challenge themes">
+          <div className="mn-section-head">
+            <div><div className="mn-kicker">Released list</div><h2 className="mn-section-title mt-4">{publicThemes.length} themes available</h2></div>
+            <p>Seat limits are set by the event team. Rank every theme in the Bidding page when the bidding window opens.</p>
+          </div>
+          <div className="mn-theme-grid">
+            {publicThemes.map((theme, index) => (
+              <article key={theme.id || theme.themeId || index} className="mn-theme-card" data-tilt>
+                <div className="flex items-start justify-between gap-4">
+                  <span className="mn-theme-card-index">THEME {String(theme.themeNumber || index + 1).padStart(2, '0')}</span>
+                  <span className="mn-status is-live">Released</span>
                 </div>
-              )}
-
-              <div className="pt-4 border-t border-[#855AB4]/20 flex items-center justify-between font-mono text-xs text-zinc-400">
-                <span>ELIGIBILITY</span>
-                <span className="text-[#B26FCB] font-medium">{theme.eligibility || "All Registered Teams"}</span>
-              </div>
-
-              <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
-                <UsersRound className="h-3.5 w-3.5 text-[#B26FCB]" />
-                <span>{theme.seatCapacity || theme.capacity || '—'} team seat{Number(theme.seatCapacity || theme.capacity) === 1 ? '' : 's'} available</span>
-              </div>
-            </div>
-          ))}
-        </div>
+                <h3>{theme.publicName || theme.name}</h3>
+                <p>{theme.publicDescription || theme.description || 'The full challenge description will be shared by the event team.'}</p>
+                {theme.brief && <div className="mt-5 border-l-2 border-[var(--mn-violet)] pl-4 text-xs leading-6 text-zinc-300">{theme.brief}</div>}
+                <div className="mn-theme-card-foot"><span>{theme.eligibility || 'All registered teams'}</span><span className="inline-flex items-center gap-1.5"><UsersRound className="h-3.5 w-3.5" />{theme.seatCapacity || theme.capacity || '—'} seats</span></div>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

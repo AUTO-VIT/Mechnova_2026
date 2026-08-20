@@ -1,9 +1,8 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { AutomationShell } from './components/common/AutomationShell';
 
 const loadComponent = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })));
-
 const HomePage = loadComponent(() => import('./components/public/HomePage'), 'HomePage');
 const EventStatus = loadComponent(() => import('./components/public/EventStatus'), 'EventStatus');
 const ThemeRevealPanel = loadComponent(() => import('./components/public/ThemeRevealPanel'), 'ThemeRevealPanel');
@@ -16,7 +15,7 @@ const AdminLogin = loadComponent(() => import('./components/admin/AdminLogin'), 
 const AdminDashboard = loadComponent(() => import('./components/admin/AdminDashboard'), 'AdminDashboard');
 
 function PageLoader() {
-  return <div className="page-loader" role="status" aria-live="polite">Loading workspace…</div>;
+  return <div className="mn-empty min-h-60" role="status" aria-live="polite">Loading page…</div>;
 }
 
 export function AppRoutes() {
@@ -24,24 +23,17 @@ export function AppRoutes() {
     <AutomationShell>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-        {/* Public Pages */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/status" element={<EventStatus />} />
-        <Route path="/themes" element={<ThemeRevealPanel />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        
-        {/* Participant Pages */}
-        <Route path="/login" element={<TeamAccessGate />} />
-        <Route path="/quiz" element={<QuizPage />} />
-        <Route path="/bidding" element={<BiddingPage />} />
-        <Route path="/results" element={<ResultsPage />} />
-
-        {/* Admin Pages */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/status" element={<EventStatus />} />
+          <Route path="/themes" element={<ThemeRevealPanel />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/login" element={<TeamAccessGate />} />
+          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/bidding" element={<BiddingPage />} />
+          <Route path="/results" element={<ResultsPage />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </AutomationShell>

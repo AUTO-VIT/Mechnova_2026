@@ -16,7 +16,9 @@ export default function ParticleCanvas() {
 
   useEffect(() => {
     const container = mountRef.current;
-    if (!container) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const compactViewport = window.matchMedia('(max-width: 860px)').matches;
+    if (!container || reduceMotion || compactViewport || !window.WebGLRenderingContext) return undefined;
 
     let animationFrameId;
     let width = window.innerWidth;
@@ -94,7 +96,7 @@ export default function ParticleCanvas() {
     scene.add(gridMesh);
 
     // 4. Stardust Particle Constellation (#B26FCB, #855AB4, #68388D, #ffffff)
-    const particleCount = 550;
+    const particleCount = window.devicePixelRatio > 1.5 ? 420 : 520;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
@@ -159,7 +161,7 @@ export default function ParticleCanvas() {
       targetMouseY = (event.clientY - windowHalfY) * 0.35;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     // 6. Resize Handler
     const handleResize = () => {
@@ -176,13 +178,18 @@ export default function ParticleCanvas() {
       octMesh.position.x = posX;
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     // 7. Animation Loop
     const startTime = performance.now();
 
+    let pageVisible = !document.hidden;
+    const handleVisibility = () => { pageVisible = !document.hidden; };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      if (!pageVisible) return;
       const elapsedTime = (performance.now() - startTime) * 0.001;
 
       // Smooth mouse damping
@@ -220,6 +227,7 @@ export default function ParticleCanvas() {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
       cancelAnimationFrame(animationFrameId);
 
       icoGeo.dispose();
@@ -248,7 +256,7 @@ export default function ParticleCanvas() {
   return (
     <div
       ref={mountRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-80 transition-opacity duration-1000 overflow-hidden"
+      className="mn-particle-canvas"
       aria-hidden="true"
     />
   );

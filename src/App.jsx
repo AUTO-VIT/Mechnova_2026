@@ -6,7 +6,7 @@ import { AppRoutes } from './routes';
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <EventProvider eventId="default-event">
         <AuthProvider>
           <AppRoutes />

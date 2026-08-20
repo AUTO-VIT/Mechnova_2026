@@ -5,30 +5,30 @@ import { DEFAULT_HOMEPAGE_CMS, saveCmsPage, subscribeToCmsContent } from '../../
 const sections = [
   {
     id: 'hero', label: 'Hero', icon: Sparkles,
-    description: 'Everything in the opening hero: headline, buttons, badges, and orbit callouts.',
+    description: 'The opening message, actions, benefits, announcement, and two supporting feature cards.',
     fields: [
-      ['heroBadge', 'Top badge'], ['heroEyebrow', 'Eyebrow'], ['heroTitleLine1', 'Headline line 1'], ['heroTitleLine2', 'Headline line 2'], ['heroTitleAccent', 'Headline accent word'],
-      ['heroSubtitle', 'Hero description', true], ['heroPrimaryCtaText', 'Primary button'], ['heroSecondaryCtaText', 'Secondary button'], ['heroBenefit1', 'Benefit 1'], ['heroBenefit2', 'Benefit 2'], ['heroBenefit3', 'Benefit 3'],
-      ['heroCoreText', 'Orbit centre text'], ['heroStatusLabel', 'Orbit status label'], ['heroStatusValue', 'Orbit status value'], ['heroMissionLabel', 'Orbit mission label'], ['heroMissionValue', 'Orbit mission value'], ['announcementLabel', 'Announcement label'], ['heroAnnouncements', 'Announcement message', true]
+      ['heroBadge', 'Fallback eyebrow'], ['heroEyebrow', 'Eyebrow'], ['heroTitleLine1', 'Headline line 1'], ['heroTitleLine2', 'Headline line 2'], ['heroTitleAccent', 'Highlighted word'],
+      ['heroSubtitle', 'Introduction', true], ['heroPrimaryCtaText', 'Primary button'], ['heroSecondaryCtaText', 'Secondary button'], ['heroBenefit1', 'Benefit 1'], ['heroBenefit2', 'Benefit 2'], ['heroBenefit3', 'Benefit 3'],
+      ['heroStatusLabel', 'First feature label'], ['heroStatusValue', 'First feature value'], ['heroMissionLabel', 'Second feature label'], ['heroMissionValue', 'Second feature value'], ['heroCoreText', 'Second feature supporting text'], ['announcementLabel', 'Announcement label'], ['heroAnnouncements', 'Announcement message', true]
     ]
   },
   {
-    id: 'live', label: 'Live panel', icon: Radio,
-    description: 'The live event signal panel and all of its status labels.',
+    id: 'status', label: 'Event status', icon: Radio,
+    description: 'The real-time event board and the text shown for open and closed phases.',
     fields: [
-      ['liveEyebrow', 'Panel eyebrow'], ['liveTitle', 'Panel title'], ['liveDescription', 'Panel description', true], ['liveLinkText', 'Panel link'],
-      ['statusRegistrationLabel', 'Registration label'], ['statusRegistrationOpen', 'Registration open value'], ['statusRegistrationClosed', 'Registration closed value'],
-      ['statusQuizLabel', 'Quiz label'], ['statusQuizLive', 'Quiz live value'], ['statusQuizStandby', 'Quiz standby value'],
-      ['statusThemesLabel', 'Theme reveal label'], ['statusThemesSealed', 'Theme sealed value'], ['statusThemesSuffix', 'Theme count suffix'],
-      ['statusBiddingLabel', 'Bidding label'], ['statusBiddingOpen', 'Bidding open value'], ['statusBiddingClosed', 'Bidding closed value']
+      ['liveEyebrow', 'Section eyebrow'], ['liveTitle', 'Section title'], ['liveDescription', 'Section description', true], ['liveLinkText', 'Status page link'],
+      ['statusRegistrationLabel', 'Registration label'], ['statusRegistrationOpen', 'Registration open'], ['statusRegistrationClosed', 'Registration closed'],
+      ['statusQuizLabel', 'Quiz label'], ['statusQuizLive', 'Quiz open'], ['statusQuizStandby', 'Quiz closed'],
+      ['statusThemesLabel', 'Themes label'], ['statusThemesSealed', 'Themes hidden'], ['statusThemesSuffix', 'Revealed count suffix'],
+      ['statusBiddingLabel', 'Bidding label'], ['statusBiddingOpen', 'Bidding open'], ['statusBiddingClosed', 'Bidding closed']
     ]
   },
   {
-    id: 'themes', label: 'Themes area', icon: Eye,
-    description: 'Headings shown before/after reveal and the four fallback domain cards. Actual revealed-theme names are edited in Theme Control.',
+    id: 'themes', label: 'Themes', icon: Eye,
+    description: 'Headings before and after reveal plus the fallback domain cards. Live theme names are edited in Themes & seats.',
     fields: [
-      ['hiddenThemesEyebrow', 'Hidden themes eyebrow'], ['hiddenThemesTitle', 'Hidden themes title'], ['hiddenThemesDescription', 'Hidden themes description', true],
-      ['revealedThemesEyebrow', 'Revealed themes eyebrow'], ['revealedThemesTitle', 'Revealed themes title'], ['revealedThemesDescription', 'Revealed themes description', true], ['themeCardLabel', 'Theme card label'], ['themeSeatSuffix', 'Theme seat suffix'],
+      ['hiddenThemesEyebrow', 'Hidden state eyebrow'], ['hiddenThemesTitle', 'Hidden state title'], ['hiddenThemesDescription', 'Hidden state description', true],
+      ['revealedThemesEyebrow', 'Revealed state eyebrow'], ['revealedThemesTitle', 'Revealed state title'], ['revealedThemesDescription', 'Revealed state description', true], ['themeCardLabel', 'Theme card label'], ['themeSeatSuffix', 'Seat suffix'],
       ['domain1Category', 'Domain 1 code'], ['domain1Title', 'Domain 1 title'], ['domain1Desc', 'Domain 1 description', true],
       ['domain2Category', 'Domain 2 code'], ['domain2Title', 'Domain 2 title'], ['domain2Desc', 'Domain 2 description', true],
       ['domain3Category', 'Domain 3 code'], ['domain3Title', 'Domain 3 title'], ['domain3Desc', 'Domain 3 description', true],
@@ -36,15 +36,15 @@ const sections = [
     ]
   },
   {
-    id: 'journey', label: 'Journey & CTA', icon: Home,
-    description: 'The workflow steps, final banner, and timestamp label.',
+    id: 'journey', label: 'Process & close', icon: Home,
+    description: 'The four event steps, final registration banner, and update timestamp.',
     fields: [
-      ['workflowEyebrow', 'Workflow eyebrow'], ['workflowTitle', 'Workflow title'], ['workflowDescription', 'Workflow description', true],
+      ['workflowEyebrow', 'Process eyebrow'], ['workflowTitle', 'Process title'], ['workflowDescription', 'Process description', true],
       ['phase1Num', 'Step 1 number'], ['phase1Title', 'Step 1 title'], ['phase1Desc', 'Step 1 description', true],
       ['phase2Num', 'Step 2 number'], ['phase2Title', 'Step 2 title'], ['phase2Desc', 'Step 2 description', true],
       ['phase3Num', 'Step 3 number'], ['phase3Title', 'Step 3 title'], ['phase3Desc', 'Step 3 description', true],
       ['phase4Num', 'Step 4 number'], ['phase4Title', 'Step 4 title'], ['phase4Desc', 'Step 4 description', true],
-      ['ctaEyebrow', 'Closing banner eyebrow'], ['ctaTitle', 'Closing banner title'], ['ctaDescription', 'Closing banner description', true], ['ctaButtonText', 'Closing banner button'], ['timestampLabel', 'Timestamp label']
+      ['ctaEyebrow', 'Closing eyebrow'], ['ctaTitle', 'Closing title'], ['ctaDescription', 'Closing description', true], ['ctaButtonText', 'Closing button'], ['timestampLabel', 'Timestamp label']
     ]
   }
 ];
@@ -56,12 +56,7 @@ export function CmsEditor({ eventData }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    return subscribeToCmsContent(eventId, 'homepage', (content) => {
-      setFormData({ ...DEFAULT_HOMEPAGE_CMS, ...content });
-    });
-  }, [eventId]);
-
+  useEffect(() => subscribeToCmsContent(eventId, 'homepage', (content) => setFormData({ ...DEFAULT_HOMEPAGE_CMS, ...content })), [eventId]);
   const section = sections.find((item) => item.id === activeSection);
   const updateField = (field, value) => setFormData((current) => ({ ...current, [field]: value }));
 
@@ -71,9 +66,9 @@ export function CmsEditor({ eventData }) {
     setMessage('');
     try {
       await saveCmsPage(eventId, 'homepage', formData);
-      setMessage('Homepage copy published to Firestore. Every visitor now receives the same content.');
+      setMessage('Homepage content saved. Visitors will receive the updated copy.');
     } catch (error) {
-      setMessage(`Could not publish CMS content: ${error.message}`);
+      setMessage(`Could not save homepage content: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -81,25 +76,15 @@ export function CmsEditor({ eventData }) {
 
   return (
     <div className="space-y-7">
-      <div className="flex flex-col justify-between gap-4 border-b border-[#855AB4]/20 pb-5 lg:flex-row lg:items-end">
-        <div><span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#B26FCB]">Homepage CMS</span><h2 className="mt-2 font-sans text-2xl font-semibold text-white">Edit every word on the homepage.</h2><p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">This editor maps directly to the redesigned homepage. Revealed theme names and briefs are managed separately in Theme Control.</p></div>
-        <button type="button" onClick={() => setFormData(DEFAULT_HOMEPAGE_CMS)} className="inline-flex items-center gap-2 self-start rounded-full border border-[#855AB4]/30 bg-[#221545]/50 px-4 py-2 font-mono text-xs text-zinc-300 transition hover:border-[#B26FCB] hover:text-white"><RefreshCw className="h-3.5 w-3.5" /> Restore defaults</button>
+      <div className="flex flex-col justify-between gap-4 border-b border-[var(--mn-line)] pb-6 lg:flex-row lg:items-end">
+        <div><span className="mn-kicker">Homepage content</span><h2 className="mt-3 font-['Syne'] text-3xl font-semibold tracking-tight">Edit the public homepage.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--mn-muted)]">Every visible block of homepage copy is grouped below. Revealed theme details remain in Themes &amp; seats.</p></div>
+        <button type="button" onClick={() => setFormData(DEFAULT_HOMEPAGE_CMS)} className="mn-button mn-button-secondary self-start"><RefreshCw className="h-3.5 w-3.5" />Restore defaults</button>
       </div>
-
-      {message && <div role="status" className={`flex items-center gap-2 rounded-2xl border p-4 font-mono text-xs ${message.startsWith('Could not') ? 'border-orange-500/40 bg-orange-500/10 text-orange-200' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'}`}><CheckCircle2 className="h-4 w-4" />{message}</div>}
-
-      <div className="flex flex-wrap gap-2 border-b border-[#855AB4]/20 pb-4">
-        {sections.map((item) => { const Icon = item.icon; const active = item.id === activeSection; return <button key={item.id} type="button" onClick={() => setActiveSection(item.id)} className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider transition ${active ? 'border border-[#B26FCB]/50 bg-[#68388D] text-white shadow-[0_0_18px_rgba(178,111,203,.3)]' : 'text-zinc-400 hover:bg-[#221545]/60 hover:text-white'}`}><Icon className="h-3.5 w-3.5" />{item.label}</button>; })}
-      </div>
-
+      {message && <div role="status" className={`mn-alert ${message.startsWith('Could not') ? 'mn-alert-error' : 'mn-alert-success'}`}><CheckCircle2 className="h-4 w-4" />{message}</div>}
+      <div className="flex flex-wrap border-b border-[var(--mn-line)]">{sections.map((item) => { const Icon = item.icon; const active = item.id === activeSection; return <button key={item.id} type="button" onClick={() => setActiveSection(item.id)} className={`flex min-h-12 items-center gap-2 border-b-2 px-4 text-xs font-medium transition ${active ? 'border-[var(--mn-violet)] text-white' : 'border-transparent text-[var(--mn-muted)] hover:text-white'}`}><Icon className="h-3.5 w-3.5" />{item.label}</button>; })}</div>
       <form onSubmit={save} className="space-y-6">
-        <div className="rounded-3xl border border-[#855AB4]/30 bg-[#221545]/45 p-5 sm:p-7">
-          <h3 className="font-sans text-xl font-semibold text-white">{section.label}</h3><p className="mt-1 text-sm leading-6 text-zinc-400">{section.description}</p>
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {section.fields.map(([field, label, multiline]) => <label key={field} className={`block space-y-1.5 ${multiline ? 'md:col-span-2' : ''}`}><span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</span>{multiline ? <textarea rows="3" value={formData[field] || ''} onChange={(event) => updateField(field, event.target.value)} className="w-full resize-y rounded-xl border border-[#855AB4]/35 bg-[#110515]/80 p-3 text-sm text-white outline-none transition focus:border-[#B26FCB]" /> : <input type="text" value={formData[field] || ''} onChange={(event) => updateField(field, event.target.value)} className="w-full rounded-xl border border-[#855AB4]/35 bg-[#110515]/80 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-[#B26FCB]" />}</label>)}
-          </div>
-        </div>
-        <div className="flex justify-end"><button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-full border border-[#e8c5f6]/45 bg-[#68388D] px-6 py-3.5 font-mono text-xs font-bold uppercase tracking-[.15em] text-white shadow-[0_0_25px_rgba(178,111,203,.3)] transition hover:bg-[#855AB4] disabled:cursor-not-allowed disabled:bg-zinc-800"><Save className="h-4 w-4" />{loading ? 'Publishing…' : 'Publish homepage copy'}</button></div>
+        <div className="mn-panel rounded-none"><h3 className="font-['Syne'] text-xl font-semibold">{section.label}</h3><p className="mt-1 text-sm leading-6 text-[var(--mn-muted)]">{section.description}</p><div className="mt-7 grid gap-5 md:grid-cols-2">{section.fields.map(([field, label, multiline]) => <label key={field} className={`mn-field ${multiline ? 'md:col-span-2' : ''}`}><span className="mn-label">{label}</span>{multiline ? <textarea rows="3" value={formData[field] || ''} onChange={(event) => updateField(field, event.target.value)} className="mn-textarea" /> : <input type="text" value={formData[field] || ''} onChange={(event) => updateField(field, event.target.value)} className="mn-input" />}</label>)}</div></div>
+        <div className="flex justify-end"><button type="submit" disabled={loading} className="mn-button mn-button-accent"><Save className="h-4 w-4" />{loading ? 'Saving…' : 'Save homepage content'}</button></div>
       </form>
     </div>
   );

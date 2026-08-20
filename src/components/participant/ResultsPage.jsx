@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Award, CheckCircle2, Clock, ListOrdered, UsersRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvent } from '../../context/EventContext';
 import { subscribeToTeamAllocation } from '../../services/firestoreService';
-import { Award, CheckCircle2, Clock, ListOrdered, UsersRound } from 'lucide-react';
 import { formatPoints } from '../../utils/formatters';
+import { LockedPanel } from '../common/LockedPanel';
 
 export function ResultsPage() {
-  const { uid, teamData } = useAuth();
+  const { uid, role, loading: authLoading, teamData } = useAuth();
   const { eventData, publicThemes } = useEvent();
-
   const [allocation, setAllocation] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,121 +17,70 @@ export function ResultsPage() {
   const resultsRevealed = eventData?.resultsRevealed === true;
 
   useEffect(() => {
-    if (!uid || !eventData?.id) return;
+    if (role !== 'TEAM' || !uid || !eventData?.id) {
+      setLoading(false);
+      return undefined;
+    }
     setLoading(true);
-    const unsub = subscribeToTeamAllocation(eventData.id, uid, (alloc) => {
-      setAllocation(alloc);
+    const unsubscribe = subscribeToTeamAllocation(eventData.id, uid, (nextAllocation) => {
+      setAllocation(nextAllocation);
       setLoading(false);
     });
-    return () => unsub();
-  }, [uid, eventData?.id]);
+    return () => unsubscribe();
+  }, [role, uid, eventData?.id]);
 
-  const assignedTheme = publicThemes.find(
-    (t) => (t.id || t.themeId) === allocation?.themeId
-  );
-
+  const assignedTheme = publicThemes.find((theme) => (theme.id || theme.themeId) === allocation?.themeId);
   const preferenceRank = allocation?.preferenceRank || allocation?.assignedPreferenceRank;
+  const waitingState = !isFinalized
+    ? { title: 'Allocation is in progress', copy: 'Teams are being considered by quiz score and ranked preferences. Your assignment will appear here automatically.' }
+    : { title: 'Results are ready but hidden', copy: 'Allocation is complete. The administrator will reveal assignments when the event is ready.' };
+
+  if (authLoading) {
+    return <div className="mn-empty mx-auto max-w-2xl py-12" role="status">Verifying team access…</div>;
+  }
+
+  if (role !== 'TEAM' || !uid) {
+    const adminActive = role === 'ADMIN';
+    return <div className="mx-auto max-w-2xl py-12"><LockedPanel title={adminActive ? 'A team account is required' : 'Team sign-in required'} message={adminActive ? 'Administrator accounts cannot view a participant assignment. Switch to the registered team account you want to check.' : 'Sign in with your team code and passkey to view your team result.'} actionButton={<Link to="/login" className="mn-button mn-button-primary">{adminActive ? 'Switch to team sign in' : 'Sign in'}</Link>} /></div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto px-2 md:px-6 space-y-12">
-      {/* Title */}
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 text-orange-500 font-mono text-xs tracking-widest uppercase">
-          <Award className="h-3.5 w-3.5" />
-          <span>OUTCOME LEDGER</span>
-        </div>
-        <h1 className="font-sans text-3xl sm:text-5xl font-bold text-white tracking-tight">
-          Allocation Results
-        </h1>
-        <p className="text-zinc-400 font-sans text-base max-w-2xl font-light">
-          Your official challenge assignment appears here after the administrator completes seat-based, ranked-preference allocation.
-        </p>
-      </div>
+    <div className="mn-page">
+      <header className="mn-page-head">
+        <span className="mn-kicker"><Award className="h-3.5 w-3.5" /> Results</span>
+        <h1 className="mn-title">Your challenge assignment.</h1>
+        <p className="mn-lede">The final result reflects your quiz score, submitted theme order, and the capacity available for each theme.</p>
+      </header>
 
-      {!isFinalized ? (
-        <div className="surface-orbit py-20 text-center border border-[#855AB4]/30 rounded-3xl space-y-4">
-          <div className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-amber-400">
-            <Clock className="h-5 w-5 animate-pulse" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="font-sans text-2xl font-bold text-white">
-              Allocation in Progress
-            </h2>
-            <p className="text-zinc-400 text-sm font-light leading-relaxed max-w-md mx-auto">
-              Bids are being checked against each theme’s available seats and each team’s ranked preferences. Your official assignment will appear automatically.
-            </p>
-          </div>
-        </div>
-      ) : !resultsRevealed ? (
-        <div className="surface-orbit py-20 text-center border border-[#855AB4]/30 rounded-3xl space-y-4">
-          <div className="h-12 w-12 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mx-auto text-amber-400">
-            <Clock className="h-5 w-5 animate-pulse" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="font-sans text-2xl font-bold text-white">Results are being prepared</h2>
-            <p className="text-zinc-400 text-sm font-light leading-relaxed max-w-md mx-auto">Allocations are complete. Your official assignment will appear when the administrator reveals results.</p>
-          </div>
+      {loading ? (
+        <div className="mn-empty" role="status"><div><Clock className="mn-empty-icon animate-pulse p-3" /><h2 className="text-xl font-semibold">Checking your result</h2></div></div>
+      ) : !isFinalized || !resultsRevealed ? (
+        <div className="mn-empty">
+          <div className="max-w-lg"><Clock className="mn-empty-icon p-3" /><span className="mn-kicker justify-center">Not published</span><h2 className="mt-4 font-['Syne'] text-3xl font-semibold">{waitingState.title}</h2><p className="mt-3 text-sm leading-6 text-[var(--mn-muted)]">{waitingState.copy}</p></div>
         </div>
       ) : (
-        <div className="space-y-10">
-          {/* Confirmed Theme Hero */}
-          <div className="surface-orbit border border-[#855AB4]/30 rounded-3xl p-8 sm:p-10 space-y-6 shadow-[0_0_40px_rgba(104,56,141,0.18)]">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                OFFICIAL ASSIGNMENT
-              </span>
-              <span className="font-mono text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold">
-                {preferenceRank ? `PREFERENCE #${preferenceRank}` : 'OFFICIAL RESULT'}
-              </span>
-            </div>
-
+        <div className="mn-result-layout grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="mn-panel mn-result-hero">
+            <div className="mn-celebration" aria-hidden="true"><span /><span /><span /><span /><span /><span /></div>
+            <div className="flex flex-wrap items-center justify-between gap-4"><span className="mn-status is-live"><CheckCircle2 className="h-3 w-3" /> Official assignment</span><span className="mn-label">{preferenceRank ? `Preference ${preferenceRank}` : 'Final result'}</span></div>
             {assignedTheme ? (
-              <div className="space-y-4">
-                <span className="font-mono text-xs text-orange-500 uppercase tracking-widest block">
-                  THEME 0{assignedTheme.themeNumber}
-                </span>
-                <h2 className="font-sans text-3xl sm:text-4xl font-bold text-white">
-                  {assignedTheme.publicName || assignedTheme.name}
-                </h2>
-                <p className="text-zinc-400 text-sm font-light leading-relaxed">
-                  {assignedTheme.publicDescription || assignedTheme.description}
-                </p>
-                {assignedTheme.brief && (
-                  <div className="text-xs text-zinc-300 font-light border-l border-white/20 pl-4 py-2 mt-4">
-                    {assignedTheme.brief}
-                  </div>
-                )}
+              <div className="mt-16 max-w-3xl">
+                <span className="mn-kicker">Theme {String(assignedTheme.themeNumber || '').padStart(2, '0')}</span>
+                <h2 className="mt-5 font-['Syne'] text-4xl font-semibold tracking-[-.045em] sm:text-6xl">{assignedTheme.publicName || assignedTheme.name}</h2>
+                <p className="mt-6 max-w-2xl text-base font-light leading-7 text-[var(--mn-muted)]">{assignedTheme.publicDescription || assignedTheme.description}</p>
+                {assignedTheme.brief && <p className="mt-8 border-l-2 border-[var(--mn-violet)] pl-5 text-sm leading-6 text-[#c8cbd0]">{assignedTheme.brief}</p>}
               </div>
-            ) : (
-              <div className="font-mono text-sm text-zinc-400">
-                Theme Assignment ID: {allocation?.themeId || "Unassigned"}
-              </div>
-            )}
-          </div>
+            ) : <div className="mt-14"><span className="mn-label">Assignment ID</span><p className="mt-3 font-mono text-lg">{allocation?.themeId || 'Unassigned'}</p></div>}
+          </section>
 
-          {/* Allocation Breakdown Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6 border-y border-white/[0.08] font-mono text-center">
-            <div>
-              <span className="text-[10px] text-zinc-500 uppercase block mb-1">ASSIGNED PREFERENCE</span>
-              <span className="text-2xl font-bold text-emerald-400">{preferenceRank ? `#${preferenceRank}` : '—'}</span>
+          <aside className="space-y-4">
+            <div className="mn-panel" data-tilt><span className="mn-label">Team</span><strong className="mt-4 block font-['Syne'] text-2xl font-semibold">{teamData?.teamName || teamData?.name || 'Your team'}</strong></div>
+            <div className="mn-stat-grid is-two"><div className="mn-stat"><label>Assigned choice</label><strong className="text-[var(--mn-green)]">{preferenceRank ? `#${preferenceRank}` : '—'}</strong></div><div className="mn-stat"><label>Quiz score</label><strong>{formatPoints(allocation?.scoreSnapshot || 0)}</strong></div></div>
+            <div className="mn-panel-soft space-y-4 p-5 text-xs leading-5 text-[var(--mn-muted)]">
+              <p className="flex gap-3"><ListOrdered className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-violet)]" />This is the highest available option from your submitted preference order.</p>
+              <p className="flex gap-3"><UsersRound className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-violet)]" />Each theme uses the capacity set before bidding began.</p>
             </div>
-            <div>
-              <span className="text-[10px] text-zinc-500 uppercase block mb-1">QUIZ POINTS</span>
-              <span className="text-2xl font-bold text-white">{formatPoints(allocation?.scoreSnapshot || 0)} PTS</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-[#855AB4]/25 bg-[#221545]/40 p-4 flex items-start gap-3">
-              <ListOrdered className="h-4 w-4 mt-0.5 text-[#B26FCB]" />
-              <p className="text-xs leading-relaxed text-zinc-400">The assigned theme is the highest available option from your submitted preference order.</p>
-            </div>
-            <div className="rounded-2xl border border-[#855AB4]/25 bg-[#221545]/40 p-4 flex items-start gap-3">
-              <UsersRound className="h-4 w-4 mt-0.5 text-[#B26FCB]" />
-              <p className="text-xs leading-relaxed text-zinc-400">Theme capacity is set by the administrator before the bidding phase starts.</p>
-            </div>
-          </div>
+          </aside>
         </div>
       )}
     </div>

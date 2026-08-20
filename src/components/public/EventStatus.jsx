@@ -1,167 +1,46 @@
 import React from 'react';
 import { useEvent } from '../../context/EventContext';
-import { Radio, CheckCircle2, Clock, ShieldAlert, Cpu, CircleDot } from 'lucide-react';
 import { formatTimestamp } from '../../utils/formatters';
 
 export function EventStatus() {
   const { eventData, serverOffsetMs } = useEvent();
-  const currentNow = Date.now() + serverOffsetMs;
-
   const phases = [
-    {
-      key: 'registration',
-      name: 'Team Registration',
-      active: eventData?.registrationOpen !== false,
-      completed: eventData?.registrationOpen === false,
-      desc: 'Synthetic credential distribution and roster verification.'
-    },
-    {
-      key: 'quiz',
-      name: 'Authoritative Quiz Evaluation',
-      active: eventData?.quizOpen === true,
-      completed: eventData?.quizOpen === false && eventData?.themesRevealed,
-      desc: '10s read prompt + 10s answer mode per question.'
-    },
-    {
-      key: 'themes',
-      name: 'Audited Theme Reveal',
-      active: eventData?.themesRevealed === true,
-      completed: eventData?.themesRevealed === true,
-      desc: 'Challenge briefs and administrator-configured seat limits are opened to all participants.'
-    },
-    {
-      key: 'bidding',
-      name: 'Ranked Theme Bidding',
-      active: eventData?.biddingOpen === true,
-      completed: eventData?.allocationFinalized === true,
-      desc: 'Teams support a first choice with quiz points and rank every revealed theme.'
-    },
-    {
-      key: 'allocation',
-      name: 'Final Allocation Lock',
-      active: eventData?.allocationFinalized === true,
-      completed: eventData?.allocationFinalized === true,
-      desc: 'Seat-based assignments are finalized from each team’s ranked preferences.'
-    }
+    ['01', 'Team registration', eventData?.registrationOpen !== false, eventData?.registrationOpen === false, 'Teams submit their roster and receive portal credentials.'],
+    ['02', 'Quiz', eventData?.quizOpen === true, eventData?.quizOpen === false && eventData?.themesRevealed, 'Teams complete the timed quiz and earn their allocation score.'],
+    ['03', 'Theme release', eventData?.themesRevealed === true, eventData?.themesRevealed === true, 'Challenge briefs and seat limits become visible to participants.'],
+    ['04', 'Preference submission', eventData?.biddingOpen === true, eventData?.allocationFinalized === true, 'Teams rank every released theme in preference order.'],
+    ['05', 'Allocation results', eventData?.resultsRevealed === true, eventData?.resultsRevealed === true, 'Final assignments are published after seat allocation is complete.']
   ];
 
   return (
-    <div className="w-full space-y-16">
-      {/* Top Title Across 1080p */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#855AB4]/20">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 text-[#B26FCB] font-mono text-xs tracking-widest uppercase">
-            <Radio className="h-3.5 w-3.5 animate-pulse" />
-            <span>REAL-TIME TELEMETRY</span>
-          </div>
-          <h1 className="font-sans text-4xl sm:text-6xl font-bold text-white tracking-tight">
-            System &amp; Event Radar
-          </h1>
-          <p className="text-zinc-300 font-sans text-base max-w-2xl font-light">
-            Live event state synchronization. Monitored through Firebase Cloud Functions and authoritative time servers.
-          </p>
+    <div className="mn-page">
+      <header className="mn-page-head">
+        <div className="mn-kicker">Live event status</div>
+        <h1 className="mn-title">Know what is open, closed, and coming next.</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="mn-status is-live"><span className="mn-live-dot" />Live updates</span>
+          <span className="font-mono text-[9px] uppercase tracking-[.1em] text-zinc-500">Updated {formatTimestamp(Date.now() + serverOffsetMs)}</span>
         </div>
+      </header>
 
-        <div className="font-mono text-xs text-[#B26FCB] border border-[#855AB4]/40 rounded-full px-4 py-2 bg-[#221545]/60">
-          NTP TIME: <span className="text-white font-bold">{formatTimestamp(currentNow)}</span>
-        </div>
-      </div>
+      <section aria-label="Event phases" className="mn-phase-track">
+        {phases.map(([number, name, active, complete, description]) => {
+          const state = complete ? 'Complete' : active ? 'Open now' : 'Not open';
+          return (
+            <article key={number} className={`mn-phase-card ${active ? 'is-active' : ''} ${complete ? 'is-complete' : ''}`}>
+              <span className="mn-phase-number">{number}</span>
+              <div><h2 className="font-['Syne'] text-2xl font-semibold tracking-[-.03em]">{name}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">{description}</p></div>
+              <span className={`mn-status ${active ? 'is-live' : ''}`}>{state}</span>
+            </article>
+          );
+        })}
+      </section>
 
-      {/* Phase Timeline - Expansive 1080p Grid */}
-      <div className="space-y-6">
-        <div className="font-mono text-xs uppercase tracking-[0.2em] text-[#B26FCB]/70 pb-2 border-b border-[#855AB4]/20">
-          EVENT PHASES &bull; SEQUENCE MONITOR
-        </div>
-
-        <div className="divide-y divide-[#855AB4]/15">
-          {phases.map((p, index) => {
-            const isCurrent = p.active && !p.completed;
-            return (
-              <div
-                key={p.key}
-                className={`py-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 transition-colors duration-200 ${
-                  isCurrent ? 'bg-[#221545]/40 -mx-6 px-6 rounded-2xl border border-[#855AB4]/25' : ''
-                }`}
-              >
-                <div className="flex items-start sm:items-center gap-6">
-                  <span className="font-mono text-base text-zinc-500 font-bold w-8">
-                    0{index + 1}
-                  </span>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h2 className="font-sans text-xl sm:text-2xl font-bold text-white">
-                        {p.name}
-                      </h2>
-                      {isCurrent && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-[#68388D]/40 text-[#B26FCB] border border-[#855AB4]/50 px-2.5 py-0.5 rounded-full font-bold">
-                          ACTIVE
-                        </span>
-                      )}
-                      {p.completed && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
-                          DONE
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-zinc-400 text-sm font-light mt-1">
-                      {p.desc}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="font-mono text-xs text-zinc-400 lg:text-right">
-                  {isCurrent ? (
-                    <span className="text-[#B26FCB] font-bold">IN PROGRESS</span>
-                  ) : p.completed ? (
-                    <span className="text-zinc-400">COMPLETED</span>
-                  ) : (
-                    <span className="text-zinc-600">SCHEDULED</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Infrastructure Telemetry Stats Across 1080p */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-[#855AB4]/20">
-        <div className="border border-[#855AB4]/30 rounded-2xl p-8 bg-[#221545]/40 space-y-2 shadow-[0_0_25px_rgba(104,56,141,0.15)]">
-          <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block">
-            AUTHORITY OFFSET
-          </span>
-          <div className="font-mono text-3xl font-bold text-white">
-            {serverOffsetMs} <span className="text-sm font-normal text-zinc-400">ms</span>
-          </div>
-          <p className="text-xs text-zinc-400 font-light">
-            Continuous NTP drift calibration between browser and cloud instance.
-          </p>
-        </div>
-
-        <div className="border border-[#855AB4]/30 rounded-2xl p-8 bg-[#221545]/40 space-y-2 shadow-[0_0_25px_rgba(104,56,141,0.15)]">
-          <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block">
-            THEME STORAGE
-          </span>
-          <div className="font-mono text-3xl font-bold text-white">
-            ISOLATED
-          </div>
-          <p className="text-xs text-zinc-400 font-light">
-            Unrevealed themes sealed in admin-only storage with deny-by-default rules.
-          </p>
-        </div>
-
-        <div className="border border-[#855AB4]/30 rounded-2xl p-8 bg-[#221545]/40 space-y-2 shadow-[0_0_25px_rgba(104,56,141,0.15)]">
-          <span className="font-mono text-xs text-[#B26FCB] uppercase tracking-widest block">
-            AUDIT TRAIL
-          </span>
-          <div className="font-mono text-3xl font-bold text-white">
-            ENABLED
-          </div>
-          <p className="text-xs text-zinc-400 font-light">
-            All administrative and state transitions recorded in immutable ledger.
-          </p>
-        </div>
-      </div>
+      <section className="mn-grid mn-grid-3" aria-label="Platform notes">
+        <div className="mn-panel"><span className="mn-label">Time sync</span><strong className="mt-4 block font-['Syne'] text-3xl font-semibold">{serverOffsetMs} ms</strong><p className="mn-copy mt-2">Current browser-to-event clock offset.</p></div>
+        <div className="mn-panel"><span className="mn-label">Private themes</span><strong className="mt-4 block font-['Syne'] text-3xl font-semibold">Protected</strong><p className="mn-copy mt-2">Unreleased theme documents remain admin-only.</p></div>
+        <div className="mn-panel"><span className="mn-label">Updates</span><strong className="mt-4 block font-['Syne'] text-3xl font-semibold">Automatic</strong><p className="mn-copy mt-2">This page refreshes as event controls change.</p></div>
+      </section>
     </div>
   );
 }

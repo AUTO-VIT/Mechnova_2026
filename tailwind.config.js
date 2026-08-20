@@ -8,29 +8,29 @@ export default {
     extend: {
       colors: {
         black: '#000000',
-        void: '#110515',
-        nebula: '#221545',
-        orchid: '#B26FCB',
-        cosmic: '#68388D',
-        amethyst: '#855AB4',
+        void: '#09000f',
+        nebula: '#22102f',
+        orchid: '#d79df1',
+        cosmic: '#69358f',
+        amethyst: '#9454c6',
         space: {
-          void: '#110515',
-          deep: '#221545',
-          surface: '#180e2a',
-          border: 'rgba(178, 111, 203, 0.18)',
-          orchid: '#B26FCB',
-          cosmic: '#68388D',
-          amethyst: '#855AB4',
-          glow: 'rgba(178, 111, 203, 0.35)'
+          void: '#09000f',
+          deep: '#11051a',
+          surface: '#241132',
+          border: 'rgba(217, 157, 241, 0.18)',
+          orchid: '#d79df1',
+          cosmic: '#69358f',
+          amethyst: '#9454c6',
+          glow: 'rgba(215, 157, 241, 0.28)'
         },
         console: {
-          bg: '#110515',
-          card: '#221545',
-          surface: '#1a0f30',
-          border: 'rgba(178, 111, 203, 0.2)',
-          orchid: '#B26FCB',
-          cosmic: '#68388D',
-          amethyst: '#855AB4',
+          bg: '#09000f',
+          card: '#22102f',
+          surface: '#2d1640',
+          border: 'rgba(217, 157, 241, 0.18)',
+          orchid: '#d79df1',
+          cosmic: '#69358f',
+          amethyst: '#9454c6',
           amber: '#f59e0b',
           emerald: '#10b981'
         }
@@ -38,7 +38,7 @@ export default {
       fontFamily: {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
         sans: ['"Outfit"', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['"Outfit"', 'sans-serif']
+        display: ['"Syne"', 'sans-serif']
       },
       animation: {
         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',

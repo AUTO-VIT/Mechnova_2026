@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { subscribeToAllBids, subscribeToAllAllocations } from '../../services/firestoreService';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Eye, EyeOff, ListOrdered, UsersRound } from 'lucide-react';
 import { finalizeAllocationApi, setResultsRevealApi } from '../../services/callableApi';
+import { subscribeToAllAllocations, subscribeToAllBids } from '../../services/firestoreService';
+import { formatPoints, formatTimestamp } from '../../utils/formatters';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 import { ControlPanel } from '../common/ControlPanel';
 import { StatusBadge } from '../common/StatusBadge';
-import { ConfirmDialog } from '../common/ConfirmDialog';
-import { ListOrdered, UsersRound } from 'lucide-react';
-import { formatPoints, formatTimestamp } from '../../utils/formatters';
 
 export function AllocationConsole({ eventData }) {
   const eventId = eventData?.id || 'default-event';
@@ -13,39 +13,34 @@ export function AllocationConsole({ eventData }) {
   const [allocations, setAllocations] = useState([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState('');
-
+  const [message, setMessage] = useState('');
   const isFinalized = eventData?.allocationFinalized === true;
   const resultsRevealed = eventData?.resultsRevealed === true;
 
   useEffect(() => {
-    const unsubBids = subscribeToAllBids(eventId, (b) => setBids(b || []));
-    const unsubAllocs = subscribeToAllAllocations(eventId, (a) => setAllocations(a || []));
-    return () => {
-      unsubBids();
-      unsubAllocs();
-    };
+    const unsubscribeBids = subscribeToAllBids(eventId, (nextBids) => setBids(nextBids || []));
+    const unsubscribeAllocations = subscribeToAllAllocations(eventId, (nextAllocations) => setAllocations(nextAllocations || []));
+    return () => { unsubscribeBids(); unsubscribeAllocations(); };
   }, [eventId]);
 
-  // Temporary display ordering. The backend allocation pass will apply capacity and ranked preferences.
-  const sortedBids = [...bids].sort((a, b) => {
+  const sortedBids = useMemo(() => [...bids].sort((a, b) => {
     if ((b.scoreSnapshot || 0) !== (a.scoreSnapshot || 0)) return (b.scoreSnapshot || 0) - (a.scoreSnapshot || 0);
     if ((a.submittedAtMs || 0) !== (b.submittedAtMs || 0)) return (a.submittedAtMs || 0) - (b.submittedAtMs || 0);
     return (a.tieBreakValue || 0) - (b.tieBreakValue || 0);
-  });
+  }), [bids]);
 
   const handleExecuteFinalize = async () => {
     setLoading(true);
-    setMsg('');
+    setMessage('');
     try {
-      const res = await finalizeAllocationApi({ eventId });
-      if (res && res.success) {
-        setMsg(`Finalized theme allocations for ${res.totalAllocations} team bids.`);
+      const result = await finalizeAllocationApi({ eventId });
+      if (result?.success) {
+        setMessage(`Theme assignments finalized for ${result.totalAllocations} teams.`);
         setConfirmOpen(false);
       }
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Allocation finalization failed.');
+    } catch (error) {
+      console.error(error);
+      window.alert(error.message || 'Allocation finalization failed.');
     } finally {
       setLoading(false);
     }
@@ -53,15 +48,13 @@ export function AllocationConsole({ eventData }) {
 
   const handleResultsReveal = async () => {
     setLoading(true);
-    setMsg('');
+    setMessage('');
     try {
-      const res = await setResultsRevealApi({ eventId, revealed: !resultsRevealed });
-      if (res?.success) {
-        setMsg(res.resultsRevealed ? 'Results are now visible to all teams.' : 'Results are hidden from teams.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Unable to update result visibility.');
+      const result = await setResultsRevealApi({ eventId, revealed: !resultsRevealed });
+      if (result?.success) setMessage(result.resultsRevealed ? 'Results are now visible to teams.' : 'Results are now hidden from teams.');
+    } catch (error) {
+      console.error(error);
+      window.alert(error.message || 'Unable to update result visibility.');
     } finally {
       setLoading(false);
     }
@@ -69,104 +62,37 @@ export function AllocationConsole({ eventData }) {
 
   return (
     <ControlPanel
-      title="RANKED PREFERENCE & SEAT ALLOCATION"
-      subtitle="Bids, Theme Seats, and Allocation Review"
-      badge={
-        <StatusBadge
-          status={isFinalized ? "FINALIZED" : "PENDING EXECUTION"}
-          variant={isFinalized ? "emerald" : "amber"}
-        />
-      }
-      action={
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            disabled={isFinalized || bids.length === 0 || loading}
-            onClick={() => setConfirmOpen(true)}
-            className="bg-orange-600 px-5 py-2 font-mono text-xs font-bold uppercase text-white hover:bg-orange-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(234,88,12,0.4)]"
-          >
-            {isFinalized ? "ALLOCATION FINALIZED" : "FINALIZE ALLOCATION"}
-          </button>
-          <button
-            type="button"
-            disabled={!isFinalized || loading}
-            onClick={handleResultsReveal}
-            className="bg-emerald-600 px-5 py-2 font-mono text-xs font-bold uppercase text-white hover:bg-emerald-500 active:scale-[0.97] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(16,185,129,0.28)]"
-          >
-            {resultsRevealed ? "HIDE RESULTS" : "REVEAL RESULTS"}
-          </button>
-        </div>
-      }
+      title="Theme allocation"
+      subtitle="Review preference submissions, finalize assignments, and control result visibility."
+      badge={<StatusBadge status={isFinalized ? 'Finalized' : 'Awaiting finalization'} variant={isFinalized ? 'emerald' : 'amber'} />}
+      action={<div className="flex flex-wrap gap-2"><button type="button" disabled={isFinalized || bids.length === 0 || loading} onClick={() => setConfirmOpen(true)} className="mn-button mn-button-danger min-h-10">{isFinalized ? 'Allocation finalized' : 'Finalize allocation'}</button><button type="button" disabled={!isFinalized || loading} onClick={handleResultsReveal} className="mn-button mn-button-secondary min-h-10">{resultsRevealed ? <><EyeOff className="h-4 w-4" />Hide results</> : <><Eye className="h-4 w-4" />Reveal results</>}</button></div>}
     >
-      <div className="space-y-6 pt-2 font-mono">
-        {msg && (
-          <div className="border border-emerald-500/50 bg-emerald-950/60 p-3 text-xs text-emerald-300">
-            {msg}
-          </div>
-        )}
-
-        {/* Allocation explanation */}
-        <div className="border border-[#855AB4]/30 bg-[#221545]/40 rounded-2xl p-5 text-xs text-zinc-300 space-y-2">
-          <div className="font-bold text-white uppercase text-[11px] mb-2 flex items-center gap-2">
-            <ListOrdered className="h-4 w-4 text-[#B26FCB]" /> RANKED PREFERENCE ALLOCATION
-          </div>
-          <div className="flex gap-2"><UsersRound className="h-3.5 w-3.5 shrink-0 text-[#B26FCB]" />Each theme has an administrator-configured seat limit.</div>
-          <div>&bull; Teams are considered using their first preference, then their next ranked preference when an earlier choice is full.</div>
-          <div>&bull; Priority is each team’s complete quiz score; tied scores are ordered by earlier submission time.</div>
-          <div>&bull; No team is assigned a random theme; allocations must come from that team’s submitted ranking.</div>
+      <div className="space-y-7">
+        {message && <div role="status" className="mn-alert mn-alert-success">{message}</div>}
+        <div className="mn-stat-grid">
+          <div className="mn-stat"><label>Submitted rankings</label><strong>{bids.length}</strong></div>
+          <div className="mn-stat"><label>Assignments</label><strong>{allocations.length}</strong></div>
+          <div className="mn-stat"><label>Results</label><strong className={resultsRevealed ? 'text-[var(--mn-green)]' : ''}>{resultsRevealed ? 'Live' : 'Hidden'}</strong></div>
         </div>
 
-        {/* Bids Table */}
-        <div className="overflow-x-auto border border-zinc-800">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-zinc-900 text-zinc-400 uppercase text-[10px]">
-              <tr>
-                <th className="p-3">Review Order</th>
-                <th className="p-3">Team ID</th>
-                <th className="p-3">First Preference</th>
-                <th className="p-3">Preference List</th>
-                <th className="p-3">Quiz Score</th>
-                <th className="p-3">Submitted At</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800 bg-[#0a030d]">
-              {sortedBids.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="p-6 text-center text-zinc-500">
-                    No team bids submitted yet.
-                  </td>
-                </tr>
-              ) : (
-                sortedBids.map((bid, idx) => (
-                  <tr key={bid.teamId} className="hover:bg-zinc-900/50">
-                    <td className="p-3 font-bold text-emerald-400">#{idx + 1}</td>
-                    <td className="p-3 font-bold text-white">{bid.teamId}</td>
-                    <td className="p-3 text-cyan-400">{bid.selectedThemeId}</td>
-                    <td className="p-3 text-zinc-300 max-w-56 truncate">{Array.isArray(bid.preferenceIds) ? bid.preferenceIds.join(' → ') : 'Legacy bid: first preference only'}</td>
-                    <td className="p-3 text-cyan-300 font-bold">{formatPoints(bid.scoreSnapshot)} PTS</td>
-                    <td className="p-3 text-zinc-400">{formatTimestamp(bid.submittedAtMs)}</td>
-                    <td className="p-3">
-                      <StatusBadge status={isFinalized ? "ALLOCATED" : "SUBMITTED"} variant={isFinalized ? "emerald" : "cyan"} />
-                    </td>
-                  </tr>
-                ))
-              )}
+        <div className="mn-panel-soft grid gap-3 p-5 text-xs leading-5 text-[var(--mn-muted)] md:grid-cols-3">
+          <p className="flex gap-2"><UsersRound className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-violet)]" />Each theme uses its administrator-set capacity.</p>
+          <p className="flex gap-2"><ListOrdered className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-violet)]" />Each team is checked against its preferences in order.</p>
+          <p>Priority uses the team’s full quiz score. Submission time resolves equal scores.</p>
+        </div>
+
+        <div className="mn-table-wrap">
+          <table className="mn-table">
+            <thead><tr><th>Order</th><th>Team</th><th>First choice</th><th>Preference order</th><th>Quiz score</th><th>Submitted</th><th>Status</th></tr></thead>
+            <tbody>
+              {sortedBids.length === 0 ? <tr><td colSpan="7" className="py-10 text-center text-[var(--mn-faint)]">No preference submissions yet.</td></tr> : sortedBids.map((bid, index) => (
+                <tr key={bid.teamId}><td className="font-semibold text-[var(--mn-green)]">#{index + 1}</td><td className="font-medium text-white">{bid.teamId}</td><td className="text-[var(--mn-violet)]">{bid.selectedThemeId}</td><td className="max-w-64 truncate text-[var(--mn-muted)]">{Array.isArray(bid.preferenceIds) ? bid.preferenceIds.join(' → ') : 'First preference only'}</td><td className="font-semibold">{formatPoints(bid.scoreSnapshot)} pts</td><td className="text-[var(--mn-muted)]">{formatTimestamp(bid.submittedAtMs)}</td><td><StatusBadge status={isFinalized ? 'Allocated' : 'Submitted'} variant={isFinalized ? 'emerald' : 'cyan'} /></td></tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        {/* FINALIZE ALLOCATION CONFIRM DIALOG */}
-        <ConfirmDialog
-          isOpen={confirmOpen}
-          title="EXECUTE FINAL THEME ALLOCATION"
-        message="This action will run the approved seat-based ranked-preference allocation, write immutable assignment records, and close the bidding phase. Confirm execution?"
-          confirmLabel="AUTHORIZE ALLOCATION"
-          requireInputMatch="FINALIZE"
-          onConfirm={handleExecuteFinalize}
-          onClose={() => setConfirmOpen(false)}
-          loading={loading}
-        />
+        <ConfirmDialog isOpen={confirmOpen} title="Finalize theme allocation?" message="This runs the seat-based allocation using each team’s quiz score and ranked preferences, writes the assignments, and closes bidding." confirmLabel="Finalize allocation" requireInputMatch="FINALIZE" onConfirm={handleExecuteFinalize} onClose={() => setConfirmOpen(false)} loading={loading} />
       </div>
     </ControlPanel>
   );

@@ -262,7 +262,8 @@ async function executeFallbackEngine(name, data) {
       }
       const currentQ = { id: currentQSnap.id, ...currentQSnap.data() };
       const correctAnswer = currentQ.correctOption !== undefined ? currentQ.correctOption : currentQ.answerKey;
-      const isCorrect = correctAnswer === selectedOption;
+      const normalizedSelection = Number.isInteger(selectedOption) ? selectedOption : null;
+      const isCorrect = normalizedSelection !== null && correctAnswer === normalizedSelection;
       const earned = isCorrect ? 100 : 0;
 
       const nextIndex = questionIndex + 1;
@@ -297,7 +298,7 @@ async function executeFallbackEngine(name, data) {
         batch.set(answerRef, {
           questionIndex,
           questionId: currentQId,
-          selectedOption,
+          selectedOption: normalizedSelection,
           isCorrect,
           earnedPoints: earned,
           submittedAt: serverTimestamp(),
@@ -312,7 +313,7 @@ async function executeFallbackEngine(name, data) {
           phase: 'READ_ONLY',
           phaseStartMs: nowMs,
           phaseDeadlineMs: nowMs + 10000
-        });
+        }, { merge: true });
 
         // Update score
         batch.set(scoreRef, {
